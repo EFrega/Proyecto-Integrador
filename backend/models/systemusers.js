@@ -1,5 +1,7 @@
+const bcrypt = require('bcryptjs');
+
 module.exports = (sequelize, DataTypes) => {
-    const SystemUsers = sequelize.define('SystemUsers', {
+    const systemUsers = sequelize.define('SystemUsers', {
         idusuario: {
             type: DataTypes.INTEGER,
             primaryKey: true
@@ -10,7 +12,7 @@ module.exports = (sequelize, DataTypes) => {
         usuario: {
             type: DataTypes.STRING(50)
         },
-        contraseña: {
+        contrasena: {
             type: DataTypes.STRING(100)
         },
         rolpaciente: {
@@ -27,7 +29,29 @@ module.exports = (sequelize, DataTypes) => {
         }
     }, {
         tableName: 'SystemUsers',
-        timestamps: false
+        timestamps: false,
+        hooks: {
+            // Hook para cifrar la contraseña antes de crear o actualizar el usuario
+            beforeCreate: async (systemUsers) => {
+              if (systemUsers.contrasena) {
+                systemUsers.contrasena = await bcrypt.hash(systemUsers.contrasena, 10); // Cifra la contraseña antes de guardarla
+              }
+            },
+            beforeUpdate: async (systemUsers) => {
+              if (systemUsers.contrasena) {
+                systemUsers.contrasena = await bcrypt.hash(systemUsers.contrasena, 10); // Cifra la contraseña antes de actualizarla
+              }
+            }
+        }
     });
-    return SystemUsers;
+    // Método de instancia para comparar contraseñas
+    systemUsers.prototype.comparePassword = async function(contrasena) {
+        return bcrypt.compare(contrasena, this.contrasena);  // Compara la contraseña proporcionada con la almacenada
+    };
+
+    console.log("Modelo Usuario cargado correctamente");
+
+    return systemUsers;
 };
+
+// module.exports = systemUsers;
