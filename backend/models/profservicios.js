@@ -1,21 +1,19 @@
 module.exports = (sequelize, DataTypes) => {
-    const Servicios = sequelize.define('Servicios', {
+    const ProfServicios = sequelize.define('ProfServicios', {
         idservicio: {
             type: DataTypes.INTEGER,
             primaryKey: true
         },
-        nombre: {
-            type: DataTypes.STRING(100)
+        idprofesional: {
+            type: DataTypes.INTEGER,
+            primaryKey: true
         },
         activo: {
             type: DataTypes.BOOLEAN
-        },
-        duracionturno: {
-            type: DataTypes.INTEGER
         }
     }, {
-        tableName: 'Servicios',
+        tableName: 'ProfServicios',
         timestamps: false
     });
-    return Servicios;
+    return ProfServicios;
 };

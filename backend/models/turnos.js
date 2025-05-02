@@ -1,57 +1,54 @@
-// models/Turno.js
-
 module.exports = (sequelize, DataTypes) => {
-    const Turno = sequelize.define('Turnos', {
-        idTurno: {
+    const Turnos = sequelize.define('Turnos', {
+        idturno: {
             type: DataTypes.INTEGER,
-            primaryKey: true,
-            autoIncrement: true
+            primaryKey: true
         },
-        idProfesional: {
-            type: DataTypes.INTEGER,
-            allowNull: false
+        idcontacto: {
+            type: DataTypes.INTEGER
         },
-        idConsultorio: {
-            type: DataTypes.INTEGER,
-            allowNull: false
+        idservicio: {
+            type: DataTypes.INTEGER
         },
-        idServicio: {
-            type: DataTypes.INTEGER,
-            allowNull: false
+        idprofesional: {
+            type: DataTypes.INTEGER
         },
-        idPaciente: {
-            type: DataTypes.INTEGER,
-            allowNull: false
+        hora: {
+            type: DataTypes.TIME
         },
-        fechaHora: {
-            type: DataTypes.DATE,
-            allowNull: false
+        dia: {
+            type: DataTypes.DATE
         },
-        sobreturno: {
-            type: DataTypes.BOOLEAN,
-            allowNull: false
+        tipo: {
+            type: DataTypes.INTEGER
+        },
+        prioridad: {
+            type: DataTypes.INTEGER
+        },
+        reservado: {
+            type: DataTypes.BOOLEAN
+        },
+        confirmado: {
+            type: DataTypes.BOOLEAN
         },
         acreditado: {
-            type: DataTypes.BOOLEAN,
-            allowNull: false
+            type: DataTypes.BOOLEAN
+        },
+        atendido: {
+            type: DataTypes.BOOLEAN
+        },
+        observaciones: {
+            type: DataTypes.TEXT
+        },
+        updsystemuser: {
+            type: DataTypes.INTEGER
+        },
+        updatetime: {
+            type: DataTypes.DATE
         }
     }, {
-      // Opciones del modelo
-      tableName: 'turnos', // Definimos explícitamente el nombre de la tabla
-      timestamps: false, // Si no tienes las columnas `createdAt` y `updatedAt`
+        tableName: 'Turnos',
+        timestamps: false
     });
-
-    // Relaciones con otras tablas
-    Turno.associate = function(models) {
-        // Relación con la tabla Profesional
-        Turno.belongsTo(models.Profesionales, { foreignKey: 'idProfesional', as: 'profesional' });
-        // Relación con la tabla Consultorio
-        Turno.belongsTo(models.Consultorios, { foreignKey: 'idConsultorio', as: 'consultorio' });
-        // Relación con la tabla Servicio
-        Turno.belongsTo(models.Servicios, { foreignKey: 'idServicio', as: 'servicio' });
-        // Relación con la tabla Paciente
-        Turno.belongsTo(models.Pacientes, { foreignKey: 'idPaciente', as: 'paciente' });
-    };
-
-    return Turno;
+    return Turnos;
 };

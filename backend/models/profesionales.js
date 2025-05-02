@@ -1,78 +1,21 @@
-// models/Profesional.js
 module.exports = (sequelize, DataTypes) => {
-    const Profesional = sequelize.define('Profesionales', {
-        idProfesional: {
+    const Profesionales = sequelize.define('Profesionales', {
+        idprofesional: {
             type: DataTypes.INTEGER,
-            primaryKey: true,
-            autoIncrement: true
+            primaryKey: true
         },
-        idServicio: {
-            type: DataTypes.INTEGER,
-            allowNull: false,
-            references: {
-                model: 'servicios', // Relación con la tabla servicios
-                key: 'idServicio'
-            }
+        idcontacto: {
+            type: DataTypes.INTEGER
         },
-        nombre: {
-            type: DataTypes.STRING(50),
-            allowNull: false
+        rolmedico: {
+            type: DataTypes.BOOLEAN
         },
-        apellido: {
-            type: DataTypes.STRING(50),
-            allowNull: false
-        },
-        dni: {
-            type: DataTypes.STRING(50),
-            allowNull: false
-        },
-        telefono: {
-            type: DataTypes.STRING(50),
-            allowNull: false
-        },
-        domicilio: {
-            type: DataTypes.STRING(50),
-            allowNull: false
-        },
-        email: {
-            type: DataTypes.STRING(50),
-            allowNull: false
-        },
-        numeroMatricula: {
-            type: DataTypes.STRING(50),
-            allowNull: false
-        },
-        horarioIngreso: {
-            type: DataTypes.INTEGER,
-            allowNull: true
-        },
-        horarioEgreso: {
-            type: DataTypes.INTEGER,
-            allowNull: true
-        },
-        inicioActividad: {
-            type: DataTypes.DATEONLY, // Para la fecha, DATEONLY es el tipo adecuado
-            allowNull: true
-        },
-        finActividad: {
-            type: DataTypes.DATE, // DATETIME para fecha y hora
-            allowNull: true,
-            defaultValue: null
+        activo: {
+            type: DataTypes.BOOLEAN
         }
     }, {
-      // Opciones adicionales del modelo
-      tableName: 'profesionales',  // El nombre de la tabla en la base de datos
-      timestamps: false, // Si no usas las columnas createdAt y updatedAt
+        tableName: 'Profesionales',
+        timestamps: false
     });
-
-    // Relaciones (FK)
-    Profesional.associate = (models) => {
-      // Relación con el modelo 'Servicio'
-        Profesional.belongsTo(models.Servicios, {
-        foreignKey: 'idServicio',
-        as: 'servicio'
-        });
-    };
-
-    return Profesional;
+    return Profesionales;
 };
