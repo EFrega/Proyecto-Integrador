@@ -154,3 +154,15 @@
 2025-05-02T20:24:32.151Z - Conexión con la base de datos establecida correctamente.
 2025-05-02T20:24:59.788Z - Se visitó la ruta principal ("/")
 2025-05-02T20:24:59.846Z - Se visitó la ruta principal ("/")
+2025-05-03T17:34:18.303Z - Servidor corriendo en http://localhost:5000
+2025-05-03T17:34:21.420Z - Conexión con la base de datos establecida correctamente.
+2025-05-03T17:50:05.240Z - Servidor corriendo en http://localhost:5000
+2025-05-03T17:50:08.768Z - Conexión con la base de datos establecida correctamente.
+2025-05-03T17:50:40.289Z - Se visitó la ruta principal ("/")
+2025-05-03T17:50:40.294Z - Se visitó la ruta principal ("/")
+2025-05-03T17:54:43.028Z - Servidor corriendo en http://localhost:5000
+2025-05-03T17:54:46.063Z - Conexión con la base de datos establecida correctamente.
+2025-05-03T17:55:03.832Z - Se visitó la ruta principal ("/")
+2025-05-03T17:55:03.848Z - Se visitó la ruta principal ("/")
+2025-05-03T17:55:36.894Z - Se visitó la ruta principal ("/")
+2025-05-03T17:55:36.929Z - Se visitó la ruta principal ("/")
