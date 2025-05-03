@@ -1,5 +1,5 @@
 import React from 'react';
-
+import { Container, Row, Col, Navbar, Nav, Button } from 'react-bootstrap';
 import {
   FaHome,
   FaCalendarAlt,
@@ -8,6 +8,7 @@ import {
   FaFolder,
   FaSignOutAlt
 } from 'react-icons/fa';
+import './dashboard.css'; // opcional para refinar estilos
 
 const Dashboard = ({ setIsLoggedIn }) => {
   const handleLogout = () => {
@@ -17,69 +18,68 @@ const Dashboard = ({ setIsLoggedIn }) => {
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-100">
-      {/* Sidebar */}
-      <aside className="w-16 bg-white border-r shadow-sm flex flex-col items-center py-4">
-        <FaHome className="mb-6 text-xl text-gray-600 hover:text-blue-500 cursor-pointer" />
-        <FaCalendarAlt className="mb-6 text-xl text-gray-600 hover:text-blue-500 cursor-pointer" />
-        <FaComments className="mb-6 text-xl text-gray-600 hover:text-blue-500 cursor-pointer" />
-        <FaFileAlt className="mb-6 text-xl text-gray-600 hover:text-blue-500 cursor-pointer" />
-        <FaFolder className="mb-6 text-xl text-gray-600 hover:text-blue-500 cursor-pointer" />
+    <div className="d-flex min-vh-100 flex-column">
+      <div className="d-flex flex-grow-1">
+        {/* Sidebar */}
+        <div className="bg-white border-end d-flex flex-column align-items-center p-2" style={{ width: '60px' }}>
+          <FaHome className="mb-4 text-secondary hover-icon" />
+          <FaCalendarAlt className="mb-4 text-secondary hover-icon" />
+          <FaComments className="mb-4 text-secondary hover-icon" />
+          <FaFileAlt className="mb-4 text-secondary hover-icon" />
+          <FaFolder className="mb-4 text-secondary hover-icon" />
+          <FaSignOutAlt
+            className="mt-auto mb-2 text-danger hover-icon"
+            title="Cerrar sesión"
+            onClick={handleLogout}
+            style={{ cursor: 'pointer' }}
+          />
+        </div>
 
-        {/* Logout Button */}
-        <FaSignOutAlt
-          onClick={handleLogout}
-          className="mt-auto mb-2 text-xl text-gray-600 hover:text-red-500 cursor-pointer"
-          title="Cerrar sesión"
-        />
-      </aside>
+        {/* Main layout */}
+        <div className="flex-grow-1 d-flex flex-column">
+          {/* Top Navbar */}
+          <Navbar bg="white" expand="lg" className="shadow-sm px-4 py-2 justify-content-between">
+            <Navbar.Brand className="text-primary fw-bold">Clínica<span className="text-dark">Medica</span></Navbar.Brand>
+            <Nav className="d-flex align-items-center gap-3">
+              <div className="rounded-circle bg-danger" style={{ width: '30px', height: '30px' }} />
+              <div className="rounded-circle bg-info" style={{ width: '30px', height: '30px' }} />
+              <span className="text-muted small">nombreapellido@example.com</span>
+            </Nav>
+          </Navbar>
 
-      {/* Main content */}
-      <div className="flex flex-col flex-1">
-        {/* Top bar */}
-        <header className="flex items-center justify-between bg-white px-6 py-4 shadow-md">
-          <h1 className="text-xl font-semibold text-blue-700">
-            Clínica<span className="text-black">Medica</span>
-          </h1>
-          <div className="flex items-center gap-4">
-            {/* Placeholder icons or avatars */}
-            <div className="w-8 h-8 rounded-full bg-red-200" />
-            <div className="w-8 h-8 rounded-full bg-blue-200" />
-            <span className="text-sm text-gray-600">nombreapellido@example.com</span>
-          </div>
-        </header>
+          {/* Main Content */}
+          <Container fluid className="flex-grow-1 p-4 bg-light">
+            <h4 className="text-primary">Inicio</h4>
+            {/* Aquí podés renderizar contenido adicional */}
+          </Container>
 
-        {/* Main area */}
-        <main className="flex-1 p-6">
-          <h2 className="text-lg font-medium text-blue-700">Inicio</h2>
-          {/* Acá va el contenido dinámico */}
-        </main>
-
-        {/* Footer */}
-        <footer className="bg-blue-900 text-white p-6 text-sm">
-          <div className="flex justify-between flex-wrap gap-4">
-            <div>
-              <h3 className="font-bold">ClínicaMedica</h3>
-            </div>
-            <div>
-              <p>Información Institucional</p>
-              <p>Especialidades médicas</p>
-              <p>Calidad y seguridad del paciente</p>
-            </div>
-            <div>
-              <p>Información Útil</p>
-              <p>Coberturas médicas</p>
-              <p>Solicite turno</p>
-              <p>Preguntas frecuentes</p>
-            </div>
-          </div>
-          <div className="text-center mt-4 text-xs">
-            ©2025 Diseñado y desarrollado por{' '}
-            <a className="underline" href="https://hehex.dev" target="_blank" rel="noreferrer">
-              HeHex Developers
-            </a>
-          </div>
-        </footer>
+          {/* Footer */}
+          <footer className="bg-dark text-light py-4 mt-auto">
+            <Container>
+              <Row>
+                <Col md={4} className="mb-3 mb-md-0">
+                  <h5>ClínicaMedica</h5>
+                </Col>
+                <Col md={4}>
+                  <p>Información Institucional</p>
+                  <p>Especialidades médicas</p>
+                  <p>Calidad y seguridad del paciente</p>
+                </Col>
+                <Col md={4}>
+                  <p>Información Útil</p>
+                  <p>Coberturas médicas</p>
+                  <p>Solicite turno</p>
+                  <p>Preguntas frecuentes</p>
+                </Col>
+              </Row>
+              <Row className="text-center mt-3">
+                <Col>
+                  <small>©2025 Diseñado y desarrollado por <a className="text-info text-decoration-underline" href="https://hehex.dev" target="_blank" rel="noreferrer">HeHex Developers</a></small>
+                </Col>
+              </Row>
+            </Container>
+          </footer>
+        </div>
       </div>
     </div>
   );
