@@ -29,4 +29,8 @@ node index.js
 
 cd .\frontend
 npm install
+npm install bootstrap-icons
+npm install react-router-dom
+npm install react-icons
+npm install react-bootstrap bootstrap react-icons
 npm start
