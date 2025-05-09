@@ -33,14 +33,14 @@ module.exports = (sequelize, DataTypes) => {
         hooks: {
             // Hook para cifrar la contraseña antes de crear o actualizar el usuario
             beforeCreate: async (systemUsers) => {
-              if (systemUsers.contrasena) {
+                if (systemUsers.contrasena) {
                 systemUsers.contrasena = await bcrypt.hash(systemUsers.contrasena, 10); // Cifra la contraseña antes de guardarla
-              }
+                }
             },
             beforeUpdate: async (systemUsers) => {
-              if (systemUsers.contrasena) {
+                if (systemUsers.contrasena) {
                 systemUsers.contrasena = await bcrypt.hash(systemUsers.contrasena, 10); // Cifra la contraseña antes de actualizarla
-              }
+                }
             }
         }
     });
