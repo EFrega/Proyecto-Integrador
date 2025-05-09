@@ -41,7 +41,7 @@ const Registro = () => {
         }
 
         try {
-            await axios.post('http://localhost:5000/registro', formData);
+            await axios.post('http://localhost:3000/register', formData);
             alert('¡Registro exitoso!');
             navigate('/login');
         } catch (err) {
@@ -67,14 +67,15 @@ const Registro = () => {
 
                     <Row className="form-row">
                         <Col>
+                            <Form.Control name="docum" placeholder="Nro. documento" onChange={handleChange} required />
+                        </Col>
+                        <Col>
                             <Form.Select name="tipodoc" onChange={handleChange}>
                                 <option value="DNI">DNI</option>
                                 <option value="Pasaporte">Pasaporte</option>
                             </Form.Select>
                         </Col>
-                        <Col>
-                            <Form.Control name="docum" placeholder="Nro. documento" onChange={handleChange} required />
-                        </Col>
+                        
                     </Row>
 
                     <Row className="form-row">
