@@ -61,12 +61,6 @@ const Registro = () => {
 
                     <Row className="form-row">
                         <Col>
-                            <Form.Control name="usuario" placeholder="Nombre de usuario" onChange={handleChange} required /> {/* 👈 Campo nuevo */}
-                        </Col>
-                    </Row>
-
-                    <Row className="form-row">
-                        <Col>
                             <Form.Control name="docum" placeholder="Nro. documento" onChange={handleChange} required />
                         </Col>
                         <Col>
