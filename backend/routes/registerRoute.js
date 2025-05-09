@@ -22,6 +22,7 @@ router.post('/', async (req, res) => {
 
     const t = await sequelize.transaction();
 
+
     try {
         // Paso 1: Crear contacto
         const nuevoContacto = await Contactos.create({

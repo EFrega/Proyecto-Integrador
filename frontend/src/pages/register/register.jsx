@@ -41,7 +41,7 @@ const Registro = () => {
         }
 
         try {
-            await axios.post('http://localhost:3000/register', formData);
+            await axios.post('http://localhost:5000/register', formData);
             alert('¡Registro exitoso!');
             navigate('/login');
         } catch (err) {
