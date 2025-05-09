@@ -35,6 +35,7 @@ router.post('/', async (req, res) => {
             correo,
             direccion
         }, { transaction: t });
+        console.log('Contacto creado con ID:', nuevoContacto.idcontacto);
 
         // Paso 2: Crear usuario asociado al contacto
         await SystemUsers.create({

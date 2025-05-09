@@ -2,7 +2,8 @@ module.exports = (sequelize, DataTypes) => {
     const FichaMedica = sequelize.define('FichaMedica', {
         idficha: {
             type: DataTypes.INTEGER,
-            primaryKey: true
+            primaryKey: true,
+            autoIncrement: true
         },
         idcontacto: {
             type: DataTypes.INTEGER

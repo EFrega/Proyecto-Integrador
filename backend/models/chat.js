@@ -2,7 +2,8 @@ module.exports = (sequelize, DataTypes) => {
     const Chat = sequelize.define('Chat', {
         idmsg: {
             type: DataTypes.INTEGER,
-            primaryKey: true
+            primaryKey: true,
+            autoIncrement: true
         },
         idchat: {
             type: DataTypes.INTEGER

@@ -2,7 +2,8 @@ module.exports = (sequelize, DataTypes) => {
     const Turnos = sequelize.define('Turnos', {
         idturno: {
             type: DataTypes.INTEGER,
-            primaryKey: true
+            primaryKey: true,
+            autoIncrement: true
         },
         idcontacto: {
             type: DataTypes.INTEGER
