@@ -8,7 +8,6 @@ const Registro = () => {
     const [formData, setFormData] = useState({
         nombre: '',
         apellido: '',
-        usuario: '', // 👈 Campo agregado
         tipodoc: 'DNI',
         docum: '',
         fechanacim: '',
@@ -43,7 +42,7 @@ const Registro = () => {
         try {
             await axios.post('http://localhost:5000/register', formData);
             alert('¡Registro exitoso!');
-            navigate('/login');
+            navigate('/');
         } catch (err) {
             setError(err.response?.data?.message || 'Error al registrar');
         }
@@ -60,14 +59,16 @@ const Registro = () => {
                     </Row>
 
                     <Row className="form-row">
-                        <Col>
-                            <Form.Control name="docum" placeholder="Nro. documento" onChange={handleChange} required />
-                        </Col>
+            
                         <Col>
                             <Form.Select name="tipodoc" onChange={handleChange}>
                                 <option value="DNI">DNI</option>
                                 <option value="Pasaporte">Pasaporte</option>
                             </Form.Select>
+                        </Col>
+
+                        <Col>
+                            <Form.Control name="docum" placeholder="Nro. documento" onChange={handleChange} required />
                         </Col>
                         
                     </Row>

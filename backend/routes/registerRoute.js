@@ -15,9 +15,10 @@ const Contactos = ContactosModel(sequelize, require('sequelize').DataTypes);
 
 // Ruta POST para registrar un nuevo usuario
 router.post('/', async (req, res) => {
+    console.log('Cuerpo recibido:', req.body);
     const {
         nombre, apellido, docum, tipodoc, fechanacim, telcontacto, telemergencia,
-        correo, direccion, contrasena
+        correo, direccion, usuario, contrasena
     } = req.body;
 
     const t = await sequelize.transaction();
@@ -37,11 +38,12 @@ router.post('/', async (req, res) => {
             direccion
         }, { transaction: t });
         console.log('Contacto creado con ID:', nuevoContacto.idcontacto);
+        console.log('Correo:', correo);
 
         // Paso 2: Crear usuario asociado al contacto
         await SystemUsers.create({
             idcontacto: nuevoContacto.idcontacto,
-            usuario: nuevoContacto.correo,
+            usuario: correo,
             contrasena, // se encripta en el hook
             rolpaciente: 1,
             rolmedico: 0,
