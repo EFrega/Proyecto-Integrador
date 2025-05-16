@@ -2,10 +2,6 @@
 
 **Plataforma de Gestión de Turnos para Clínicas y Consultorios** 
 
-Este sistema busca optimizar la gestión de citas médicas en clínicas y consultorios, reduciendo tiempos de espera y maximizando la eficiencia de los profesionales de la salud. 
-Permitirá a los pacientes reservar, modificar o cancelar turnos de manera online, con recordatorios automatizados para evitar ausencias. El software integrará un calendario inteligente que asignará turnos según la disponibilidad y urgencia de los casos, además de permitir a los médicos visualizar el historial de cada paciente antes de la consulta. 
-
-También incluirá un chat interno entre pacientes y especialistas para consultas rápidas. Para mejorar la experiencia del usuario, se implementarán encuestas de satisfacción y análisis de métricas sobre tiempos de espera y calidad del servicio. La plataforma será adaptable a distintos tipos de centros médicos, desde consultorios independientes hasta grandes clínicas. Agregar posibilidad de avisos.
 
 
 ## Datos de la DDBB 

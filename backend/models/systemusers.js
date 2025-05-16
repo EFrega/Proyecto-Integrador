@@ -4,13 +4,16 @@ module.exports = (sequelize, DataTypes) => {
     const systemUsers = sequelize.define('SystemUsers', {
         idusuario: {
             type: DataTypes.INTEGER,
-            primaryKey: true
+            primaryKey: true,
+            autoIncrement: true,
+            allowNull: false
         },
         idcontacto: {
             type: DataTypes.INTEGER
         },
         usuario: {
-            type: DataTypes.STRING(50)
+            type: DataTypes.STRING(50),
+            allowNull: false
         },
         contrasena: {
             type: DataTypes.STRING(100)
@@ -33,14 +36,14 @@ module.exports = (sequelize, DataTypes) => {
         hooks: {
             // Hook para cifrar la contraseña antes de crear o actualizar el usuario
             beforeCreate: async (systemUsers) => {
-              if (systemUsers.contrasena) {
+                if (systemUsers.contrasena) {
                 systemUsers.contrasena = await bcrypt.hash(systemUsers.contrasena, 10); // Cifra la contraseña antes de guardarla
-              }
+                }
             },
             beforeUpdate: async (systemUsers) => {
-              if (systemUsers.contrasena) {
+                if (systemUsers.contrasena) {
                 systemUsers.contrasena = await bcrypt.hash(systemUsers.contrasena, 10); // Cifra la contraseña antes de actualizarla
-              }
+                }
             }
         }
     });

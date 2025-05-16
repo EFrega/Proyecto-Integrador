@@ -1,8 +1,12 @@
+const { all } = require("../routes/registerRoute");
+
 module.exports = (sequelize, DataTypes) => {
     const Contactos = sequelize.define('Contactos', {
         idcontacto: {
             type: DataTypes.INTEGER,
-            primaryKey: true
+            primaryKey: true,
+            autoIncrement: true,
+            allowNull: false
         },
         nombre: {
             type: DataTypes.STRING(100)

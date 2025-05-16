@@ -7,7 +7,8 @@ import {
   Navigate
 } from 'react-router-dom';
 import Login from './pages/login/login';  // Importa el componente Login
-import Dashboard from './pages/dashboard/dashboard';
+import Dashboard from './pages/dashboard/dashboard'; // importa el componente Dashboard
+import Registro from './pages/register/register'; // importa el componente Register
 
 function App() {
   const [, setMessage] = useState('');
@@ -41,6 +42,7 @@ function App() {
             isLoggedIn ? <Navigate to="/dashboard" /> : <Login setIsLoggedIn={setIsLoggedIn} />
           }
         />
+        <Route path="/register" element={<Registro />} />
         <Route
           path="/dashboard"
           element={

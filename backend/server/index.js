@@ -5,6 +5,7 @@ const socketIo = require('socket.io');
 const cors = require('cors');
 const fs = require('fs');
 const loginRoutes = require('../routes/loginRoute');  // Importamos las rutas de login
+const registerRoutes = require('../routes/registerRoute');
 const authenticateToken = require('../middlewares/auth');  // Middleware para la autenticación del token
 const sequelize = require('../config/database');  // Importamos la configuración de la base de datos
 const Usuario = require('../models/systemusers');  // Importamos directamente la función
@@ -40,6 +41,7 @@ io.on('connection', (socket) => {
 
 // Rutas de login
 app.use('/login', loginRoutes);
+app.use('/register', registerRoutes);
 
 // Ruta protegida (solo accesible si el token es válido)
 app.get('/usuarios/:id', authenticateToken, async (req, res) => {

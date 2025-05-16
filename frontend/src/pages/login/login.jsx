@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import './login.css';
 
@@ -64,6 +64,7 @@ const Login = ({ setIsLoggedIn }) => {
                     <button type="submit">Iniciar sesión</button>
                 </div>
             </form>
+            <p>¿No tienes cuenta? <Link to="/register">Registrarse</Link></p>
         </div>
     );
 };
