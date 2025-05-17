@@ -4,80 +4,83 @@ const http = require('http');
 const socketIo = require('socket.io');
 const cors = require('cors');
 const fs = require('fs');
-const loginRoutes = require('../routes/loginRoute');  // Importamos las rutas de login
+const sequelize = require('../config/database');
+
+const loginRoutes = require('../routes/loginRoute');
 const registerRoutes = require('../routes/registerRoute');
-const authenticateToken = require('../middlewares/auth');  // Middleware para la autenticación del token
-const sequelize = require('../config/database');  // Importamos la configuración de la base de datos
-const Usuario = require('../models/systemusers');  // Importamos directamente la función
-const usuarioModelo = Usuario(sequelize, require('sequelize').DataTypes);  // Ejecutamos la función y obtenemos el modelo
-console.log("Modelo Usuario en index.js:", Usuario); // Verifica que el modelo se cargue correctamente
+const usuariosRoutes = require('../routes/usuariosRoute'); // ✅ NUEVA RUTA
 
-// Crear la aplicación de Express
+const authenticateToken = require('../middlewares/auth');
+const Usuario = require('../models/systemusers');
+const usuarioModelo = Usuario(sequelize, require('sequelize').DataTypes);
+
+console.log("Modelo Usuario en index.js:", Usuario);
+
 const app = express();
-
-app.use(express.json());  // Para analizar las solicitudes con cuerpo JSON
-app.use(cors());  // Habilitar CORS
-
-// Configura el servidor HTTP para usar con Socket.io
 const server = http.createServer(app);
 const io = socketIo(server);
 
-// Ruta básica
+// Middleware
+app.use(express.json());
+app.use(cors());
+
+// Ruta principal
 app.get('/', (req, res) => {
     res.send('¡Servidor de gestión de turnos en funcionamiento!');
     logToFile('Se visitó la ruta principal ("/")');
 });
 
-// Conexión WebSocket
+// WebSocket
 io.on('connection', (socket) => {
     console.log('Un usuario se ha conectado');
     logToFile('Un usuario se ha conectado');
-    
+
     socket.on('disconnect', () => {
         console.log('Un usuario se ha desconectado');
         logToFile('Un usuario se ha desconectado');
     });
 });
 
-// Rutas de login
+// Rutas principales
 app.use('/login', loginRoutes);
 app.use('/register', registerRoutes);
+app.use('/usuarios', usuariosRoutes); // ✅ RUTA NUEVA DE CONFIGURACIÓN
 
-// Ruta protegida (solo accesible si el token es válido)
+// Ruta protegida de ejemplo
 app.get('/usuarios/:id', authenticateToken, async (req, res) => {
     const { id } = req.params;
 
     try {
         const usuario = await usuarioModelo.findOne({ where: { idUsuario: id } });
-        
+
         if (!usuario) {
             return res.status(404).json({ message: 'Usuario no encontrado' });
         }
-        
+
         res.json(usuario);
     } catch (err) {
         return res.status(500).send('Error en el servidooor');
     }
 });
 
-// Configuración del puerto del servidor
+// Puerto
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
     console.log(`Servidor corriendo en http://localhost:${PORT}`);
     logToFile(`Servidor corriendo en http://localhost:${PORT}`);
 });
 
-// Función para escribir en el archivo de log
+// Logging
 function logToFile(message) {
-    const logMessage = `${new Date().toISOString()} - ${message}\n`; // Agrega la fecha y el mensaje
-    fs.appendFile('logs.txt', logMessage, (err) => { // Escribe el mensaje en el archivo logs.txt
+    const logMessage = `${new Date().toISOString()} - ${message}\n`;
+    fs.appendFile('logs.txt', logMessage, (err) => {
         if (err) {
-            console.error('Error al escribir en el archivo de logs:', err); // Si hay un error, lo mostramos
+            console.error('Error al escribir en el archivo de logs:', err);
         }
     });
 }
 
-// Verificación de la conexión con la base de datos
+// Conexión a la base de datos
 sequelize.authenticate()
     .then(() => {
         console.log('Conexión con la base de datos establecida correctamente.');

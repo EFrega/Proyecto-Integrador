@@ -52,7 +52,7 @@ const Registro = () => {
         <div className="register-wrapper">
             <div className="register-container">
                 <h2 className="register-title">Registro</h2>
-                <Form onSubmit={handleSubmit}>
+                <Form onSubmit={handleSubmit} className="col-12">
                     <Row className="form-row">
                         <Col><Form.Control name="nombre" placeholder="Nombre" onChange={handleChange} required /></Col>
                         <Col><Form.Control name="apellido" placeholder="Apellido" onChange={handleChange} required /></Col>
@@ -112,11 +112,11 @@ const Registro = () => {
                     {error && <p className="error-message">{error}</p>}
 
                     <Button type="submit" className="register-button">Registrar</Button>
-                    <Button variant="light" className="google-button">Registrarse con Google</Button>
+                    <Button variant="light" className="google-button d-none">Registrarse con Google</Button>
                 </Form>
 
                 <div className="register-link">
-                    ¿Ya tiene una cuenta? <Link to="/login">Ingresar</Link>
+                    ¿Ya tiene una cuenta? <Link to="/">Ingresar</Link>
                 </div>
             </div>
         </div>

@@ -40,7 +40,16 @@ router.post('/', async (req, res) => {
         );
 
         console.log('Token generado:', token);
-        res.json({ token });
+        res.json({
+            token,
+            usuario: usuarioDb.usuario,
+            roles: {
+                rolpaciente: usuarioDb.rolpaciente,
+                rolmedico: usuarioDb.rolmedico,
+                roladministrativo: usuarioDb.roladministrativo,
+                rolsuperadmin: usuarioDb.rolsuperadmin
+            }
+        });
     } catch (err) {
         console.log("Error en el catch de loginRoute:", err); // Agregamos un log para mostrar el error exacto
         res.status(500).json({ message: 'Error en el servidoor' });
