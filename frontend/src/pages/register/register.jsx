@@ -112,7 +112,7 @@ const Registro = () => {
                     {error && <p className="error-message">{error}</p>}
 
                     <Button type="submit" className="register-button">Registrar</Button>
-                    <Button variant="light" className="google-button">Registrarse con Google</Button>
+                    <Button variant="light" className="google-button d-none">Registrarse con Google</Button>
                 </Form>
 
                 <div className="register-link">
