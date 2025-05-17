@@ -19,9 +19,20 @@ const Login = ({ setIsLoggedIn }) => {
                 contrasena,
             });
 
-            // Si la autenticación es exitosa
-            localStorage.setItem('token', response.data.token);
+            const { token, usuario: nombreUsuario, roles } = response.data;
+
+            if (!roles || typeof roles !== 'object') {
+                console.error('Roles inválidos:', roles);
+                setError('Error al obtener roles del usuario');
+                return;
+            }
+
+            // Guardamos datos en localStorage
+            localStorage.setItem('token', token);
             localStorage.setItem('isLoggedIn', 'true');
+            localStorage.setItem('usuario', nombreUsuario);
+            localStorage.setItem('roles', JSON.stringify(roles));
+
             setIsLoggedIn(true);
 
             alert('¡Login exitoso!');
