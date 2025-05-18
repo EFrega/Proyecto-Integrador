@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Table, Button, Form, Alert, Spinner, Container } from 'react-bootstrap';
 
-const Configuracion = () => {
+const Roles = () => {
   const [usuarios, setUsuarios] = useState([]);
   const [mensaje, setMensaje] = useState('');
   const [cargando, setCargando] = useState(true);
@@ -109,4 +109,4 @@ const Configuracion = () => {
   );
 };
 
-export default Configuracion;
+export default Roles;

@@ -7,10 +7,10 @@ import {
   FaFileAlt,
   FaFolder,
   FaSignOutAlt,
-  FaCog
+  FaUsers
 } from 'react-icons/fa';
 import './dashboard.css';
-import Configuracion from '../configuration/Configuracion';
+import Roles from '../roles/Roles';
 
 const Dashboard = ({ setIsLoggedIn }) => {
   const [visibleIcons, setVisibleIcons] = useState([]);
@@ -80,11 +80,11 @@ const Dashboard = ({ setIsLoggedIn }) => {
           {visibleIcons.map(icon => icon.component)}
 
           {roles.rolsuperadmin && (
-            <FaCog
+            <FaUsers
               className="mb-4 text-secondary hover-icon"
-              title="Configuración"
+              title="Roles"
               style={{ cursor: 'pointer' }}
-              onClick={() => setVista('configuracion')}
+              onClick={() => setVista('roles')}
             />
           )}
 
@@ -110,8 +110,8 @@ const Dashboard = ({ setIsLoggedIn }) => {
           </Navbar>
 
           <Container fluid className="flex-grow-1 p-4 bg-light">
-            {vista === 'configuracion' ? (
-              <Configuracion />
+            {vista === 'roles' ? (
+              <Roles />
             ) : (
               <h4 className="text-primary">Inicio</h4>
             )}
