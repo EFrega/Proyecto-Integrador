@@ -79,10 +79,10 @@ const Dashboard = ({ setIsLoggedIn }) => {
         <div className="bg-white border-end d-flex flex-column align-items-center p-2" style={{ width: '60px' }}>
           {visibleIcons.map(icon => icon.component)}
 
-          {roles.rolsuperadmin && (
+          {(roles.rolsuperadmin || roles.roladministrativo) && (
             <FaUsers
               className="mb-4 text-secondary hover-icon"
-              title="Roles"
+              title="Usuarios"
               style={{ cursor: 'pointer' }}
               onClick={() => setVista('roles')}
             />
