@@ -78,14 +78,16 @@ const Roles = () => {
   const totalPaginas = Math.ceil(usuariosFiltrados.length / usuariosPorPagina);
 
   const handleBuscar = (e) => {
-    const texto = e.target.value;
+    const texto = e.target.value.toLowerCase();
     setBusqueda(texto);
     setPaginaActual(1);
     if (texto.trim() === '') {
       setUsuariosFiltrados(usuariosOriginal);
     } else {
       const filtrados = usuariosOriginal.filter((u) =>
-        u.usuario.toLowerCase().includes(texto.toLowerCase())
+        u.usuario.toLowerCase().includes(texto) ||
+        u.nombre?.toLowerCase().includes(texto) ||
+        u.apellido?.toLowerCase().includes(texto)
       );
       setUsuariosFiltrados(filtrados);
     }
@@ -175,6 +177,8 @@ const Roles = () => {
           <Table striped bordered hover responsive className="mb-3">
             <thead className="table-dark text-center">
               <tr>
+                <th>Nombre</th>
+                <th>Apellido</th>
                 <th>Usuario</th>
                 <th>Paciente</th>
                 <th>Médico</th>
@@ -186,6 +190,8 @@ const Roles = () => {
             <tbody>
               {usuariosPaginados.map((user) => (
                 <tr key={user.idusuario} className="text-center">
+                  <td>{user.nombre}</td>
+                  <td>{user.apellido}</td>
                   <td>{user.usuario}</td>
                   <td>
                     <Form.Check

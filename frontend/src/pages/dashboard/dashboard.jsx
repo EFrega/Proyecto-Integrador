@@ -82,7 +82,7 @@ const Dashboard = ({ setIsLoggedIn }) => {
           {(roles.rolsuperadmin || roles.roladministrativo) && (
             <FaUsers
               className="mb-4 text-secondary hover-icon"
-              title="Usuarios"
+              title="Gestion de Usuarios"
               style={{ cursor: 'pointer' }}
               onClick={() => setVista('roles')}
             />
