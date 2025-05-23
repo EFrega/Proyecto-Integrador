@@ -7,7 +7,8 @@ import {
   FaFileAlt,
   FaFolder,
   FaSignOutAlt,
-  FaUsers
+  FaUsers,
+  FaEnvelope
 } from 'react-icons/fa';
 import './dashboard.css';
 import Roles from '../roles/Roles';
@@ -82,7 +83,7 @@ const Dashboard = ({ setIsLoggedIn }) => {
           {(roles.rolsuperadmin || roles.roladministrativo) && (
             <FaUsers
               className="mb-4 text-secondary hover-icon"
-              title="Gestion de Usuarios"
+              title="Gestión de Usuarios"
               style={{ cursor: 'pointer' }}
               onClick={() => setVista('roles')}
             />
@@ -101,8 +102,12 @@ const Dashboard = ({ setIsLoggedIn }) => {
           <Navbar bg="white" expand="lg" className="shadow-sm px-4 py-2 justify-content-between">
             <Navbar.Brand className="text-primary fw-bold">Clínica<span className="text-dark">Medica</span></Navbar.Brand>
             <Nav className="d-flex align-items-center gap-3">
-              <div className="rounded-circle bg-danger" style={{ width: '30px', height: '30px' }} />
-              <div className="rounded-circle bg-info" style={{ width: '30px', height: '30px' }} />
+              <div className="rounded-circle bg-danger d-flex justify-content-center align-items-center" style={{ width: '30px', height: '30px' }}>
+                <FaComments color="white" />
+              </div>
+              <div className="rounded-circle bg-info d-flex justify-content-center align-items-center" style={{ width: '30px', height: '30px' }}>
+                <FaEnvelope color="white" />
+              </div>
               <span className="text-muted small">
                 {localStorage.getItem('usuario') || 'Usuario'}
               </span>
@@ -135,7 +140,7 @@ const Dashboard = ({ setIsLoggedIn }) => {
               </Row>
               <Row className="text-center mt-3">
                 <Col>
-                  <small>©2025 Diseñado y desarrollado por <a className="text-info text-decoration-underline" href="https://hehex.dev" target="_blank" rel="noreferrer">HeHex Developers</a></small>
+                  <small>©2025 Diseñado y desarrollado por <a className="text-info text-decoration-underline" href="https://hehex.dev" target="_blank" rel="noreferrer">HiFive Developers</a></small>
                 </Col>
               </Row>
             </Container>
