@@ -61,15 +61,11 @@ const [ordenAscendente, setOrdenAscendente] = useState(true);
   };
   const toggleRol = (idusuario, rol) => {
     setUsuariosFiltrados((prev) =>
-      prev.map((user) => {
-        if (user.idusuario !== idusuario) return user;
-        const nuevoValor = !user[rol];
-        const updatedUser = { ...user, [rol]: nuevoValor };
-        if (rol === 'roladministrativo' && !nuevoValor) {
-          updatedUser.rolsuperadmin = false;
-        }
-        return updatedUser;
-      })
+      prev.map((user) =>
+        user.idusuario === idusuario
+          ? { ...user, [rol]: !user[rol] }
+          : user
+      )
     );
   };
 
@@ -239,10 +235,6 @@ const [ordenAscendente, setOrdenAscendente] = useState(true);
                 const esAdmin = user.usuario === 'admin';
                 const noSoyAdmin = usuarioLogueado !== 'admin';
                 const filaBloqueada = esAdmin && noSoyAdmin;
-                const puedeTocarSuperadmin =
-                  puedeVerSuperadmin &&
-                  !esAdmin &&
-                  user.roladministrativo;
 
                 return (
                   <tr key={user.idusuario} className="text-center">
@@ -279,7 +271,7 @@ const [ordenAscendente, setOrdenAscendente] = useState(true);
                         <Form.Check
                           type="checkbox"
                           checked={!!user.rolsuperadmin}
-                          disabled={filaBloqueada || !puedeTocarSuperadmin}
+                          disabled={filaBloqueada || user.usuario === 'admin'}
                           onChange={() => toggleRol(user.idusuario, 'rolsuperadmin')}
                         />
                       </td>
