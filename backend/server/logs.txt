@@ -410,3 +410,35 @@
 2025-05-23T02:48:43.059Z - Se visitó la ruta principal ("/")
 2025-05-23T03:48:48.693Z - Se visitó la ruta principal ("/")
 2025-05-23T03:48:48.687Z - Se visitó la ruta principal ("/")
+2025-05-24T18:42:37.108Z - Servidor corriendo en http://localhost:5000
+2025-05-24T18:42:40.106Z - Conexión con la base de datos establecida correctamente.
+2025-05-24T18:43:10.219Z - Se visitó la ruta principal ("/")
+2025-05-24T18:43:10.227Z - Se visitó la ruta principal ("/")
+2025-05-24T18:54:23.508Z - Servidor corriendo en http://localhost:5000
+2025-05-24T18:54:27.269Z - Conexión con la base de datos establecida correctamente.
+2025-05-24T18:54:50.079Z - Se visitó la ruta principal ("/")
+2025-05-24T18:54:50.083Z - Se visitó la ruta principal ("/")
+2025-05-24T18:58:08.008Z - Servidor corriendo en http://localhost:5000
+2025-05-24T18:58:11.060Z - Conexión con la base de datos establecida correctamente.
+2025-05-24T18:58:23.991Z - Se visitó la ruta principal ("/")
+2025-05-24T18:58:23.995Z - Se visitó la ruta principal ("/")
+2025-05-24T19:00:32.626Z - Servidor corriendo en http://localhost:5000
+2025-05-24T19:00:35.165Z - Conexión con la base de datos establecida correctamente.
+2025-05-24T19:00:48.460Z - Se visitó la ruta principal ("/")
+2025-05-24T19:00:48.464Z - Se visitó la ruta principal ("/")
+2025-05-24T19:01:34.171Z - Se visitó la ruta principal ("/")
+2025-05-24T19:01:34.177Z - Se visitó la ruta principal ("/")
+2025-05-24T19:26:57.206Z - Se visitó la ruta principal ("/")
+2025-05-24T19:26:57.209Z - Se visitó la ruta principal ("/")
+2025-05-24T19:27:12.324Z - Servidor corriendo en http://localhost:5000
+2025-05-24T19:27:15.301Z - Conexión con la base de datos establecida correctamente.
+2025-05-24T19:27:28.501Z - Se visitó la ruta principal ("/")
+2025-05-24T19:27:28.506Z - Se visitó la ruta principal ("/")
+2025-05-24T19:32:32.700Z - Se visitó la ruta principal ("/")
+2025-05-24T19:32:32.704Z - Se visitó la ruta principal ("/")
+2025-05-24T19:34:57.891Z - Se visitó la ruta principal ("/")
+2025-05-24T19:34:57.897Z - Se visitó la ruta principal ("/")
+2025-05-24T19:36:00.089Z - Se visitó la ruta principal ("/")
+2025-05-24T19:36:00.093Z - Se visitó la ruta principal ("/")
+2025-05-24T19:53:29.946Z - Se visitó la ruta principal ("/")
+2025-05-24T19:53:29.949Z - Se visitó la ruta principal ("/")
