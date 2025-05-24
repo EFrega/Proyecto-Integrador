@@ -1,0 +1,2 @@
+2025-05-24T13:45:57.585Z - Servidor corriendo en http://localhost:5000
+2025-05-24T13:46:01.583Z - No se pudo conectar a la base de datos: SequelizeConnectionRefusedError: connect ECONNREFUSED 85.10.205.173:3306
