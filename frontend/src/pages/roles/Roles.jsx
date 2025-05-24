@@ -109,23 +109,51 @@ const [ordenAscendente, setOrdenAscendente] = useState(true);
   const abrirFormularioEdicion = async (idusuario) => {
     try {
       const res = await axios.get(`http://localhost:5000/contactos/${idusuario}`);
-      setContacto(res.data);
+      setContacto({ ...res.data, idusuario });
       setMostrarModal(true);
     } catch (err) {
       alert('Error al obtener los datos del contacto');
     }
   };
 
+  const aplicarOrdenamientoActual = (lista) => {
+    return [...lista].sort((a, b) => {
+      const valA = a[ordenCampo]?.toString().toLowerCase() || '';
+      const valB = b[ordenCampo]?.toString().toLowerCase() || '';
+      return ordenAscendente ? valA.localeCompare(valB) : valB.localeCompare(valA);
+    });
+  };
   const guardarContacto = async () => {
     try {
       await axios.put(`http://localhost:5000/contactos/${contacto.idcontacto}`, contacto);
       alert('Contacto actualizado correctamente');
+
+      // Actualizamos datos y reordenamos visualmente
+      const actualizarYOrdenar = (lista) =>
+        aplicarOrdenamientoActual(
+          lista.map((user) =>
+            user.idusuario === contacto.idusuario
+              ? {
+                  ...user,
+                  nombre: contacto.nombre,
+                  apellido: contacto.apellido,
+                  docum: contacto.docum
+                }
+              : user
+          )
+        );
+
+      setUsuariosOriginal((prev) => actualizarYOrdenar(prev));
+      setUsuariosFiltrados((prev) => actualizarYOrdenar(prev));
+
+      // Forzar refresco visual re-triggering paginación
+      setPaginaActual((prev) => prev);
+
       setMostrarModal(false);
     } catch (err) {
       alert('Error al actualizar el contacto');
     }
   };
-
   const verContacto = async (idusuario) => {
     try {
       const res = await axios.get(`http://localhost:5000/contactos/${idusuario}`);
