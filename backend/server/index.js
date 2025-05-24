@@ -8,7 +8,8 @@ const sequelize = require('../config/database');
 
 const loginRoutes = require('../routes/loginRoute');
 const registerRoutes = require('../routes/registerRoute');
-const usuariosRoutes = require('../routes/usuariosRoute'); // ✅ NUEVA RUTA
+const usuariosRoutes = require('../routes/usuariosRoute');
+const contactosRoutes = require('../routes/contactosRoute');
 
 const authenticateToken = require('../middlewares/auth');
 const Usuario = require('../models/systemusers');
@@ -44,7 +45,8 @@ io.on('connection', (socket) => {
 // Rutas principales
 app.use('/login', loginRoutes);
 app.use('/register', registerRoutes);
-app.use('/usuarios', usuariosRoutes); // ✅ RUTA NUEVA DE CONFIGURACIÓN
+app.use('/usuarios', usuariosRoutes);
+app.use('/contactos', contactosRoutes);
 
 // Ruta protegida de ejemplo
 app.get('/usuarios/:id', authenticateToken, async (req, res) => {
