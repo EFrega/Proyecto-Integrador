@@ -1,16 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import {
-  Table,
-  Button,
-  Form,
-  Alert,
-  Spinner,
-  Container,
-  Row,
-  Col,
-  InputGroup,
-  Modal
+  Table, Button, Form, Alert, Spinner,
+  Container, Row, Col, InputGroup, Modal
 } from 'react-bootstrap';
 import { FaEdit, FaEye } from 'react-icons/fa';
 
@@ -21,14 +13,16 @@ const Roles = () => {
   const [cargando, setCargando] = useState(true);
   const [guardando, setGuardando] = useState(false);
   const [paginaActual, setPaginaActual] = useState(1);
+  const [ordenCampo, setOrdenCampo] = useState('apellido');
+const [ordenAscendente, setOrdenAscendente] = useState(true);
   const [busqueda, setBusqueda] = useState('');
   const [mostrarModal, setMostrarModal] = useState(false);
   const [contacto, setContacto] = useState(null);
   const [modalVista, setModalVista] = useState(false);
   const [contactoVista, setContactoVista] = useState(null);
 
-  // Roles del usuario conectado
   const roles = JSON.parse(localStorage.getItem('roles') || '{}');
+  const usuarioLogueado = localStorage.getItem('usuario') || '';
   const puedeVerSuperadmin = roles.rolsuperadmin;
   const puedeAcceder = roles.rolsuperadmin || roles.roladministrativo;
 
@@ -42,40 +36,51 @@ const Roles = () => {
   const usuariosPorPagina = 10;
 
   useEffect(() => {
-    axios
-      .get('http://localhost:5000/usuarios')
+    axios.get('http://localhost:5000/usuarios')
       .then((res) => {
-        setUsuariosOriginal(res.data);
-        setUsuariosFiltrados(res.data);
+        const ordenado = [...res.data].sort((a, b) => a.apellido?.localeCompare(b.apellido));
+        setUsuariosOriginal(ordenado);
+        setUsuariosFiltrados(ordenado);
       })
       .catch(() => setMensaje('Error al cargar usuarios'))
       .finally(() => setCargando(false));
   }, []);
 
+  const ordenarPorCampo = (campo) => {
+    const ascendente = campo === ordenCampo ? !ordenAscendente : true;
+    setOrdenCampo(campo);
+    setOrdenAscendente(ascendente);
+
+    const ordenado = [...usuariosFiltrados].sort((a, b) => {
+      const valA = a[campo]?.toString().toLowerCase() || '';
+      const valB = b[campo]?.toString().toLowerCase() || '';
+      return ascendente ? valA.localeCompare(valB) : valB.localeCompare(valA);
+    });
+
+    setUsuariosFiltrados(ordenado);
+  };
   const toggleRol = (idusuario, rol) => {
     setUsuariosFiltrados((prev) =>
-      prev.map((user) =>
-        user.idusuario === idusuario ? { ...user, [rol]: !user[rol] } : user
-      )
+      prev.map((user) => {
+        if (user.idusuario !== idusuario) return user;
+        const nuevoValor = !user[rol];
+        const updatedUser = { ...user, [rol]: nuevoValor };
+        if (rol === 'roladministrativo' && !nuevoValor) {
+          updatedUser.rolsuperadmin = false;
+        }
+        return updatedUser;
+      })
     );
   };
 
   const guardarCambios = () => {
     setGuardando(true);
     setMensaje('');
-    axios
-      .put('http://localhost:5000/usuarios/roles', { usuarios: usuariosFiltrados })
+    axios.put('http://localhost:5000/usuarios/roles', { usuarios: usuariosFiltrados })
       .then(() => setMensaje('Roles actualizados correctamente'))
       .catch(() => setMensaje('Error al actualizar roles'))
       .finally(() => setGuardando(false));
   };
-
-  const usuariosPaginados = usuariosFiltrados.slice(
-    (paginaActual - 1) * usuariosPorPagina,
-    paginaActual * usuariosPorPagina
-  );
-
-  const totalPaginas = Math.ceil(usuariosFiltrados.length / usuariosPorPagina);
 
   const handleBuscar = (e) => {
     const texto = e.target.value.toLowerCase();
@@ -87,32 +92,68 @@ const Roles = () => {
       const filtrados = usuariosOriginal.filter((u) =>
         u.usuario.toLowerCase().includes(texto) ||
         u.nombre?.toLowerCase().includes(texto) ||
-        u.apellido?.toLowerCase().includes(texto)
+        u.apellido?.toLowerCase().includes(texto) ||
+        u.docum?.toLowerCase().includes(texto)
       );
       setUsuariosFiltrados(filtrados);
     }
   };
 
+  const usuariosPaginados = usuariosFiltrados.slice(
+    (paginaActual - 1) * usuariosPorPagina,
+    paginaActual * usuariosPorPagina
+  );
+
+  const totalPaginas = Math.ceil(usuariosFiltrados.length / usuariosPorPagina);
+
   const abrirFormularioEdicion = async (idusuario) => {
     try {
       const res = await axios.get(`http://localhost:5000/contactos/${idusuario}`);
-      setContacto(res.data);
+      setContacto({ ...res.data, idusuario });
       setMostrarModal(true);
     } catch (err) {
       alert('Error al obtener los datos del contacto');
     }
   };
 
+  const aplicarOrdenamientoActual = (lista) => {
+    return [...lista].sort((a, b) => {
+      const valA = a[ordenCampo]?.toString().toLowerCase() || '';
+      const valB = b[ordenCampo]?.toString().toLowerCase() || '';
+      return ordenAscendente ? valA.localeCompare(valB) : valB.localeCompare(valA);
+    });
+  };
   const guardarContacto = async () => {
     try {
       await axios.put(`http://localhost:5000/contactos/${contacto.idcontacto}`, contacto);
       alert('Contacto actualizado correctamente');
+
+      // Actualizamos datos y reordenamos visualmente
+      const actualizarYOrdenar = (lista) =>
+        aplicarOrdenamientoActual(
+          lista.map((user) =>
+            user.idusuario === contacto.idusuario
+              ? {
+                  ...user,
+                  nombre: contacto.nombre,
+                  apellido: contacto.apellido,
+                  docum: contacto.docum
+                }
+              : user
+          )
+        );
+
+      setUsuariosOriginal((prev) => actualizarYOrdenar(prev));
+      setUsuariosFiltrados((prev) => actualizarYOrdenar(prev));
+
+      // Forzar refresco visual re-triggering paginación
+      setPaginaActual((prev) => prev);
+
       setMostrarModal(false);
     } catch (err) {
       alert('Error al actualizar el contacto');
     }
   };
-
   const verContacto = async (idusuario) => {
     try {
       const res = await axios.get(`http://localhost:5000/contactos/${idusuario}`);
@@ -138,7 +179,6 @@ const Roles = () => {
           }
         `}
       </style>
-
       <h3 className="mb-4 text-primary">Gestión de Usuarios</h3>
 
       {mensaje && (
@@ -150,7 +190,7 @@ const Roles = () => {
           <InputGroup>
             <Form.Control
               type="text"
-              placeholder="Buscar usuario..."
+              placeholder="Buscar usuario, nombre, apellido o documento..."
               value={busqueda}
               onChange={handleBuscar}
             />
@@ -177,9 +217,16 @@ const Roles = () => {
           <Table striped bordered hover responsive className="mb-3">
             <thead className="table-dark text-center">
               <tr>
-                <th>Nombre</th>
-                <th>Apellido</th>
-                <th>Usuario</th>
+                {['nombre', 'apellido', 'usuario', 'docum'].map((campo) => (
+                  <th
+                    key={campo}
+                    onClick={() => ordenarPorCampo(campo)}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    {campo === 'docum' ? 'Documento' : campo.charAt(0).toUpperCase() + campo.slice(1)}
+                    {ordenCampo === campo && (ordenAscendente ? '▲' : '▼')}
+                  </th>
+                ))}
                 <th>Paciente</th>
                 <th>Médico</th>
                 <th>Administrativo</th>
@@ -188,87 +235,96 @@ const Roles = () => {
               </tr>
             </thead>
             <tbody>
-              {usuariosPaginados.map((user) => (
-                <tr key={user.idusuario} className="text-center">
-                  <td>{user.nombre}</td>
-                  <td>{user.apellido}</td>
-                  <td>{user.usuario}</td>
-                  <td>
-                    <Form.Check
-                      type="checkbox"
-                      checked={!!user.rolpaciente}
-                      onChange={() => toggleRol(user.idusuario, 'rolpaciente')}
-                    />
-                  </td>
-                  <td>
-                    <Form.Check
-                      type="checkbox"
-                      checked={!!user.rolmedico}
-                      onChange={() => toggleRol(user.idusuario, 'rolmedico')}
-                    />
-                  </td>
-                  <td>
-                    <Form.Check
-                      type="checkbox"
-                      checked={!!user.roladministrativo}
-                      onChange={() => toggleRol(user.idusuario, 'roladministrativo')}
-                    />
-                  </td>
-                  {puedeVerSuperadmin && (
+              {usuariosPaginados.map((user) => {
+                const esAdmin = user.usuario === 'admin';
+                const noSoyAdmin = usuarioLogueado !== 'admin';
+                const filaBloqueada = esAdmin && noSoyAdmin;
+                const puedeTocarSuperadmin =
+                  puedeVerSuperadmin &&
+                  !esAdmin &&
+                  user.roladministrativo;
+
+                return (
+                  <tr key={user.idusuario} className="text-center">
+                    <td>{user.nombre}</td>
+                    <td>{user.apellido}</td>
+                    <td>{user.usuario}</td>
+                    <td>{user.docum || '—'}</td>
                     <td>
                       <Form.Check
                         type="checkbox"
-                        checked={!!user.rolsuperadmin}
-                        onChange={() => toggleRol(user.idusuario, 'rolsuperadmin')}
+                        checked={!!user.rolpaciente}
+                        disabled={filaBloqueada}
+                        onChange={() => toggleRol(user.idusuario, 'rolpaciente')}
                       />
                     </td>
-                  )}
-                  <td>
-                    <FaEye
-                      className="icon-action"
-                      title="Ver contacto"
-                      onClick={() => verContacto(user.idusuario)}
-                      size={18}
-                    />
-                    <FaEdit
-                      className="icon-action"
-                      title="Editar contacto"
-                      onClick={() => abrirFormularioEdicion(user.idusuario)}
-                      size={18}
-                    />
-                  </td>
-                </tr>
-              ))}
+                    <td>
+                      <Form.Check
+                        type="checkbox"
+                        checked={!!user.rolmedico}
+                        disabled={filaBloqueada}
+                        onChange={() => toggleRol(user.idusuario, 'rolmedico')}
+                      />
+                    </td>
+                    <td>
+                      <Form.Check
+                        type="checkbox"
+                        checked={!!user.roladministrativo}
+                        disabled={filaBloqueada}
+                        onChange={() => toggleRol(user.idusuario, 'roladministrativo')}
+                      />
+                    </td>
+                    {puedeVerSuperadmin && (
+                      <td>
+                        <Form.Check
+                          type="checkbox"
+                          checked={!!user.rolsuperadmin}
+                          disabled={filaBloqueada || !puedeTocarSuperadmin}
+                          onChange={() => toggleRol(user.idusuario, 'rolsuperadmin')}
+                        />
+                      </td>
+                    )}
+                    <td>
+                      <FaEye
+                        className="icon-action"
+                        title="Ver contacto"
+                        onClick={() => !filaBloqueada && verContacto(user.idusuario)}
+                        size={18}
+                        style={{ pointerEvents: filaBloqueada ? 'none' : 'auto', opacity: filaBloqueada ? 0.3 : 1 }}
+                      />
+                      <FaEdit
+                        className="icon-action"
+                        title="Editar contacto"
+                        onClick={() => !filaBloqueada && abrirFormularioEdicion(user.idusuario)}
+                        size={18}
+                        style={{ pointerEvents: filaBloqueada ? 'none' : 'auto', opacity: filaBloqueada ? 0.3 : 1 }}
+                      />
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </Table>
 
-          <Row className="align-items-center justify-content-between">
-            <Col xs="auto" className="text-muted">
-              Mostrando {usuariosFiltrados.length === 0 ? 0 : (paginaActual - 1) * usuariosPorPagina + 1}
-              {' '}–{' '}
-              {Math.min(paginaActual * usuariosPorPagina, usuariosFiltrados.length)} de {usuariosFiltrados.length}
-            </Col>
-            <Col xs="auto">
-              <Button
-                variant="secondary"
-                className="me-2"
-                disabled={paginaActual === 1}
-                onClick={() => setPaginaActual((prev) => prev - 1)}
-              >
-                Anterior
-              </Button>
-              <Button
-                variant="secondary"
-                disabled={paginaActual === totalPaginas || totalPaginas === 0}
-                onClick={() => setPaginaActual((prev) => prev + 1)}
-              >
-                Siguiente
-              </Button>
-            </Col>
-            <Col xs="auto">
-              <Button variant="primary" onClick={guardarCambios} disabled={guardando}>
-                {guardando ? 'Guardando...' : 'Guardar Cambios'}
-              </Button>
+          <Row className="align-items-center justify-content-between mt-3">
+            <Col xs={12}>
+              <div className="d-flex flex-wrap justify-content-between align-items-center">
+                <div className="d-flex align-items-center justify-content-center gap-2 mx-auto">
+                  <Button variant="outline-secondary" size="sm" disabled={paginaActual === 1} onClick={() => setPaginaActual(1)} title="Primera página">⏮️</Button>
+                  <Button variant="outline-secondary" size="sm" disabled={paginaActual === 1} onClick={() => setPaginaActual(paginaActual - 1)} title="Anterior">◀️</Button>
+                  <span style={{ whiteSpace: 'nowrap', display: 'inline-block', minWidth: '110px', textAlign: 'center' }}>
+                    Página <strong>{paginaActual}</strong> de <strong>{totalPaginas}</strong>
+                  </span>
+                  <Button variant="outline-secondary" size="sm" disabled={paginaActual === totalPaginas} onClick={() => setPaginaActual(paginaActual + 1)} title="Siguiente">▶️</Button>
+                  <Button variant="outline-secondary" size="sm" disabled={paginaActual === totalPaginas} onClick={() => setPaginaActual(totalPaginas)} title="Última página">⏭️</Button>
+                </div>
+
+                <div>
+                  <Button variant="primary" onClick={guardarCambios} disabled={guardando}>
+                    {guardando ? 'Guardando...' : 'Guardar Cambios'}
+                  </Button>
+                </div>
+              </div>
             </Col>
           </Row>
         </>
@@ -296,12 +352,8 @@ const Roles = () => {
           )}
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={() => setMostrarModal(false)}>
-            Cancelar
-          </Button>
-          <Button variant="primary" onClick={guardarContacto}>
-            Guardar Cambios
-          </Button>
+          <Button variant="secondary" onClick={() => setMostrarModal(false)}>Cancelar</Button>
+          <Button variant="primary" onClick={guardarContacto}>Guardar Cambios</Button>
         </Modal.Footer>
       </Modal>
 
@@ -334,9 +386,7 @@ const Roles = () => {
           )}
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={() => setModalVista(false)}>
-            Cerrar
-          </Button>
+          <Button variant="secondary" onClick={() => setModalVista(false)}>Cerrar</Button>
         </Modal.Footer>
       </Modal>
     </Container>

@@ -16,10 +16,10 @@ DDBB MySQL: https://www.db4free.net
 ## Instalar dependencias 
 
 cd <carpeta raiz del proyecto> 
-npm install react@^19.1.0 react-dom@^19.1.0 bcryptjs@^3.0.2 body-parser@^2.2.0 cors@^2.8.5 express@^4.21.2 jsonwebtoken@^9.0.2 mysql2@^3.14.0 sequelize@^6.37.7 socket.io@^4.8.1 
+npm install
 
 cd <carpeta raiz frontend> 
-npm install axios@^1.8.4 react-bootstrap@^2.10.9 bootstrap@^5.3.5 bootstrap-icons@^1.11.3 react-icons@5.5.0 socket.io-client@^4.8.1 web-vitals@^2.1.4 react-router-dom@^7.5.3 
+npm install
 
 ## Ejecutar el Backend 
 
