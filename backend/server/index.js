@@ -10,6 +10,7 @@ const loginRoutes = require('../routes/loginRoute');
 const registerRoutes = require('../routes/registerRoute');
 const usuariosRoutes = require('../routes/usuariosRoute');
 const contactosRoutes = require('../routes/contactosRoute');
+const profesionalesRoute = require('../routes/profesionalesRoute');
 const serviciosRoutes = require('../routes/serviciosRoute');
 
 const authenticateToken = require('../middlewares/auth');
@@ -48,6 +49,7 @@ app.use('/login', loginRoutes);
 app.use('/register', registerRoutes);
 app.use('/usuarios', usuariosRoutes);
 app.use('/contactos', contactosRoutes);
+app.use('/profesionales', profesionalesRoute);
 app.use('/servicios', serviciosRoutes);
 
 
