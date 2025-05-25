@@ -8,10 +8,13 @@ import {
   FaFolder,
   FaSignOutAlt,
   FaUsers,
-  FaEnvelope
+  FaEnvelope,
+  FaClipboardList
 } from 'react-icons/fa';
 import './dashboard.css';
 import Roles from '../roles/Roles';
+import CargarServicio from '../cargaServicios/cargarServicios'; // Ajustá la ruta si está en otro directorio
+
 
 const Dashboard = ({ setIsLoggedIn }) => {
   const [visibleIcons, setVisibleIcons] = useState([]);
@@ -46,14 +49,15 @@ const Dashboard = ({ setIsLoggedIn }) => {
       { id: 'comments', component: <FaComments className="mb-4 text-secondary hover-icon" key="comments" onClick={() => setVista('inicio')} /> },
       { id: 'file', component: <FaFileAlt className="mb-4 text-secondary hover-icon" key="file" onClick={() => setVista('inicio')} /> },
       { id: 'folder', component: <FaFolder className="mb-4 text-secondary hover-icon" key="folder" onClick={() => setVista('inicio')} /> },
+      { id: 'servicios', component: <FaClipboardList className="mb-4 text-secondary hover-icon" key="servicios" onClick={() => setVista('servicios')} /> },
     ];
 
     let allowedIds = [];
 
     if (bool(roles.rolsuperadmin)) {
-      allowedIds = ['home', 'calendar', 'comments', 'file', 'folder'];
+      allowedIds = ['home', 'calendar', 'comments', 'file', 'folder', 'servicios'];
     } else if (bool(roles.roladministrativo)) {
-      allowedIds = ['home', 'calendar', 'comments'];
+      allowedIds = ['home', 'calendar', 'comments', 'servicios'];
     } else if (bool(roles.rolmedico) || bool(roles.rolpaciente)) {
       allowedIds = ['home', 'calendar'];
     } else {
@@ -117,6 +121,8 @@ const Dashboard = ({ setIsLoggedIn }) => {
           <Container fluid className="flex-grow-1 p-4 bg-light">
             {vista === 'roles' ? (
               <Roles />
+            ) : vista === 'servicios' ? (
+              <CargarServicio />
             ) : (
               <h4 className="text-primary">Inicio</h4>
             )}
