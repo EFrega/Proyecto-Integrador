@@ -84,4 +84,23 @@ router.put('/roles', async (req, res) => {
   }
 });
 
+router.put('/resetear-contrasena/:idusuario', async (req, res) => {
+  const { idusuario } = req.params;
+  const { nuevaContrasena } = req.body;
+
+  try {
+    const usuario = await SystemUsers.findByPk(idusuario);
+    if (!usuario) return res.status(404).json({ message: 'Usuario no encontrado' });
+
+    usuario.contrasena = nuevaContrasena;
+    await usuario.save();
+
+    res.json({ message: 'Contraseña actualizada' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Error al actualizar contraseña' });
+  }
+});
+
+
 module.exports = router;
