@@ -8,9 +8,6 @@ module.exports = (sequelize, DataTypes) => {
         idcontacto: {
             type: DataTypes.INTEGER
         },
-        rolmedico: {
-            type: DataTypes.BOOLEAN
-        },
         activo: {
             type: DataTypes.BOOLEAN
         }

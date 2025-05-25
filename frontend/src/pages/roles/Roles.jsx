@@ -69,14 +69,41 @@ const [ordenAscendente, setOrdenAscendente] = useState(true);
     );
   };
 
-  const guardarCambios = () => {
+  const guardarCambios = async () => {
     setGuardando(true);
     setMensaje('');
-    axios.put('http://localhost:5000/usuarios/roles', { usuarios: usuariosFiltrados })
-      .then(() => setMensaje('Roles actualizados correctamente'))
-      .catch(() => setMensaje('Error al actualizar roles'))
-      .finally(() => setGuardando(false));
+
+    try {
+      // 1. Guardar cambios en roles de usuarios
+      await axios.put('http://localhost:5000/usuarios/roles', {
+        usuarios: usuariosFiltrados
+      });
+
+      // 2. Procesar los cambios en el rol médico
+      for (const user of usuariosFiltrados) {
+        const original = usuariosOriginal.find(u => u.idusuario === user.idusuario);
+        if (!original) continue;
+
+        const cambioEnRolMedico = original.rolmedico !== user.rolmedico;
+
+        if (cambioEnRolMedico) {
+          await axios.put(
+            `http://localhost:5000/profesionales/actualizar-medico/${user.idusuario}`,
+            { rolmedico: user.rolmedico }
+          );
+        }
+      }
+
+      setMensaje('Roles actualizados correctamente');
+      setUsuariosOriginal([...usuariosFiltrados]);
+    } catch (error) {
+      console.error(error);
+      setMensaje('Error al actualizar roles');
+    } finally {
+      setGuardando(false);
+    }
   };
+
 
   const handleBuscar = (e) => {
     const texto = e.target.value.toLowerCase();
