@@ -13,7 +13,7 @@ dist/
 
 # Ignorar logs
 *.log
-logs.txt
+backend/server/logs.txt
 
 # Ignorar archivos de configuración del editor (por ejemplo, Visual Studio Code)
 .vscode/
