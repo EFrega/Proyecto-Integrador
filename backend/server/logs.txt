@@ -454,31 +454,6 @@
 2025-05-24T20:11:52.775Z - Se visitó la ruta principal ("/")
 2025-05-24T20:14:23.800Z - Se visitó la ruta principal ("/")
 2025-05-24T20:14:23.806Z - Se visitó la ruta principal ("/")
-<<<<<<< HEAD
-2025-05-24T20:35:11.862Z - Servidor corriendo en http://localhost:5000
-2025-05-24T20:35:16.913Z - Conexión con la base de datos establecida correctamente.
-2025-05-24T20:36:43.005Z - Se visitó la ruta principal ("/")
-2025-05-24T20:36:43.011Z - Se visitó la ruta principal ("/")
-2025-05-24T20:42:41.749Z - Se visitó la ruta principal ("/")
-2025-05-24T20:42:41.795Z - Se visitó la ruta principal ("/")
-2025-05-24T21:01:50.577Z - Se visitó la ruta principal ("/")
-2025-05-24T21:01:50.606Z - Se visitó la ruta principal ("/")
-2025-05-24T21:03:00.976Z - Se visitó la ruta principal ("/")
-2025-05-24T21:03:01.032Z - Se visitó la ruta principal ("/")
-2025-05-24T21:03:51.236Z - Se visitó la ruta principal ("/")
-2025-05-24T21:03:51.258Z - Se visitó la ruta principal ("/")
-2025-05-24T21:46:57.475Z - Se visitó la ruta principal ("/")
-2025-05-24T21:46:57.479Z - Se visitó la ruta principal ("/")
-=======
-2025-05-24T20:21:14.248Z - Se visitó la ruta principal ("/")
-2025-05-24T20:21:14.251Z - Se visitó la ruta principal ("/")
-2025-05-24T21:06:11.019Z - Se visitó la ruta principal ("/")
-2025-05-24T21:06:11.031Z - Se visitó la ruta principal ("/")
-2025-05-24T22:02:53.407Z - Se visitó la ruta principal ("/")
-2025-05-24T22:02:53.426Z - Se visitó la ruta principal ("/")
-2025-05-24T22:04:21.289Z - Se visitó la ruta principal ("/")
-2025-05-24T22:04:21.315Z - Se visitó la ruta principal ("/")
->>>>>>> eb861a6cd10f1d2134c8f5868ed44d2a1484882f
 2025-05-24T23:16:13.441Z - Servidor corriendo en http://localhost:5000
 2025-05-24T23:16:16.364Z - Conexión con la base de datos establecida correctamente.
 2025-05-24T23:16:52.267Z - Se visitó la ruta principal ("/")
@@ -520,3 +495,4 @@
 2025-05-25T01:07:10.203Z - Se visitó la ruta principal ("/")
 2025-05-25T01:43:17.743Z - Se visitó la ruta principal ("/")
 2025-05-25T01:43:17.748Z - Se visitó la ruta principal ("/")
+
