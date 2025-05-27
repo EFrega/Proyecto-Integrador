@@ -52,7 +52,6 @@ app.use('/contactos', contactosRoutes);
 app.use('/profesionales', profesionalesRoute);
 app.use('/servicios', serviciosRoutes);
 
-
 // Ruta protegida de ejemplo
 app.get('/usuarios/:id', authenticateToken, async (req, res) => {
     const { id } = req.params;

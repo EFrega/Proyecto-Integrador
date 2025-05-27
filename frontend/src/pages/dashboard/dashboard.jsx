@@ -68,15 +68,6 @@ const Dashboard = ({ setIsLoggedIn }) => {
     setVisibleIcons(filteredIcons);
   }, []);
 
-  const roles = (() => {
-    try {
-      const raw = localStorage.getItem('roles');
-      return raw && raw !== 'undefined' ? JSON.parse(raw) : {};
-    } catch {
-      return {};
-    }
-  })();
-
   return (
     <div className="d-flex min-vh-100 flex-column">
       <div className="d-flex flex-grow-1">
@@ -84,14 +75,12 @@ const Dashboard = ({ setIsLoggedIn }) => {
         <div className="bg-white border-end d-flex flex-column align-items-center p-2" style={{ width: '60px' }}>
           {visibleIcons.map(icon => icon.component)}
 
-          {(roles.rolsuperadmin || roles.roladministrativo) && (
-            <FaUsers
-              className="mb-4 text-secondary hover-icon"
-              title="Gestión de Usuarios"
-              style={{ cursor: 'pointer' }}
-              onClick={() => setVista('roles')}
-            />
-          )}
+          <FaUsers
+            className="mb-4 text-secondary hover-icon"
+            title="Gestión de Usuarios"
+            style={{ cursor: 'pointer' }}
+            onClick={() => setVista('roles')}
+          />
 
           <FaSignOutAlt
             className="mt-auto mb-2 text-danger hover-icon"
