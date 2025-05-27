@@ -16,3 +16,6 @@ dist/
 
 # Ignorar archivos de configuración del editor (por ejemplo, Visual Studio Code)
 .vscode/
+
+# Ignorar logs.txt
+*.txt
