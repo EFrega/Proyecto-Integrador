@@ -57,6 +57,7 @@ const Roles = () => {
   const abrirModalReset = (idusuario) => {
     setUsuarioPwdId(idusuario);
     setNuevaContrasena('');
+    setConfirmarContrasena('');
     setMostrarModalPwd(true);
   };
 
