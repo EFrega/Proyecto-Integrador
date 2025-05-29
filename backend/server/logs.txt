@@ -498,3 +498,7 @@
 
 2025-05-26T05:06:12.658Z - Se visitó la ruta principal ("/")
 2025-05-26T05:06:12.665Z - Se visitó la ruta principal ("/")
+2025-05-28T03:17:25.208Z - Servidor corriendo en http://localhost:5000
+2025-05-28T03:17:31.794Z - Conexión con la base de datos establecida correctamente.
+2025-05-28T03:18:15.206Z - Se visitó la ruta principal ("/")
+2025-05-28T03:18:15.233Z - Se visitó la ruta principal ("/")
