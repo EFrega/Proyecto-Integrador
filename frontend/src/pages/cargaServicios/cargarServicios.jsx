@@ -1,95 +1,236 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-//import './register.css';
-import { Form, Button, Row, Col } from 'react-bootstrap';
+import { Table, Button, Form, Spinner, Alert, Row, Col } from 'react-bootstrap';
+import { FaEdit } from 'react-icons/fa';
 
-const CargarServicio = () => {
-    const [formData, setFormData] = useState({
-        nombre: '',
-        activo: true,
-        duracionturno: ''
-    });
+const Servicios = () => {
+    const [servicios, setServicios] = useState([]);
+    const [cargando, setCargando] = useState(true);
+    const [mensaje, setMensaje] = useState('');
+    const [nuevoServicio, setNuevoServicio] = useState({ nombre: '', activo: true, duracionturno: '' });
+    const [guardandoNuevo, setGuardandoNuevo] = useState(false);
+    const [editandoId, setEditandoId] = useState(null);
+    const [servicioEditado, setServicioEditado] = useState({});
 
-    const [error, setError] = useState('');
-    const [success, setSuccess] = useState('');
+    useEffect(() => {
+        cargarServicios();
+    }, []);
 
-    const handleChange = (e) => {
-        const { name, value, type, checked } = e.target;
-        setFormData({
-            ...formData,
-            [name]: type === 'checkbox' ? checked : value
-        });
+    const cargarServicios = async () => {
+        try {
+        setCargando(true);
+        const res = await axios.get('http://localhost:5000/servicios');
+        setServicios(res.data);
+        } catch (error) {
+        setMensaje('Error al cargar los servicios.');
+        } finally {
+        setCargando(false);
+        }
     };
 
-    const handleSubmit = async (e) => {
+    const handleAgregarServicio = async (e) => {
         e.preventDefault();
-        setError('');
-        setSuccess('');
+        setMensaje('');
 
-        if (!formData.nombre || !formData.duracionturno) {
-            setError('Todos los campos son obligatorios');
-            return;
+        const { nombre, duracionturno, activo } = nuevoServicio;
+        const duracionInt = parseInt(duracionturno, 10);
+
+        if (!nombre.trim() || isNaN(duracionInt) || duracionInt <= 0) {
+        setMensaje('Complete todos los campos correctamente.');
+        return;
         }
 
         try {
-            await axios.post('http://localhost:5000/servicios', formData);
-            setSuccess('¡Servicio cargado con éxito!');
-            setFormData({ nombre: '', activo: true, duracionturno: '' });
-        } catch (err) {
-            setError(err.response?.data?.message || 'Error al cargar el servicio');
+        setGuardandoNuevo(true);
+        const res = await axios.post('http://localhost:5000/servicios', {
+            nombre: nombre.trim(),
+            activo,
+            duracionturno: duracionInt,
+        });
+
+        setServicios([...servicios, res.data]);
+        setNuevoServicio({ nombre: '', activo: true, duracionturno: '' });
+        setMensaje('Servicio agregado correctamente.');
+        } catch {
+        setMensaje('Error al agregar el servicio.');
+        } finally {
+        setGuardandoNuevo(false);
+        }
+    };
+
+    const iniciarEdicion = (servicio) => {
+        setEditandoId(servicio.idservicio);
+        setServicioEditado({ ...servicio });
+        setMensaje('');
+    };
+
+    const handleCambioEdicion = (e) => {
+        const { name, value, type, checked } = e.target;
+        setServicioEditado({ ...servicioEditado, [name]: type === 'checkbox' ? checked : value });
+    };
+
+    const guardarEdicion = async () => {
+        const { nombre, duracionturno, activo } = servicioEditado;
+        const duracionInt = parseInt(duracionturno, 10);
+
+        if (!nombre.trim() || isNaN(duracionInt) || duracionInt <= 0) {
+        setMensaje('Complete todos los campos correctamente al editar.');
+        return;
+        }
+
+        try {
+        await axios.put(`http://localhost:5000/servicios/${editandoId}`, {
+            nombre: nombre.trim(),
+            activo,
+            duracionturno: duracionInt,
+        });
+
+        setServicios(servicios.map((s) =>
+            s.idservicio === editandoId ? { ...servicioEditado, duracionturno: duracionInt } : s
+        ));
+        setEditandoId(null);
+        setMensaje('Servicio actualizado correctamente.');
+        } catch {
+        setMensaje('Error al actualizar el servicio.');
         }
     };
 
     return (
-        <div className="register-wrapper">
-            <div className="register-container">
-                <h2 className="register-title">Cargar Servicio</h2>
-                <Form onSubmit={handleSubmit} className="col-12">
-                    <Row className="form-row">
-                        <Col>
-                            <Form.Control
-                                name="nombre"
-                                placeholder="Nombre del servicio"
-                                value={formData.nombre}
-                                onChange={handleChange}
-                                required
-                            />
-                        </Col>
-                    </Row>
+        <div className="p-4 bg-white shadow rounded">
+        <h3 className="mb-4">Listado de Servicios</h3>
 
-                    <Row className="form-row">
-                        <Col>
-                            <Form.Control
-                                type="number"
-                                name="duracionturno"
-                                placeholder="Duración del turno (minutos)"
-                                value={formData.duracionturno}
-                                onChange={handleChange}
-                                required
-                            />
-                        </Col>
-                    </Row>
+        {mensaje && <Alert variant="info">{mensaje}</Alert>}
 
-                    <Row className="form-row">
-                        <Col>
-                            <Form.Check
-                                type="checkbox"
-                                label="Activo"
-                                name="activo"
-                                checked={formData.activo}
-                                onChange={handleChange}
-                            />
-                        </Col>
-                    </Row>
-
-                    {error && <p className="error-message">{error}</p>}
-                    {success && <p className="text-success">{success}</p>}
-
-                    <Button type="submit" className="register-button">Guardar Servicio</Button>
-                </Form>
+        {cargando ? (
+            <div className="text-center py-5">
+            <Spinner animation="border" />
+            <div>Cargando servicios...</div>
             </div>
+        ) : (
+            <>
+            <Table striped bordered hover responsive>
+                <thead className="table-dark text-center">
+                <tr>
+                    <th>Nombre del Servicio</th>
+                    <th>Estado</th>
+                    <th>Duración del Turno (min)</th>
+                    <th>Modificar</th>
+                </tr>
+                </thead>
+                <tbody>
+                {servicios.map((serv) => (
+                    <tr key={serv.idservicio} className="text-center">
+                    <td>
+                        {editandoId === serv.idservicio ? (
+                        <Form.Control
+                            name="nombre"
+                            value={servicioEditado.nombre}
+                            onChange={handleCambioEdicion}
+                        />
+                        ) : (
+                        serv.nombre
+                        )}
+                    </td>
+                    <td>
+                        {editandoId === serv.idservicio ? (
+                        <Form.Check
+                            type="checkbox"
+                            name="activo"
+                            label={servicioEditado.activo ? 'Activo' : 'Inactivo'}
+                            checked={servicioEditado.activo}
+                            onChange={handleCambioEdicion}
+                            style={{ userSelect: 'none' }}
+                        />
+                        ) : (
+                        serv.activo ? 'Activo' : 'Inactivo'
+                        )}
+                    </td>
+                    <td>
+                        {editandoId === serv.idservicio ? (
+                        <Form.Control
+                            name="duracionturno"
+                            type="number"
+                            min="1"
+                            value={servicioEditado.duracionturno}
+                            onChange={handleCambioEdicion}
+                        />
+                        ) : (
+                        serv.duracionturno
+                        )}
+                    </td>
+                    <td style={{ minWidth: '110px' }}>
+                        {editandoId === serv.idservicio ? (
+                        <>
+                            <Button variant="success" size="sm" onClick={guardarEdicion} className="me-2">
+                            Guardar
+                            </Button>
+                            <Button variant="secondary" size="sm" onClick={() => setEditandoId(null)}>
+                            Cancelar
+                            </Button>
+                        </>
+                        ) : (
+                        <FaEdit
+                            style={{ cursor: 'pointer', color: '#0d6efd' }}
+                            title="Modificar servicio"
+                            size={18}
+                            onClick={() => iniciarEdicion(serv)}
+                        />
+                        )}
+                    </td>
+                    </tr>
+                ))}
+                </tbody>
+            </Table>
+
+            <hr />
+            <h5 className="mb-3">Agregar Nuevo Servicio</h5>
+
+            <Form onSubmit={handleAgregarServicio}>
+                <Row className="g-3">
+                <Col md={4}>
+                    <Form.Label>Nombre del Servicio</Form.Label>
+                    <Form.Control
+                    type="text"
+                    value={nuevoServicio.nombre}
+                    onChange={(e) => setNuevoServicio({ ...nuevoServicio, nombre: e.target.value })}
+                    placeholder="Nombre"
+                    />
+                </Col>
+                <Col md={3}>
+                    <Form.Label>Activo</Form.Label>
+                    <Form.Check
+                    type="checkbox"
+                    label={nuevoServicio.activo ? 'Activo' : 'Inactivo'}
+                    checked={nuevoServicio.activo}
+                    onChange={(e) =>
+                        setNuevoServicio({ ...nuevoServicio, activo: e.target.checked })
+                    }
+                    style={{ userSelect: 'none' }}
+                    />
+                </Col>
+                <Col md={3}>
+                    <Form.Label>Duración del Turno (min)</Form.Label>
+                    <Form.Control
+                    type="number"
+                    min="1"
+                    placeholder="Ej: 30"
+                    value={nuevoServicio.duracionturno}
+                    onChange={(e) =>
+                        setNuevoServicio({ ...nuevoServicio, duracionturno: e.target.value })
+                    }
+                    />
+                </Col>
+                <Col md={2} className="d-flex align-items-end">
+                    <Button type="submit" variant="primary" disabled={guardandoNuevo} className="w-100">
+                    {guardandoNuevo ? 'Guardando...' : 'Agregar'}
+                    </Button>
+                </Col>
+                </Row>
+            </Form>
+            </>
+        )}
         </div>
     );
 };
 
-export default CargarServicio;
+export default Servicios;
