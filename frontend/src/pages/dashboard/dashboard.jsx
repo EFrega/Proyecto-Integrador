@@ -44,12 +44,12 @@ const Dashboard = ({ setIsLoggedIn }) => {
     const bool = (val) => val === true || val === 1 || val === "1";
 
     const allIcons = [
-      { id: 'home', component: <FaHome className="mb-4 text-secondary hover-icon" key="home" onClick={() => setVista('inicio')} /> },
+      { id: 'home', component: <FaHome className="mb-4 text-secondary hover-icon" title="Inicio" key="home" onClick={() => setVista('inicio')} /> },
       { id: 'calendar', component: <FaCalendarAlt className="mb-4 text-secondary hover-icon" key="calendar" onClick={() => setVista('inicio')} /> },
-      { id: 'comments', component: <FaComments className="mb-4 text-secondary hover-icon" key="comments" onClick={() => setVista('inicio')} /> },
+      { id: 'comments', component: <FaComments className="mb-4 text-secondary hover-icon" title="Chat" key="comments" onClick={() => setVista('inicio')} /> },
       { id: 'file', component: <FaFileAlt className="mb-4 text-secondary hover-icon" key="file" onClick={() => setVista('inicio')} /> },
       { id: 'folder', component: <FaFolder className="mb-4 text-secondary hover-icon" key="folder" onClick={() => setVista('inicio')} /> },
-      { id: 'servicios', component: <FaClipboardList className="mb-4 text-secondary hover-icon" key="servicios" onClick={() => setVista('servicios')} /> },
+      { id: 'servicios', component: <FaClipboardList className="mb-4 text-secondary hover-icon" title="Gestión de Servicios" key="servicios" onClick={() => setVista('servicios')} /> },
     ];
 
     let allowedIds = [];
