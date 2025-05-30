@@ -514,3 +514,7 @@
 2025-05-30T01:43:10.482Z - Conexión con la base de datos establecida correctamente.
 2025-05-30T01:43:30.900Z - Se visitó la ruta principal ("/")
 2025-05-30T01:43:30.913Z - Se visitó la ruta principal ("/")
+2025-05-30T02:36:12.599Z - Se visitó la ruta principal ("/")
+2025-05-30T02:36:12.605Z - Se visitó la ruta principal ("/")
+2025-05-30T02:39:03.171Z - Se visitó la ruta principal ("/")
+2025-05-30T02:39:03.175Z - Se visitó la ruta principal ("/")
