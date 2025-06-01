@@ -17,7 +17,6 @@ import Roles from '../roles/Roles';
 import CargarServicio from '../cargaServicios/cargarServicios'; // Ajustá la ruta si está en otro directorio
 import ExcepcionesProf from '../excepcionesProf/excepcionesProf'; // ajustá la ruta si es diferente
 import { FaCalendarTimes } from 'react-icons/fa';
-import CargarServicio from '../cargaServicios/cargarServicios';
 import Agendas from '../agendas/agendas';
 
 const Dashboard = ({ setIsLoggedIn }) => {
