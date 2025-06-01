@@ -17,6 +17,10 @@ dist/
 # Ignorar archivos de configuración del editor (por ejemplo, Visual Studio Code)
 .vscode/
 
+<<<<<<< HEAD
+logs.txt
+=======
 backend/server/logs.txt
 # Ignorar logs.txt
 *.txt
+>>>>>>> be619892824e4601f8751069e5c4f415006b98e2

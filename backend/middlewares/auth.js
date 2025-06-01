@@ -8,9 +8,12 @@ const authenticateToken = (req, res, next) => {
         return res.status(401).json({ message: 'Token no proporcionado' });
     }
 
-    jwt.verify(token, 'secreto', (err, user) => {
+    // Usar variable de entorno para el secreto JWT
+    const jwtSecret = process.env.JWT_SECRET || 'secreto';
+
+    jwt.verify(token, jwtSecret, (err, user) => {
         if (err) {
-        return res.status(403).json({ message: 'Token inválido' });
+            return res.status(403).json({ message: 'Token inválido' });
         }
 
         // Guardamos la información del usuario decodificada del token

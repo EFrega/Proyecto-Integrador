@@ -1,0 +1,63 @@
+services:
+  # Base de datos local (comentada - descomenta para usar MySQL en Docker)
+  # database:
+  #   image: mysql:8.0
+  #   container_name: proyecto_db
+  #   restart: unless-stopped
+  #   environment:
+  #     MYSQL_ROOT_PASSWORD: Sabbah2505
+  #     MYSQL_DATABASE: pp4_clinica
+  #     MYSQL_USER: pp4_root
+  #     MYSQL_PASSWORD: Sabbah2505
+  #   ports:
+  #     - "3306:3306"
+  #   volumes:
+  #     - db_data:/var/lib/mysql
+  #   networks:
+  #     - proyecto-network
+
+  # Backend
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: proyecto_backend
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      NODE_ENV: production
+      DB_HOST: db4free.net
+      DB_PORT: 3306
+      DB_NAME: pp4_clinica
+      DB_USER: pp4_root
+      DB_PASSWORD: Sabbah2505
+      JWT_SECRET: secreto
+    # depends_on:        # Comenta esta línea cuando uses DB externa
+    #   - database       # Comenta esta línea cuando uses DB externa
+    volumes:
+      - ./backend/server/logs.txt:/app/server/logs.txt
+    networks:
+      - proyecto-network
+
+  # Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: proyecto_frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - proyecto-network
+
+# Volúmenes (comentado - descomenta si usas MySQL en Docker)
+# volumes:
+#   db_data:
+
+networks:
+  proyecto-network:
+    driver: bridge
