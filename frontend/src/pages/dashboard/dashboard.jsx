@@ -9,12 +9,15 @@ import {
   FaSignOutAlt,
   FaUsers,
   FaEnvelope,
-  FaClipboardList
+  FaClipboardList,
+  FaTicketAlt
 } from 'react-icons/fa';
 import './dashboard.css';
 import Roles from '../roles/Roles';
 import CargarServicio from '../cargaServicios/cargarServicios'; // Ajustá la ruta si está en otro directorio
-
+import ExcepcionesProf from '../excepcionesProf/excepcionesProf'; // ajustá la ruta si es diferente
+import { FaCalendarTimes } from 'react-icons/fa';
+import Agendas from '../agendas/agendas';
 
 const Dashboard = ({ setIsLoggedIn }) => {
   const [visibleIcons, setVisibleIcons] = useState([]);
@@ -44,22 +47,24 @@ const Dashboard = ({ setIsLoggedIn }) => {
     const bool = (val) => val === true || val === 1 || val === "1";
 
     const allIcons = [
-      { id: 'home', component: <FaHome className="mb-4 text-secondary hover-icon" key="home" onClick={() => setVista('inicio')} /> },
-      { id: 'calendar', component: <FaCalendarAlt className="mb-4 text-secondary hover-icon" key="calendar" onClick={() => setVista('inicio')} /> },
-      { id: 'comments', component: <FaComments className="mb-4 text-secondary hover-icon" key="comments" onClick={() => setVista('inicio')} /> },
+      { id: 'home', component: <FaHome className="mb-4 text-secondary hover-icon" title="Inicio" key="home" onClick={() => setVista('inicio')} /> },
+      { id: 'calendar', component: <FaCalendarAlt className="mb-4 text-secondary hover-icon" title="Gestión de Agendas" key="agendas" onClick={() => setVista('agendas')} /> },
+      { id: 'comments', component: <FaComments className="mb-4 text-secondary hover-icon" title="Chat" key="comments" onClick={() => setVista('inicio')} /> },
       { id: 'file', component: <FaFileAlt className="mb-4 text-secondary hover-icon" key="file" onClick={() => setVista('inicio')} /> },
       { id: 'folder', component: <FaFolder className="mb-4 text-secondary hover-icon" key="folder" onClick={() => setVista('inicio')} /> },
-      { id: 'servicios', component: <FaClipboardList className="mb-4 text-secondary hover-icon" key="servicios" onClick={() => setVista('servicios')} /> },
+      { id: 'excepcionesProf', component: <FaCalendarTimes className="mb-4 text-secondary hover-icon" key="excepciones" onClick={() => setVista('excepcionesProf')} /> },
+      { id: 'servicios', component: <FaClipboardList className="mb-4 text-secondary hover-icon" title="Gestión de Servicios" key="servicios" onClick={() => setVista('servicios')} /> },
+      { id: 'turnos', component: <FaTicketAlt className="mb-4 text-secondary hover-icon" title="Gestión de Turnos" key="turnos" onClick={() => setVista('turnos')} /> },
     ];
 
     let allowedIds = [];
 
     if (bool(roles.rolsuperadmin)) {
-      allowedIds = ['home', 'calendar', 'comments', 'file', 'folder', 'servicios'];
+      allowedIds = ['home', 'calendar', 'comments', 'file', 'folder', 'servicios', 'turnos', 'excepcionesProf'];
     } else if (bool(roles.roladministrativo)) {
-      allowedIds = ['home', 'calendar', 'comments', 'servicios'];
+      allowedIds = ['home', 'calendar', 'comments', 'servicios', 'turnos','excepcionesProf'];
     } else if (bool(roles.rolmedico) || bool(roles.rolpaciente)) {
-      allowedIds = ['home', 'calendar'];
+      allowedIds = ['home', 'turnos'];
     } else {
       allowedIds = ['home'];
     }
@@ -68,15 +73,6 @@ const Dashboard = ({ setIsLoggedIn }) => {
     setVisibleIcons(filteredIcons);
   }, []);
 
-  const roles = (() => {
-    try {
-      const raw = localStorage.getItem('roles');
-      return raw && raw !== 'undefined' ? JSON.parse(raw) : {};
-    } catch {
-      return {};
-    }
-  })();
-
   return (
     <div className="d-flex min-vh-100 flex-column">
       <div className="d-flex flex-grow-1">
@@ -84,14 +80,12 @@ const Dashboard = ({ setIsLoggedIn }) => {
         <div className="bg-white border-end d-flex flex-column align-items-center p-2" style={{ width: '60px' }}>
           {visibleIcons.map(icon => icon.component)}
 
-          {(roles.rolsuperadmin || roles.roladministrativo) && (
-            <FaUsers
-              className="mb-4 text-secondary hover-icon"
-              title="Gestión de Usuarios"
-              style={{ cursor: 'pointer' }}
-              onClick={() => setVista('roles')}
-            />
-          )}
+          <FaUsers
+            className="mb-4 text-secondary hover-icon"
+            title="Gestión de Usuarios"
+            style={{ cursor: 'pointer' }}
+            onClick={() => setVista('roles')}
+          />
 
           <FaSignOutAlt
             className="mt-auto mb-2 text-danger hover-icon"
@@ -123,6 +117,10 @@ const Dashboard = ({ setIsLoggedIn }) => {
               <Roles />
             ) : vista === 'servicios' ? (
               <CargarServicio />
+            ) : vista === 'excepcionesProf' ? (
+              <ExcepcionesProf/>
+            ) : vista === 'agendas' ? (
+              <Agendas />
             ) : (
               <h4 className="text-primary">Inicio</h4>
             )}
