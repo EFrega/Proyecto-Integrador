@@ -9,11 +9,13 @@ import {
   FaSignOutAlt,
   FaUsers,
   FaEnvelope,
-  FaClipboardList
+  FaClipboardList,
+  FaTicketAlt
 } from 'react-icons/fa';
 import './dashboard.css';
 import Roles from '../roles/Roles';
-import CargarServicio from '../cargaServicios/cargarServicios'; // Ajustá la ruta si está en otro directorio
+import CargarServicio from '../cargaServicios/cargarServicios';
+import Agendas from '../agendas/agendas';
 
 
 const Dashboard = ({ setIsLoggedIn }) => {
@@ -45,21 +47,22 @@ const Dashboard = ({ setIsLoggedIn }) => {
 
     const allIcons = [
       { id: 'home', component: <FaHome className="mb-4 text-secondary hover-icon" title="Inicio" key="home" onClick={() => setVista('inicio')} /> },
-      { id: 'calendar', component: <FaCalendarAlt className="mb-4 text-secondary hover-icon" key="calendar" onClick={() => setVista('inicio')} /> },
+      { id: 'calendar', component: <FaCalendarAlt className="mb-4 text-secondary hover-icon" title="Gestión de Agendas" key="agendas" onClick={() => setVista('agendas')} /> },
       { id: 'comments', component: <FaComments className="mb-4 text-secondary hover-icon" title="Chat" key="comments" onClick={() => setVista('inicio')} /> },
       { id: 'file', component: <FaFileAlt className="mb-4 text-secondary hover-icon" key="file" onClick={() => setVista('inicio')} /> },
       { id: 'folder', component: <FaFolder className="mb-4 text-secondary hover-icon" key="folder" onClick={() => setVista('inicio')} /> },
       { id: 'servicios', component: <FaClipboardList className="mb-4 text-secondary hover-icon" title="Gestión de Servicios" key="servicios" onClick={() => setVista('servicios')} /> },
+      { id: 'turnos', component: <FaTicketAlt className="mb-4 text-secondary hover-icon" title="Gestión de Turnos" key="turnos" onClick={() => setVista('turnos')} /> },
     ];
 
     let allowedIds = [];
 
     if (bool(roles.rolsuperadmin)) {
-      allowedIds = ['home', 'calendar', 'comments', 'file', 'folder', 'servicios'];
+      allowedIds = ['home', 'calendar', 'comments', 'file', 'folder', 'servicios', 'turnos'];
     } else if (bool(roles.roladministrativo)) {
-      allowedIds = ['home', 'calendar', 'comments', 'servicios'];
+      allowedIds = ['home', 'calendar', 'comments', 'servicios', 'turnos'];
     } else if (bool(roles.rolmedico) || bool(roles.rolpaciente)) {
-      allowedIds = ['home', 'calendar'];
+      allowedIds = ['home', 'turnos'];
     } else {
       allowedIds = ['home'];
     }
@@ -112,6 +115,8 @@ const Dashboard = ({ setIsLoggedIn }) => {
               <Roles />
             ) : vista === 'servicios' ? (
               <CargarServicio />
+            ) : vista === 'agendas' ? (
+              <Agendas />
             ) : (
               <h4 className="text-primary">Inicio</h4>
             )}
