@@ -14,6 +14,8 @@ import {
 import './dashboard.css';
 import Roles from '../roles/Roles';
 import CargarServicio from '../cargaServicios/cargarServicios'; // Ajustá la ruta si está en otro directorio
+import ExcepcionesProf from '../excepcionesProf/excepcionesProf'; // ajustá la ruta si es diferente
+import { FaCalendarTimes } from 'react-icons/fa';
 
 
 const Dashboard = ({ setIsLoggedIn }) => {
@@ -50,14 +52,15 @@ const Dashboard = ({ setIsLoggedIn }) => {
       { id: 'file', component: <FaFileAlt className="mb-4 text-secondary hover-icon" key="file" onClick={() => setVista('inicio')} /> },
       { id: 'folder', component: <FaFolder className="mb-4 text-secondary hover-icon" key="folder" onClick={() => setVista('inicio')} /> },
       { id: 'servicios', component: <FaClipboardList className="mb-4 text-secondary hover-icon" key="servicios" onClick={() => setVista('servicios')} /> },
+      { id: 'excepcionesProf', component: <FaCalendarTimes className="mb-4 text-secondary hover-icon" key="excepciones" onClick={() => setVista('excepcionesProf')} /> },
     ];
 
     let allowedIds = [];
 
     if (bool(roles.rolsuperadmin)) {
-      allowedIds = ['home', 'calendar', 'comments', 'file', 'folder', 'servicios'];
+      allowedIds = ['home', 'calendar', 'comments', 'file', 'folder', 'servicios','excepcionesProf'];
     } else if (bool(roles.roladministrativo)) {
-      allowedIds = ['home', 'calendar', 'comments', 'servicios'];
+      allowedIds = ['home', 'calendar', 'comments', 'servicios','excepcionesProf'];
     } else if (bool(roles.rolmedico) || bool(roles.rolpaciente)) {
       allowedIds = ['home', 'calendar'];
     } else {
@@ -112,6 +115,8 @@ const Dashboard = ({ setIsLoggedIn }) => {
               <Roles />
             ) : vista === 'servicios' ? (
               <CargarServicio />
+            ) : vista === 'excepcionesProf' ? (
+              <ExcepcionesProf/>
             ) : (
               <h4 className="text-primary">Inicio</h4>
             )}

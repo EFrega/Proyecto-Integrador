@@ -4,9 +4,14 @@ const sequelize = require('../config/database');
 
 const SystemUsersModel = require('../models/systemusers');
 const ProfesionalesModel = require('../models/profesionales');
+const ContactosModel = require('../models/contactos');
 
 const SystemUsers = SystemUsersModel(sequelize, require('sequelize').DataTypes);
 const Profesionales = ProfesionalesModel(sequelize, require('sequelize').DataTypes);
+const Contactos = ContactosModel(sequelize, require('sequelize').DataTypes);
+
+// 🔧 Esta línea es clave
+Profesionales.belongsTo(Contactos, { foreignKey: 'idcontacto' });
 
 // Actualizar estado del profesional según rolmedico
 router.put('/actualizar-medico/:idusuario', async (req, res) => {
@@ -41,5 +46,22 @@ router.put('/actualizar-medico/:idusuario', async (req, res) => {
     res.status(500).json({ message: 'Error en servidor' });
   }
 });
+
+// Obtener profesionales activos con nombre y apellido
+router.get('/', async (req, res) => {
+  try {
+    const [result] = await sequelize.query(`
+      SELECT p.idprofesional, p.matricula, c.nombre, c.apellido
+      FROM Profesionales p
+      JOIN Contactos c ON p.idcontacto = c.idcontacto
+      WHERE p.activo <> 0
+    `);
+    res.json(result);
+  } catch (error) {
+    console.error('Error al obtener profesionales (raw):', error);
+    res.status(500).json({ error: 'Error al obtener profesionales' });
+  }
+});
+
 
 module.exports = router;
