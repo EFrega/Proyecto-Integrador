@@ -31,11 +31,12 @@ router.post('/', async (req, res) => {
             return res.status(401).json({ message: 'Credenciales incorrectas' });
         }
 
-        // Generamos el token JWT
+        // Generamos el token JWT usando variable de entorno
         console.log("Generando el token...");
+        const jwtSecret = process.env.JWT_SECRET || 'secreto';
         const token = jwt.sign(
             { id: usuarioDb.idUsuario, usuario: usuarioDb.usuario },
-            'secreto', // Asegúrate de mantener esta clave secreta segura
+            jwtSecret, // Usar variable de entorno
             { expiresIn: '1h' }  // El token expira en una hora
         );
 
