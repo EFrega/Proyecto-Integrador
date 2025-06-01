@@ -12,6 +12,7 @@ const usuariosRoutes = require('../routes/usuariosRoute');
 const contactosRoutes = require('../routes/contactosRoute');
 const profesionalesRoute = require('../routes/profesionalesRoute');
 const serviciosRoutes = require('../routes/serviciosRoute');
+const feriadosRoutes = require('../routes/feriadosRoute');
 
 const authenticateToken = require('../middlewares/auth');
 const Usuario = require('../models/systemusers');
@@ -51,6 +52,7 @@ app.use('/usuarios', usuariosRoutes);
 app.use('/contactos', contactosRoutes);
 app.use('/profesionales', profesionalesRoute);
 app.use('/servicios', serviciosRoutes);
+app.use('/agendas', feriadosRoutes);
 
 // Ruta protegida de ejemplo
 app.get('/usuarios/:id', authenticateToken, async (req, res) => {
