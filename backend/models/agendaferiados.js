@@ -1,7 +1,7 @@
 module.exports = (sequelize, DataTypes) => {
     const AgendaFeriados = sequelize.define('AgendaFeriados', {
         dia: {
-            type: DataTypes.DATE,
+            type: DataTypes.DATEONLY,
             primaryKey: true
         },
         motivoferiado: {

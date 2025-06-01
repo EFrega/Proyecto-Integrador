@@ -4,10 +4,6 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.INTEGER,
             primaryKey: true
         },
-        idservicio: {
-            type: DataTypes.INTEGER,
-            primaryKey: true
-        },
         dia_inicio: {
             type: DataTypes.DATE,
             primaryKey: true
@@ -15,16 +11,7 @@ module.exports = (sequelize, DataTypes) => {
         dia_fin: {
             type: DataTypes.DATE
         },
-        hora_inicio: {
-            type: DataTypes.TIME
-        },
-        hora_fin: {
-            type: DataTypes.TIME
-        },
-        disponible: {
-            type: DataTypes.BOOLEAN
-        },
-        motivo_inasistencia: {
+        tipo_licencia: {
             type: DataTypes.STRING(255)
         }
     }, {

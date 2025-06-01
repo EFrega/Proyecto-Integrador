@@ -4,7 +4,7 @@ import {
   Table, Button, Form, Alert, Spinner,
   Container, Row, Col, InputGroup, Modal
 } from 'react-bootstrap';
-import { FaEdit, FaEye } from 'react-icons/fa';
+import { FaEdit, FaEye, FaKey } from 'react-icons/fa';
 
 const Roles = () => {
   const [usuariosOriginal, setUsuariosOriginal] = useState([]);
@@ -14,37 +14,78 @@ const Roles = () => {
   const [guardando, setGuardando] = useState(false);
   const [paginaActual, setPaginaActual] = useState(1);
   const [ordenCampo, setOrdenCampo] = useState('apellido');
-const [ordenAscendente, setOrdenAscendente] = useState(true);
+  const [ordenAscendente, setOrdenAscendente] = useState(true);
   const [busqueda, setBusqueda] = useState('');
   const [mostrarModal, setMostrarModal] = useState(false);
   const [contacto, setContacto] = useState(null);
   const [modalVista, setModalVista] = useState(false);
   const [contactoVista, setContactoVista] = useState(null);
+  const [mostrarModalPwd, setMostrarModalPwd] = useState(false);
+  const [usuarioPwdId, setUsuarioPwdId] = useState(null);
+  const [nuevaContrasena, setNuevaContrasena] = useState('');
+  const [confirmarContrasena, setConfirmarContrasena] = useState('');
+  const [verNueva, setVerNueva] = useState(false);
+  const [verConfirmar, setVerConfirmar] = useState(false);
 
   const roles = JSON.parse(localStorage.getItem('roles') || '{}');
   const usuarioLogueado = localStorage.getItem('usuario') || '';
-  const puedeVerSuperadmin = roles.rolsuperadmin;
-  const puedeAcceder = roles.rolsuperadmin || roles.roladministrativo;
+  const puedeEditarRoles = roles.roladministrativo || roles.rolsuperadmin;
 
-  useEffect(() => {
-    if (!puedeAcceder) {
-      alert('No tiene permiso para acceder a esta sección');
-      window.location.href = '/dashboard';
-    }
-  }, [puedeAcceder]);
+  const puedeVerSuperadmin = roles.rolsuperadmin;
+  const puedeEditarContrasenaDeOtro = usuarioLogueado === 'admin' || roles.roladministrativo || roles.rolsuperadmin;
 
   const usuariosPorPagina = 10;
 
   useEffect(() => {
     axios.get('http://localhost:5000/usuarios')
       .then((res) => {
-        const ordenado = [...res.data].sort((a, b) => a.apellido?.localeCompare(b.apellido));
+        let data = res.data;
+
+        if (!roles.roladministrativo && !roles.rolsuperadmin) {
+          data = data.filter((u) => u.usuario === usuarioLogueado);
+        }
+
+        const ordenado = [...data].sort((a, b) => a.apellido?.localeCompare(b.apellido));
         setUsuariosOriginal(ordenado);
         setUsuariosFiltrados(ordenado);
       })
       .catch(() => setMensaje('Error al cargar usuarios'))
       .finally(() => setCargando(false));
-  }, []);
+  }, [roles.roladministrativo, roles.rolsuperadmin, usuarioLogueado]);
+
+
+  const abrirModalReset = (idusuario) => {
+    setUsuarioPwdId(idusuario);
+    setNuevaContrasena('');
+    setConfirmarContrasena('');
+    setMostrarModalPwd(true);
+  };
+
+  const guardarNuevaContrasena = async () => {
+    try {
+      await axios.put(`http://localhost:5000/usuarios/resetear-contrasena/${usuarioPwdId}`, {
+        nuevaContrasena
+      });
+      alert('Contraseña actualizada correctamente');
+      setMostrarModalPwd(false);
+
+      // Vuelve a cargar todos los usuarios, manteniendo filtros
+      const res = await axios.get('http://localhost:5000/usuarios');
+      let data = res.data;
+
+      if (!roles.roladministrativo && !roles.rolsuperadmin && usuarioLogueado !== 'admin') {
+        data = data.filter((u) => u.usuario === usuarioLogueado);
+      }
+
+      const ordenado = [...data].sort((a, b) => a.apellido?.localeCompare(b.apellido));
+      setUsuariosOriginal(ordenado);
+      setUsuariosFiltrados(ordenado);
+
+    } catch (err) {
+      alert('Error al actualizar la contraseña');
+    }
+  };
+
 
   const ordenarPorCampo = (campo) => {
     const ascendente = campo === ordenCampo ? !ordenAscendente : true;
@@ -69,14 +110,41 @@ const [ordenAscendente, setOrdenAscendente] = useState(true);
     );
   };
 
-  const guardarCambios = () => {
+  const guardarCambios = async () => {
     setGuardando(true);
     setMensaje('');
-    axios.put('http://localhost:5000/usuarios/roles', { usuarios: usuariosFiltrados })
-      .then(() => setMensaje('Roles actualizados correctamente'))
-      .catch(() => setMensaje('Error al actualizar roles'))
-      .finally(() => setGuardando(false));
+
+    try {
+      // 1. Guardar cambios en roles de usuarios
+      await axios.put('http://localhost:5000/usuarios/roles', {
+        usuarios: usuariosFiltrados
+      });
+
+      // 2. Procesar los cambios en el rol médico
+      for (const user of usuariosFiltrados) {
+        const original = usuariosOriginal.find(u => u.idusuario === user.idusuario);
+        if (!original) continue;
+
+        const cambioEnRolMedico = original.rolmedico !== user.rolmedico;
+
+        if (cambioEnRolMedico) {
+          await axios.put(
+            `http://localhost:5000/profesionales/actualizar-medico/${user.idusuario}`,
+            { rolmedico: user.rolmedico }
+          );
+        }
+      }
+
+      setMensaje('Roles actualizados correctamente');
+      setUsuariosOriginal([...usuariosFiltrados]);
+    } catch (error) {
+      console.error(error);
+      setMensaje('Error al actualizar roles');
+    } finally {
+      setGuardando(false);
+    }
   };
+
 
   const handleBuscar = (e) => {
     const texto = e.target.value.toLowerCase();
@@ -246,7 +314,7 @@ const [ordenAscendente, setOrdenAscendente] = useState(true);
                       <Form.Check
                         type="checkbox"
                         checked={!!user.rolpaciente}
-                        disabled={filaBloqueada}
+                        disabled={filaBloqueada || !puedeEditarRoles}
                         onChange={() => toggleRol(user.idusuario, 'rolpaciente')}
                       />
                     </td>
@@ -254,7 +322,7 @@ const [ordenAscendente, setOrdenAscendente] = useState(true);
                       <Form.Check
                         type="checkbox"
                         checked={!!user.rolmedico}
-                        disabled={filaBloqueada}
+                        disabled={filaBloqueada || !puedeEditarRoles}
                         onChange={() => toggleRol(user.idusuario, 'rolmedico')}
                       />
                     </td>
@@ -262,7 +330,7 @@ const [ordenAscendente, setOrdenAscendente] = useState(true);
                       <Form.Check
                         type="checkbox"
                         checked={!!user.roladministrativo}
-                        disabled={filaBloqueada}
+                        disabled={filaBloqueada || !puedeEditarRoles}
                         onChange={() => toggleRol(user.idusuario, 'roladministrativo')}
                       />
                     </td>
@@ -291,6 +359,21 @@ const [ordenAscendente, setOrdenAscendente] = useState(true);
                         size={18}
                         style={{ pointerEvents: filaBloqueada ? 'none' : 'auto', opacity: filaBloqueada ? 0.3 : 1 }}
                       />
+                      <FaKey
+                        className="icon-action"
+                        title="Resetear contraseña"
+                        onClick={() => {
+                          if (puedeEditarContrasenaDeOtro || user.usuario === usuarioLogueado) {
+                            abrirModalReset(user.idusuario);
+                          }
+                        }}
+                        size={18}
+                        style={{
+                          pointerEvents: (puedeEditarContrasenaDeOtro || user.usuario === usuarioLogueado) ? 'auto' : 'none',
+                          opacity: (puedeEditarContrasenaDeOtro || user.usuario === usuarioLogueado) ? 1 : 0.3
+                        }}
+                      />
+
                     </td>
                   </tr>
                 );
@@ -356,23 +439,23 @@ const [ordenAscendente, setOrdenAscendente] = useState(true);
         </Modal.Header>
         <Modal.Body>
           {contactoVista ? (
-            <div>
+            <Form>
               {[
-                ['Nombre', contactoVista.nombre],
-                ['Apellido', contactoVista.apellido],
-                ['Documento', contactoVista.docum],
-                ['Tipo Documento', contactoVista.tipodoc],
-                ['Fecha de Nacimiento', contactoVista.fechanacim?.split('T')[0]],
-                ['Tel. Contacto', contactoVista.telcontacto],
-                ['Tel. Emergencia', contactoVista.telemergencia],
-                ['Correo', contactoVista.correo],
-                ['Dirección', contactoVista.direccion]
-              ].map(([label, valor], idx) => (
-                <p key={idx}>
-                  <strong>{label}:</strong> {valor || '—'}
-                </p>
+                'nombre', 'apellido', 'docum', 'tipodoc', 'fechanacim',
+                'telcontacto', 'telemergencia', 'correo', 'direccion'
+              ].map((campo, idx) => (
+                <Form.Group className="mb-2" key={idx}>
+                  <Form.Label>{campo.charAt(0).toUpperCase() + campo.slice(1)}</Form.Label>
+                  <Form.Control
+                    type={campo === 'fechanacim' ? 'date' : 'text'}
+                    value={campo === 'fechanacim'
+                      ? (contactoVista[campo]?.split('T')[0] || '')
+                      : contactoVista[campo] || ''}
+                    disabled
+                  />
+                </Form.Group>
               ))}
-            </div>
+            </Form>
           ) : (
             <p>Cargando datos...</p>
           )}
@@ -381,6 +464,79 @@ const [ordenAscendente, setOrdenAscendente] = useState(true);
           <Button variant="secondary" onClick={() => setModalVista(false)}>Cerrar</Button>
         </Modal.Footer>
       </Modal>
+
+      <Modal show={mostrarModalPwd} onHide={() => setMostrarModalPwd(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Resetear Contraseña</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form.Group className="mb-3">
+            <Form.Label>Nueva Contraseña</Form.Label>
+            <InputGroup>
+              <Form.Control
+                type={verNueva ? 'text' : 'password'}
+                value={nuevaContrasena}
+                onChange={(e) => setNuevaContrasena(e.target.value)}
+              />
+              <span
+                onClick={() => setVerNueva(!verNueva)}
+                title={verNueva ? 'Ocultar' : 'Mostrar'}
+                style={{
+                  cursor: 'pointer',
+                  padding: '0.375rem 0.75rem',
+                  backgroundColor: 'transparent',
+                  border: 'none',
+                  marginLeft: '0.25rem',
+                  fontSize: '1.25rem'
+                }}
+              >
+                {verNueva ? '🙈' : '👁️'}
+              </span>
+            </InputGroup>
+          </Form.Group>
+
+          <Form.Group>
+            <Form.Label>Confirmar Contraseña</Form.Label>
+            <InputGroup>
+              <Form.Control
+                type={verConfirmar ? 'text' : 'password'}
+                value={confirmarContrasena}
+                onChange={(e) => setConfirmarContrasena(e.target.value)}
+              />
+              <span
+                onClick={() => setVerConfirmar(!verConfirmar)}
+                title={verConfirmar ? 'Ocultar' : 'Mostrar'}
+                style={{
+                  cursor: 'pointer',
+                  padding: '0.375rem 0.75rem',
+                  backgroundColor: 'transparent',
+                  border: 'none',
+                  marginLeft: '0.25rem',
+                  fontSize: '1.25rem'
+                }}
+              >
+                {verConfirmar ? '🙈' : '👁️'}
+              </span>
+            </InputGroup>
+          </Form.Group>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setMostrarModalPwd(false)}>Cancelar</Button>
+          <Button
+            variant="primary"
+            onClick={() => {
+              if (nuevaContrasena !== confirmarContrasena) {
+                alert('Las contraseñas no coinciden');
+                return;
+              }
+              guardarNuevaContrasena();
+            }}
+          >
+            Guardar
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
     </Container>
   );
 };
