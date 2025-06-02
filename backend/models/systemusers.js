@@ -1,60 +1,81 @@
 const bcrypt = require('bcryptjs');
 
 module.exports = (sequelize, DataTypes) => {
-    const systemUsers = sequelize.define('SystemUsers', {
-        idusuario: {
-            type: DataTypes.INTEGER,
-            primaryKey: true,
-            autoIncrement: true,
-            allowNull: false
+  const systemUsers = sequelize.define('SystemUsers', {
+    idusuario: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
+      allowNull: false
+    },
+    idcontacto: {
+      type: DataTypes.INTEGER,
+      allowNull: true // Si querés validación referencial, podés ajustar esto
+    },
+    usuario: {
+      type: DataTypes.STRING(50),
+      allowNull: false,
+      unique: {
+        msg: 'El nombre de usuario ya existe'
+      },
+      validate: {
+        len: {
+          args: [5, 50],
+          msg: 'El usuario debe tener entre 5 y 50 caracteres'
         },
-        idcontacto: {
-            type: DataTypes.INTEGER
-        },
-        usuario: {
-            type: DataTypes.STRING(50),
-            allowNull: false
-        },
-        contrasena: {
-            type: DataTypes.STRING(100)
-        },
-        rolpaciente: {
-            type: DataTypes.BOOLEAN
-        },
-        rolmedico: {
-            type: DataTypes.BOOLEAN
-        },
-        roladministrativo: {
-            type: DataTypes.BOOLEAN
-        },
-        rolsuperadmin: {
-            type: DataTypes.BOOLEAN
+        isEmail: {
+          msg: 'El usuario debe tener formato de email válido'
         }
-    }, {
-        tableName: 'SystemUsers',
-        timestamps: false,
-        hooks: {
-            // Hook para cifrar la contraseña antes de crear o actualizar el usuario
-            beforeCreate: async (systemUsers) => {
-                if (systemUsers.contrasena) {
-                systemUsers.contrasena = await bcrypt.hash(systemUsers.contrasena, 10); // Cifra la contraseña antes de guardarla
-                }
-            },
-            beforeUpdate: async (systemUsers) => {
-                if (systemUsers.contrasena) {
-                systemUsers.contrasena = await bcrypt.hash(systemUsers.contrasena, 10); // Cifra la contraseña antes de actualizarla
-                }
-            }
+      }
+    },
+    contrasena: {
+      type: DataTypes.STRING(100),
+      allowNull: false,
+      validate: {
+        len: {
+          args: [6, 100],
+          msg: 'La contraseña debe tener al menos 6 caracteres'
         }
-    });
-    // Método de instancia para comparar contraseñas
-    systemUsers.prototype.comparePassword = async function(contrasena) {
-        return bcrypt.compare(contrasena, this.contrasena);  // Compara la contraseña proporcionada con la almacenada
-    };
+      }
+    },
+    rolpaciente: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false
+    },
+    rolmedico: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false
+    },
+    roladministrativo: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false
+    },
+    rolsuperadmin: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false
+    }
+  }, {
+    tableName: 'SystemUsers',
+    timestamps: false,
+    hooks: {
+      beforeCreate: async (systemUsers) => {
+        if (systemUsers.contrasena) {
+          systemUsers.contrasena = await bcrypt.hash(systemUsers.contrasena, 10);
+        }
+      },
+      beforeUpdate: async (systemUsers) => {
+        if (systemUsers.changed('contrasena')) {
+          systemUsers.contrasena = await bcrypt.hash(systemUsers.contrasena, 10);
+        }
+      }
+    }
+  });
 
-    console.log("Modelo Usuario cargado correctamente");
+  systemUsers.prototype.comparePassword = async function(contrasena) {
+    return bcrypt.compare(contrasena, this.contrasena);
+  };
 
-    return systemUsers;
+  console.log("Modelo Usuario cargado correctamente");
+
+  return systemUsers;
 };
-
-// module.exports = systemUsers;

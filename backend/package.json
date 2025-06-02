@@ -6,7 +6,18 @@
   "scripts": {
     "start": "node server/index.js",
     "dev": "nodemon server/index.js",
-    "test": "jest"
+    "test": "NODE_ENV=test jest",
+    "test:watch": "NODE_ENV=test jest --watch",
+    "test:coverage": "NODE_ENV=test jest --coverage",
+    "test:verbose": "NODE_ENV=test jest --verbose",
+    "test:auth": "NODE_ENV=test jest --testPathPattern=auth",
+    "test:models": "NODE_ENV=test jest models-validation.test.js",
+    "test:integration": "NODE_ENV=test jest integration-auth.test.js",
+    "test:server": "NODE_ENV=test jest server.test.js",
+    "test:login": "NODE_ENV=test jest login.test.js",
+    "test:register": "NODE_ENV=test jest register.test.js",
+    "test:protected": "NODE_ENV=test jest protectedRoute.test.js",
+    "test:ci": "NODE_ENV=test jest --ci --coverage --watchAll=false"
   },
   "keywords": [],
   "author": "",
@@ -25,8 +36,28 @@
     "nodemon": "^2.0.22",
     "supertest": "^7.1.1"
   },
-
   "jest": {
-  "setupFilesAfterEnv": ["<rootDir>/tests/setup.js"]
+    "testEnvironment": "node",
+    "setupFilesAfterEnv": ["<rootDir>/tests/setup.js"],
+    "testTimeout": 10000,
+    "verbose": true,
+    "collectCoverageFrom": [
+      "**/*.js",
+      "!node_modules/**",
+      "!tests/**",
+      "!coverage/**",
+      "!logs.txt"
+    ],
+    "coverageDirectory": "tests/coverage",
+    "coverageReporters": [
+      "text",
+      "lcov",
+      "html"
+    ],
+    "testMatch": [
+      "**/tests/**/*.test.js"
+    ],
+    "forceExit": true,
+    "detectOpenHandles": true
   }
 }
