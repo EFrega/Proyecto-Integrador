@@ -6,7 +6,7 @@
 
 ## 🌐 Descripción
 
-Aplicación fullstack desarrollada en Node.js, Express, React y MySQL, diseñada para administrar turnos médicos, registros de profesionales, servicios y más.
+Aplicación **fullstack** desarrollada con **Node.js**, **Express**, **React** y **MySQL**, diseñada para administrar turnos médicos, registro de profesionales, servicios ofrecidos y manejo de usuarios autenticados por JWT.
 
 ---
 
@@ -21,6 +21,7 @@ Base externa de pruebas:
 - **Contraseña:** `Sabbah2505`
 - [phpMyAdmin](https://www.db4free.net/phpMyAdmin/index.php?route=/database/structure&db=pp4_clinica)
 
+> ⚠️ Considerar migrar a una base en Docker o local para producción.
 ---
 
 ## ⚙️ Instalación Manual (sin Docker)
@@ -83,29 +84,61 @@ docker-compose up --build
 
 Esto levantará:
 
-- **Backend** (Node.js + Express)
-- **Frontend** (React)
-- (Opcional) Podés modificar `docker-compose.yml` para levantar también un contenedor de MySQL.
+- **Backend (API):** http://localhost:5000
+- **Frontend (React):** http://localhost:3000
 
-### 3. Acceso
-
-- **Frontend:** http://localhost:3000
-- **Backend API:** http://localhost:5000
+> La configuración actual **utiliza una base externa**, pero puede adaptarse fácilmente para levantar un contenedor `mysql` desde el `docker-compose.yml`.
 
 ---
 
 ## 🧪 Testing
 
-### Backend
+### Herramientas
 
-Se usa **Jest** + **Supertest**. Para correr los tests:
+- [Jest](https://jestjs.io/)
+- [Supertest](https://github.com/visionmedia/supertest)
+
+### Comandos disponibles
 
 ```bash
-cd backend
+# Todos los tests
 npm test
+
+# Tests con cobertura
+npm run test:coverage
+
+# Solo validaciones de modelos
+npm run test:models
+
+# Solo autenticación
+npm run test:auth
+
+# Solo flujo completo login → token → ruta protegida
+npm run test:integration
 ```
 
-> Se incluye una batería básica para login, registro y rutas protegidas.
+> Las pruebas incluyen validación de modelos, validaciones de base de datos, login y flujo de autenticación, rutas protegidas, y verificación de cifrado de contraseñas.
+
+---
+
+## 🔐 Seguridad y Validaciones
+
+### Validaciones del lado del backend (Sequelize)
+
+- **`contactos.js`**:
+  - Email válido y único.
+  - Documento único.
+  - Tipo de documento permitido.
+  - Fecha de nacimiento válida (no futura, no anterior a 1900).
+  - Nombre, apellido y dirección con longitud mínima.
+
+- **`systemusers.js`**:
+  - Usuario con formato email y único.
+  - Contraseña mínima de 6 caracteres.
+  - Roles (`paciente`, `médico`, `administrativo`, `superadmin`) como booleanos.
+  - Contraseña cifrada con `bcryptjs` en `beforeCreate` y `beforeUpdate`.
+
+> Todos estos campos son verificados también por los tests automatizados.
 
 ---
 
@@ -113,111 +146,42 @@ npm test
 
 ```
 PROYECTO-INTEGRADOR/
-│── backend/
-│   ├── config/
-│   │   ├── database.js
-│   ├── middlewares
-│   │   ├── auth.js
-│   ├── models/
-│   │   ├── agendaferiados.js
-│   │   ├── agendaprofexcep.js
-│   │   ├── agendaproregular.js
-│   │   ├── chat.js
-│   │   ├── contactos.js
-│   │   ├── fichamedica.js
-│   │   ├── profesionales.js
-│   │   ├── profservicios.js
-│   │   ├── servicios.js
-│   │   ├── systemusers.js
-│   │   ├── turnos.js
-│   ├── routes/
-│   │   ├── contactosRoute.js
-│   │   ├── excepcionesRoute.js
-│   │   ├── feriadosRoute.js
-│   │   ├── loginRoute.js
-│   │   ├── profesionalesRoute.js
-│   │   ├── registerRoute.js
-│   │   ├── rolesRoute.js
-│   │   ├── serviciosRoute.js
-│   │   ├── usuariosRoute.js
-│   ├── server/
-│   │   ├── index.js
-│   │   ├── logs.txt
-│   ├── tests/
-│   │   ├── api.test.js
-│   ├── .dockerignore
-│   ├── Dockerfile
-│   ├── logs.txt
-│   ├── package.json
-│ 
-│── frontend/
-│   ├── node_modules/
-│   ├── public/
-│   │   ├── favicon.ico
-│   │   ├── index.html
-│   │   ├── logo192.png
-│   │   ├── logo512.png
-│   │   ├── manifest.json
-│   │   ├── robots.txt
-│   ├── src/
-│   │   ├── pages/
-│   │   │   ├── agendas/
-│   │   │   │   ├── agendas.jsx
-│   │   │   ├── cargaServicios/
-│   │   │   │   ├── cargarServicios.jsx
-│   │   │   ├── dashboard/
-│   │   │   │   ├── dashboard.css
-│   │   │   │   ├── dashboard.jsx
-│   │   │   │   ├── dashboard.test.js
-│   │   │   ├── excepcionesProf/
-│   │   │   │   ├── excepcionesProf.css
-│   │   │   │   ├── excepcionesProf.jsx
-│   │   │   ├── login/
-│   │   │   │   ├── login.css
-│   │   │   │   ├── login.jsx
-│   │   │   │   ├── login.test.js
-│   │   │   ├── register/
-│   │   │   │   ├── register.css
-│   │   │   │   ├── register.jsx
-│   │   │   ├── roles/
-│   │   │   │   ├── Roles.jsx
-│   │   ├── App.css
-│   │   ├── App.js
-│   │   ├── App.test.js
-│   │   ├── index.css
-│   │   ├── index.js
-│   │   ├── logo.svg
-│   │   ├── reportWebVitals.js
-│   │   ├── setupTests.js
-│   ├── .dockerignore
-│   ├── .gitignore
-│   ├── Dockerfile
-│   ├── package-lock.json
-│   ├── package.json
-│   ├── README.md
-├── node_modules/
-├── .env
-├── .gitignore
-├── chat-datamodel.sql
-├── docker-compose.yml
-├── LICENSE
-├── package-lock.json
-├── package.json
-├── README.md
+├── backend/
+│   ├── models/            # Modelos Sequelize validados
+│   ├── routes/            # Rutas Express separadas
+│   ├── server/            # App Express principal + WebSockets
+│   ├── tests/             # Jest + Supertest organizados por tipo
+│   └── Dockerfile
+├── frontend/
+│   ├── src/pages/         # Vistas agrupadas por función
+│   └── Dockerfile
+├── docker-compose.yml     # Configuración completa para contenedores
 ```
 
 ---
 
-## ✅ Estado actual
+## ✅ Funcionalidades implementadas
 
-- ✔️ Login y Registro de Usuarios
-- ✔️ Rutas protegidas con JWT
-- ✔️ Gestión de Turnos, Profesionales y Servicios
-- ✔️ Pruebas unitarias básicas
-- ✔️ Configuración con Docker
+- ✅ Registro y Login de Usuarios con cifrado de contraseña.
+- ✅ Rutas protegidas por JWT (`/usuarios/:id`, etc).
+- ✅ Administración de Contactos, Profesionales, Servicios, Turnos y Excepciones.
+- ✅ WebSockets configurado para futura mensajería en tiempo real.
+- ✅ Testing completo backend (validaciones, autenticación, integridad referencial).
+- ✅ Documentación clara y modularización adecuada.
+- ✅ Compatible con ejecución local y en Docker.
+
+---
+
+## 🚧 Pendientes / Ideas futuras
+
+- [ ] Implementar recuperación de contraseña por email.
+- [ ] Subida de documentos personales (DNI, carnet médico).
+- [ ] Pagos online y gestión de facturación.
+- [ ] Panel de administración más avanzado (estadísticas, logs).
+- [ ] Internacionalización y multilenguaje.
 
 ---
 
 ## ✨ Autor
 
-- Proyecto realizado como parte del ciclo formativo en Desarrollo de Software por HiFive Developers.
+Proyecto desarrollado como parte del Ciclo Formativo en Desarrollo de Software por **HiFive Developers**.

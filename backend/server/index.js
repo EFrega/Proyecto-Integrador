@@ -100,3 +100,5 @@ sequelize.authenticate()
         console.error('No se pudo conectar a la base de datos:', err);
         logToFile(`No se pudo conectar a la base de datos: ${err}`);
     });
+
+    module.exports = { app, server };
