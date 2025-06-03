@@ -2,7 +2,7 @@
 node_modules/
 
 # Archivos de configuración local que no deberían subirse
-.env
+#.env
 
 # Archivos del sistema operativo (ejemplo para macOS)
 .DS_Store
