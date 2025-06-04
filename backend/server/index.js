@@ -77,28 +77,28 @@ app.get('/usuarios/:id', authenticateToken, async (req, res) => {
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
     console.log(`Servidor corriendo en http://localhost:${PORT}`);
-    logToFile(`Servidor corriendo en http://localhost:${PORT}`);
+   // logToFile(`Servidor corriendo en http://localhost:${PORT}`);
 });
 
 // Logging
-function logToFile(message) {
+/*function logToFile(message) {
     const logMessage = `${new Date().toISOString()} - ${message}\n`;
     fs.appendFile('logs.txt', logMessage, (err) => {
         if (err) {
             console.error('Error al escribir en el archivo de logs:', err);
         }
     });
-}
+}*/
 
 // Conexión a la base de datos
 sequelize.authenticate()
     .then(() => {
         console.log('Conexión con la base de datos establecida correctamente.');
-        logToFile('Conexión con la base de datos establecida correctamente.');
+        //logToFile('Conexión con la base de datos establecida correctamente.');
     })
     .catch(err => {
         console.error('No se pudo conectar a la base de datos:', err);
-        logToFile(`No se pudo conectar a la base de datos: ${err}`);
+        //logToFile(`No se pudo conectar a la base de datos: ${err}`);
     });
 
     module.exports = { app, server };
