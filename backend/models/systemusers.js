@@ -10,7 +10,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     idcontacto: {
       type: DataTypes.INTEGER,
-      allowNull: true // Si querés validación referencial, podés ajustar esto
+      allowNull: false
     },
     usuario: {
       type: DataTypes.STRING(50),
