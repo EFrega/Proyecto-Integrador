@@ -18,6 +18,7 @@ import CargarServicio from '../cargaServicios/cargarServicios'; // Ajustá la ru
 import ExcepcionesProf from '../excepcionesProf/excepcionesProf'; // ajustá la ruta si es diferente
 import { FaCalendarTimes } from 'react-icons/fa';
 import Agendas from '../agendas/agendas';
+import AgendaRegular from '../agendaRegular/agendaRegular';
 
 const Dashboard = ({ setIsLoggedIn }) => {
   const [visibleIcons, setVisibleIcons] = useState([]);
@@ -55,14 +56,15 @@ const Dashboard = ({ setIsLoggedIn }) => {
       { id: 'excepcionesProf', component: <FaCalendarTimes className="mb-4 text-secondary hover-icon" key="excepciones" onClick={() => setVista('excepcionesProf')} /> },
       { id: 'servicios', component: <FaClipboardList className="mb-4 text-secondary hover-icon" title="Gestión de Servicios" key="servicios" onClick={() => setVista('servicios')} /> },
       { id: 'turnos', component: <FaTicketAlt className="mb-4 text-secondary hover-icon" title="Gestión de Turnos" key="turnos" onClick={() => setVista('turnos')} /> },
+      { id: 'agendaRegular', component: <FaCalendarAlt className="mb-4 text-secondary hover-icon" title="Agenda Regular" key="agendaRegular" onClick={() => setVista('agendaRegular')} /> },
     ];
 
     let allowedIds = [];
 
     if (bool(roles.rolsuperadmin)) {
-      allowedIds = ['home', 'calendar', 'comments', 'file', 'folder', 'servicios', 'turnos', 'excepcionesProf'];
+      allowedIds = ['home', 'calendar', 'agendaRegular', 'comments', 'file', 'folder', 'servicios', 'turnos', 'excepcionesProf'];
     } else if (bool(roles.roladministrativo)) {
-      allowedIds = ['home', 'calendar', 'comments', 'servicios', 'turnos','excepcionesProf'];
+      allowedIds = ['home', 'calendar', 'agendaRegular', 'comments', 'servicios', 'turnos','excepcionesProf'];
     } else if (bool(roles.rolmedico) || bool(roles.rolpaciente)) {
       allowedIds = ['home', 'turnos'];
     } else {
@@ -121,7 +123,9 @@ const Dashboard = ({ setIsLoggedIn }) => {
               <ExcepcionesProf/>
             ) : vista === 'agendas' ? (
               <Agendas />
-            ) : (
+            ) : vista === 'agendaRegular' ? (
+              <AgendaRegular />
+            ) :(
               <h4 className="text-primary">Inicio</h4>
             )}
           </Container>

@@ -14,6 +14,7 @@ const profesionalesRoute = require('../routes/profesionalesRoute');
 const serviciosRoutes = require('../routes/serviciosRoute');
 const excepcionesRoute = require('../routes/excepcionesRoute');
 const feriadosRoutes = require('../routes/feriadosRoute');
+const agendaRegularRoutes = require('../routes/agendaregularRoute');
 
 const authenticateToken = require('../middlewares/auth');
 const Usuario = require('../models/systemusers');
@@ -32,17 +33,17 @@ app.use(cors());
 // Ruta principal
 app.get('/', (req, res) => {
     res.send('¡Servidor de gestión de turnos en funcionamiento!');
-    logToFile('Se visitó la ruta principal ("/")');
+    //logToFile('Se visitó la ruta principal ("/")');
 });
 
 // WebSocket
 io.on('connection', (socket) => {
     console.log('Un usuario se ha conectado');
-    logToFile('Un usuario se ha conectado');
+    //logToFile('Un usuario se ha conectado');
 
     socket.on('disconnect', () => {
         console.log('Un usuario se ha desconectado');
-        logToFile('Un usuario se ha desconectado');
+        //logToFile('Un usuario se ha desconectado');
     });
 });
 
@@ -55,6 +56,7 @@ app.use('/profesionales', profesionalesRoute);
 app.use('/servicios', serviciosRoutes);
 app.use('/excepcionesProf', excepcionesRoute);
 app.use('/agendas', feriadosRoutes);
+app.use('/agendaregular', agendaRegularRoutes);
 
 // Ruta protegida de ejemplo
 app.get('/usuarios/:id', authenticateToken, async (req, res) => {
