@@ -28,7 +28,7 @@ const Roles = () => {
   const [verConfirmar, setVerConfirmar] = useState(false);
 
   const roles = JSON.parse(localStorage.getItem('roles') || '{}');
-  const usuarioLogueado = localStorage.getItem('usuario') || '';
+  const usuarioLogueado = JSON.parse(localStorage.getItem('usuario') || '{}').nombreUsuario || '';
   const puedeEditarRoles = roles.roladministrativo || roles.rolsuperadmin;
 
   const puedeVerSuperadmin = roles.rolsuperadmin;

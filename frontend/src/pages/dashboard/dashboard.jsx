@@ -19,6 +19,7 @@ import ExcepcionesProf from '../excepcionesProf/excepcionesProf'; // ajustá la 
 import { FaCalendarTimes } from 'react-icons/fa';
 import Agendas from '../agendas/agendas';
 import AgendaRegular from '../agendaRegular/agendaRegular';
+import Chat from '../chat/chat';
 
 const Dashboard = ({ setIsLoggedIn }) => {
   const [visibleIcons, setVisibleIcons] = useState([]);
@@ -50,7 +51,7 @@ const Dashboard = ({ setIsLoggedIn }) => {
     const allIcons = [
       { id: 'home', component: <FaHome className="mb-4 text-secondary hover-icon" title="Inicio" key="home" onClick={() => setVista('inicio')} /> },
       { id: 'calendar', component: <FaCalendarAlt className="mb-4 text-secondary hover-icon" title="Gestión de Agendas" key="agendas" onClick={() => setVista('agendas')} /> },
-      { id: 'comments', component: <FaComments className="mb-4 text-secondary hover-icon" title="Chat" key="comments" onClick={() => setVista('inicio')} /> },
+      { id: 'comments', component: <FaComments className="mb-4 text-secondary hover-icon" title="Chat" key="comments" onClick={() => setVista('chat')} /> },
       { id: 'file', component: <FaFileAlt className="mb-4 text-secondary hover-icon" key="file" onClick={() => setVista('inicio')} /> },
       { id: 'folder', component: <FaFolder className="mb-4 text-secondary hover-icon" key="folder" onClick={() => setVista('inicio')} /> },
       { id: 'excepcionesProf', component: <FaCalendarTimes className="mb-4 text-secondary hover-icon" key="excepciones" onClick={() => setVista('excepcionesProf')} /> },
@@ -66,9 +67,9 @@ const Dashboard = ({ setIsLoggedIn }) => {
     } else if (bool(roles.roladministrativo)) {
       allowedIds = ['home', 'calendar', 'agendaRegular', 'comments', 'servicios', 'turnos','excepcionesProf'];
     } else if (bool(roles.rolmedico) || bool(roles.rolpaciente)) {
-      allowedIds = ['home', 'turnos'];
+      allowedIds = ['home', 'comments','turnos'];
     } else {
-      allowedIds = ['home'];
+      allowedIds = ['home', 'comments'];
     }
 
     const filteredIcons = allIcons.filter(icon => allowedIds.includes(icon.id));
@@ -109,8 +110,20 @@ const Dashboard = ({ setIsLoggedIn }) => {
                 <FaEnvelope color="white" />
               </div>
               <span className="text-muted small">
-                {localStorage.getItem('usuario') || 'Usuario'}
+                {(() => {
+                  try {
+                    const usuarioRaw = localStorage.getItem('usuario');
+                    const usuario = typeof usuarioRaw === 'string' && usuarioRaw.startsWith('{')
+                      ? JSON.parse(usuarioRaw)
+                      : { nombre: usuarioRaw };
+
+                    return `${usuario?.nombre ?? 'Usuario'} ${usuario?.apellido ?? ''}`.trim();
+                  } catch (e) {
+                    return 'Usuario';
+                  }
+                })()}
               </span>
+
             </Nav>
           </Navbar>
 
@@ -125,6 +138,8 @@ const Dashboard = ({ setIsLoggedIn }) => {
               <Agendas />
             ) : vista === 'agendaRegular' ? (
               <AgendaRegular />
+            ) : vista === 'chat' ? (
+              <Chat />
             ) :(
               <h4 className="text-primary">Inicio</h4>
             )}

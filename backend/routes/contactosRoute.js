@@ -1,4 +1,5 @@
 const express = require('express');
+const { Op } = require('sequelize');
 const router = express.Router();
 const sequelize = require('../config/database');
 
@@ -7,6 +8,22 @@ const SystemUsersModel = require('../models/systemusers');
 
 const Contactos = ContactosModel(sequelize, require('sequelize').DataTypes);
 const SystemUsers = SystemUsersModel(sequelize, require('sequelize').DataTypes);
+
+// Obtener todos los contactos
+
+router.get('/', async (req, res) => {
+  const excluir = parseInt(req.query.excluir, 10);
+  try {
+    const where = excluir ? { idcontacto: { [Op.ne]: Number(excluir) } } : {};
+    console.log("Ruta GET /contactos, excluir:", excluir);
+    const contactos = await Contactos.findAll({ where });
+    res.json(contactos);
+    console.log("Contactos devueltos (excluyendo id", excluir, "):", contactos);
+  } catch (error) {
+    console.error('🔥 Error al obtener contactos:', error);
+    res.status(500).json({ message: 'Error al obtener contactos' });
+  }
+});
 
 // Obtener contacto por ID de usuario
 router.get('/:idusuario', async (req, res) => {
