@@ -1,3 +1,4 @@
+import './chat.css';
 import React, { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
 import { Card, Button, Form, ListGroup, Row, Col } from 'react-bootstrap';
@@ -87,6 +88,24 @@ const Chat = () => {
     }
   };
 
+  const agruparPorFecha = (mensajes) => {
+    const agrupados = {};
+
+    mensajes.forEach(msg => {
+      const fecha = new Date(msg.msgtimesent).toLocaleDateString('es-AR', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+
+      if (!agrupados[fecha]) agrupados[fecha] = [];
+      agrupados[fecha].push(msg);
+    });
+
+    return agrupados;
+  };
+
   const scrollAlFinal = () => {
     setTimeout(() => {
       if (contenedorMensajesRef.current) {
@@ -109,24 +128,42 @@ const Chat = () => {
               active={chatActivo?.idchat === chat.idchat}
               onClick={() => abrirChat(chat)}
             >
-              {chat.idsystemuser1 === idusuario ? `Usuario ${chat.idsystemuser2}` : `Usuario ${chat.idsystemuser1}`}
+              {chat.nombreOtro} {chat.apellidoOtro}
             </ListGroup.Item>
           ))}
         </ListGroup>
 
-        <h6>Iniciar nuevo chat</h6>
-        <ListGroup>
+        <h6 className="mt-4 mb-3 fw-bold text-secondary">Iniciar nuevo chat</h6>
+        <ListGroup className="chat-iniciar-lista">
           {contactos.length > 0 ? (
             contactos.map(c => (
-              <ListGroup.Item key={c.idcontacto} className="d-flex justify-content-between align-items-center">
-                <span>{nombreContacto(c)}</span>
-                <Button size="sm" onClick={() => iniciarChat(c.idcontacto)}>Iniciar</Button>
+              <ListGroup.Item
+                key={c.idcontacto}
+                className="d-flex justify-content-between align-items-center chat-iniciar-item px-3 py-2"
+                style={{
+                  border: '1px solid #ddd',
+                  borderRadius: '6px',
+                  marginBottom: '8px',
+                  backgroundColor: '#fff'
+                }}
+              >
+                <div className="fw-medium text-dark">{nombreContacto(c)}</div>
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    className="btn-iniciar-chat"
+                    onClick={() => iniciarChat(c.idcontacto)}
+                  >
+                    Iniciar
+                  </Button>
+
               </ListGroup.Item>
             ))
           ) : (
             <p className="text-muted">No hay otros contactos disponibles</p>
           )}
         </ListGroup>
+
       </Col>
 
       <Col md={8}>
@@ -134,27 +171,33 @@ const Chat = () => {
           <div className="chat-container">
             <Card.Header>
               <div className="d-flex justify-content-between align-items-center">
-                <span className="fw-bold">Conversación</span>
-                <span className="text-muted small">
-                  {usuario?.nombre} {usuario?.apellido}
+                <span className="fw-bold">
+                  Conversación entre {usuario?.nombre} {usuario?.apellido} y {chatActivo?.nombreOtro} {chatActivo?.apellidoOtro}
                 </span>
               </div>
             </Card.Header>
+
             <div className="chat-messages" ref={contenedorMensajesRef}>
-              {mensajes.map(msg => (
-                <div
-                  key={msg.idmsg}
-                  className={msg.idsystemuseremisor === idusuario ? 'chat-msg-sent' : 'chat-msg-received'}
-                >
-                  <div className="bubble">
-                    {msg.msgtexto}
-                    <div className="chat-msg-time">
-                      {new Date(msg.msgtimesent).toLocaleTimeString()}
+              {Object.entries(agruparPorFecha(mensajes)).map(([fecha, mensajesDelDia]) => (
+                <div key={fecha}>
+                  <div className="text-center text-muted my-2 fw-bold">{fecha}</div>
+                  {mensajesDelDia.map(msg => (
+                    <div
+                      key={msg.idmsg}
+                      className={msg.idsystemuseremisor === idusuario ? 'chat-msg-sent' : 'chat-msg-received'}
+                    >
+                      <div className="bubble">
+                        {msg.msgtexto}
+                        <div className="chat-msg-time">
+                          {new Date(msg.msgtimesent).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </div>
+                      </div>
                     </div>
-                  </div>
+                  ))}
                 </div>
               ))}
             </div>
+
             <Form onSubmit={e => { e.preventDefault(); enviarMensaje(); }} className="chat-input-form">
               <Form.Control
                 type="text"
@@ -168,6 +211,7 @@ const Chat = () => {
         ) : (
           <p className="text-danger">Seleccioná un chat para comenzar.</p>
         )}
+
       </Col>
     </Row>
   );
