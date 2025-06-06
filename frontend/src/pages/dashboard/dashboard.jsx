@@ -18,6 +18,7 @@ import CargarServicio from '../cargaServicios/cargarServicios'; // Ajustá la ru
 import ExcepcionesProf from '../excepcionesProf/excepcionesProf'; // ajustá la ruta si es diferente
 import { FaCalendarTimes } from 'react-icons/fa';
 import Agendas from '../agendas/agendas';
+import FichaMedica from '../fichaMedica/fichaMedica';
 
 const Dashboard = ({ setIsLoggedIn }) => {
   const [visibleIcons, setVisibleIcons] = useState([]);
@@ -51,8 +52,8 @@ const Dashboard = ({ setIsLoggedIn }) => {
       { id: 'calendar', component: <FaCalendarAlt className="mb-4 text-secondary hover-icon" title="Gestión de Agendas" key="agendas" onClick={() => setVista('agendas')} /> },
       { id: 'comments', component: <FaComments className="mb-4 text-secondary hover-icon" title="Chat" key="comments" onClick={() => setVista('inicio')} /> },
       { id: 'file', component: <FaFileAlt className="mb-4 text-secondary hover-icon" key="file" onClick={() => setVista('inicio')} /> },
-      { id: 'folder', component: <FaFolder className="mb-4 text-secondary hover-icon" key="folder" onClick={() => setVista('inicio')} /> },
-      { id: 'excepcionesProf', component: <FaCalendarTimes className="mb-4 text-secondary hover-icon" key="excepciones" onClick={() => setVista('excepcionesProf')} /> },
+      { id: 'folder', component: <FaFolder className="mb-4 text-secondary hover-icon" title="Fichas Médicas" key="folder" onClick={() => setVista('fichaMedica')} /> },
+      { id: 'excepcionesProf', component: <FaCalendarTimes className="mb-4 text-secondary hover-icon" title="Gestión de Licencias" key="excepciones" onClick={() => setVista('excepcionesProf')} /> },
       { id: 'servicios', component: <FaClipboardList className="mb-4 text-secondary hover-icon" title="Gestión de Servicios" key="servicios" onClick={() => setVista('servicios')} /> },
       { id: 'turnos', component: <FaTicketAlt className="mb-4 text-secondary hover-icon" title="Gestión de Turnos" key="turnos" onClick={() => setVista('turnos')} /> },
     ];
@@ -62,9 +63,9 @@ const Dashboard = ({ setIsLoggedIn }) => {
     if (bool(roles.rolsuperadmin)) {
       allowedIds = ['home', 'calendar', 'comments', 'file', 'folder', 'servicios', 'turnos', 'excepcionesProf'];
     } else if (bool(roles.roladministrativo)) {
-      allowedIds = ['home', 'calendar', 'comments', 'servicios', 'turnos','excepcionesProf'];
+      allowedIds = ['home', 'calendar', 'comments', 'servicios', 'folder', 'turnos','excepcionesProf'];
     } else if (bool(roles.rolmedico) || bool(roles.rolpaciente)) {
-      allowedIds = ['home', 'turnos'];
+      allowedIds = ['home', 'folder', 'turnos'];
     } else {
       allowedIds = ['home'];
     }
@@ -121,6 +122,8 @@ const Dashboard = ({ setIsLoggedIn }) => {
               <ExcepcionesProf/>
             ) : vista === 'agendas' ? (
               <Agendas />
+            ) : vista === 'fichaMedica' ? (
+              <FichaMedica />
             ) : (
               <h4 className="text-primary">Inicio</h4>
             )}
