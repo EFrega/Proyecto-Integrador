@@ -3,24 +3,22 @@
   "version": "1.0.0",
   "description": "Backend del proyecto integrador",
   "main": "server/index.js",
-
   "scripts": {
-  "start": "node server/index.js",
-  "dev": "nodemon server/index.js",
-  "test": "cross-env NODE_ENV=test jest",
-  "test:watch": "cross-env NODE_ENV=test jest --watch",
-  "test:coverage": "cross-env NODE_ENV=test jest --coverage",
-  "test:verbose": "cross-env NODE_ENV=test jest --verbose",
-  "test:auth": "cross-env NODE_ENV=test jest --testPathPattern=auth",
-  "test:models": "cross-env NODE_ENV=test jest models-validation.test.js",
-  "test:integration": "cross-env NODE_ENV=test jest integration-auth.test.js",
-  "test:server": "cross-env NODE_ENV=test jest server.test.js",
-  "test:login": "cross-env NODE_ENV=test jest login.test.js",
-  "test:register": "cross-env NODE_ENV=test jest register.test.js",
-  "test:protected": "cross-env NODE_ENV=test jest protectedRoute.test.js",
-  "test:ci": "cross-env NODE_ENV=test jest --ci --coverage --watchAll=false"
-},
-  
+    "start": "node server/index.js",
+    "dev": "nodemon server/index.js",
+    "test": "cross-env NODE_ENV=test jest",
+    "test:watch": "cross-env NODE_ENV=test jest --watch",
+    "test:coverage": "cross-env NODE_ENV=test jest --coverage",
+    "test:verbose": "cross-env NODE_ENV=test jest --verbose",
+    "test:auth": "cross-env NODE_ENV=test jest --testPathPattern=auth",
+    "test:models": "cross-env NODE_ENV=test jest models-validation.test.js",
+    "test:integration": "cross-env NODE_ENV=test jest integration-auth.test.js",
+    "test:server": "cross-env NODE_ENV=test jest server.test.js",
+    "test:login": "cross-env NODE_ENV=test jest login.test.js",
+    "test:register": "cross-env NODE_ENV=test jest register.test.js",
+    "test:protected": "cross-env NODE_ENV=test jest protectedRoute.test.js",
+    "test:ci": "cross-env NODE_ENV=test jest --ci --coverage --watchAll=false"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -31,7 +29,7 @@
     "jsonwebtoken": "^9.0.0",
     "mysql2": "^3.2.0",
     "sequelize": "^6.30.0",
-    "socket.io": "^4.6.1"
+    "socket.io": "^4.8.1"
   },
   "devDependencies": {
     "cross-env": "^7.0.3",

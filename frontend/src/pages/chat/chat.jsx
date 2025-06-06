@@ -1,7 +1,10 @@
 import './chat.css';
+import { io } from 'socket.io-client';
 import React, { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
 import { Card, Button, Form, ListGroup, Row, Col } from 'react-bootstrap';
+
+const socket = io('http://localhost:5000');
 
 const Chat = () => {
   const [chats, setChats] = useState([]);
@@ -30,6 +33,19 @@ const Chat = () => {
       }
     }
   }, []);
+
+  useEffect(() => {
+    socket.on('nuevo-mensaje', (msg) => {
+      if (msg.idchat === chatActivo?.idchat) {
+        setMensajes(prev => [...prev, msg]);
+        scrollAlFinal();
+      }
+    });
+
+    return () => {
+      socket.off('nuevo-mensaje'); // 🧼 Limpieza segura
+    };
+  }, [chatActivo]);
 
   const cargarChats = async (id) => {
     try {
@@ -73,20 +89,21 @@ const Chat = () => {
     }
   };
 
-  const enviarMensaje = async () => {
+  const enviarMensaje = () => {
     if (!nuevoMensaje.trim()) return;
-    try {
-      await axios.post('http://localhost:5000/chat/mensajes', {
-        idchat: chatActivo.idchat,
-        idsystemuseremisor: idusuario,
-        msgtexto: nuevoMensaje
-      });
-      setNuevoMensaje('');
-      abrirChat(chatActivo);
-    } catch (error) {
-      console.error('Error al enviar mensaje:', error);
-    }
+
+    const nuevo = {
+      idchat: chatActivo.idchat,
+      idsystemuseremisor: idusuario,
+      msgtexto: nuevoMensaje,
+      msgtimesent: new Date().toISOString()
+    };
+
+    socket.emit('enviar-mensaje', nuevo); // solo lo emitís
+    setNuevoMensaje('');
+    scrollAlFinal(); // (opcional, podés esperar a que llegue el mensaje)
   };
+
 
   const agruparPorFecha = (mensajes) => {
     const agrupados = {};
