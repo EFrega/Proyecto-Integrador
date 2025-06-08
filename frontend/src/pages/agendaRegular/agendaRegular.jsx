@@ -2,8 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Button, Form, Row, Col, Card, Alert } from 'react-bootstrap';
 import axios from 'axios';
 
-const API = process.env.REACT_APP_API_URL; //Acá levanta el localhost del docker-compose
-
 const diasSemana = ['lun', 'mar', 'mie', 'jue', 'vie', 'sab', 'dom'];
 
 const AgendaRegular = () => {
@@ -14,18 +12,18 @@ const AgendaRegular = () => {
   const [mensaje, setMensaje] = useState('');
 
   useEffect(() => {
-    axios.get(`${API}/profesionales`) // y lo mete acá
+    axios.get('http://localhost:5000/profesionales')
       .then(res => setProfesionalesLista(res.data))
       .catch(err => console.error('Error cargando profesionales:', err));
 
-    axios.get(`${API}/servicios`)
+    axios.get('http://localhost:5000/servicios')
       .then(res => setServiciosLista(res.data.filter(s => s.activo)))
       .catch(err => console.error('Error cargando servicios:', err));
   }, []);
 
   useEffect(() => {
     if (!profesional) return;
-    axios.get(`${API}/agendaregular/${profesional}`)
+    axios.get(`http://localhost:5000/agendaregular/${profesional}`)
       .then(res => {
         const agenda = res.data.map(item => ({
           id: Date.now() + Math.random(),
@@ -60,7 +58,7 @@ const AgendaRegular = () => {
     if (!window.confirm('¿Seguro que desea eliminar este bloque?')) return;
 
     try {
-      await axios.delete(`${API}/agendaregular/${profesional}/${idservicio}`);
+      await axios.delete(`http://localhost:5000/agendaregular/${profesional}/${idservicio}`);
       setBloques(prev => prev.filter(b => b.id !== idBloque));
       setMensaje('Bloque eliminado.');
     } catch (err) {
@@ -89,6 +87,7 @@ const AgendaRegular = () => {
 
   const guardarAgenda = async () => {
     if (!profesional) return setMensaje('Debe seleccionar un profesional.');
+
     const bloquesValidos = bloques.filter(b =>
       b.servicio &&
       diasSemana.some(d => b.dias[d].activo)
@@ -109,7 +108,7 @@ const AgendaRegular = () => {
         ]))
       }));
 
-      await axios.post(`${API}/agendaregular`, { agenda: payload });
+      await axios.post('http://localhost:5000/agendaregular', { agenda: payload });
       setMensaje('Agenda guardada correctamente.');
     } catch (err) {
       console.error('Error al guardar agenda:', err);

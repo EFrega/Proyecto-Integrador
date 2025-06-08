@@ -4,7 +4,6 @@ import { Table, Button, Form, Spinner, Alert, Row, Col } from 'react-bootstrap';
 import { FaEdit } from 'react-icons/fa';
 
 const Servicios = () => {
-    const API = process.env.REACT_APP_API_URL;
     const [servicios, setServicios] = useState([]);
     const [cargando, setCargando] = useState(true);
     const [mensaje, setMensaje] = useState('');
@@ -20,10 +19,9 @@ const Servicios = () => {
     const cargarServicios = async () => {
         try {
         setCargando(true);
-        const res = await axios.get(`${API}/servicios`);
+        const res = await axios.get('http://localhost:5000/servicios');
         setServicios(res.data);
         } catch (error) {
-        console.error(error);
         setMensaje('Error al cargar los servicios.');
         } finally {
         setCargando(false);
@@ -33,6 +31,7 @@ const Servicios = () => {
     const handleAgregarServicio = async (e) => {
         e.preventDefault();
         setMensaje('');
+
         const { nombre, duracionturno, activo } = nuevoServicio;
         const duracionInt = parseInt(duracionturno, 10);
 
@@ -42,9 +41,8 @@ const Servicios = () => {
         }
 
         try {
-        
         setGuardandoNuevo(true);
-        const res = await axios.post(`${API}/servicios`, {
+        const res = await axios.post('http://localhost:5000/servicios', {
             nombre: nombre.trim(),
             activo,
             duracionturno: duracionInt,
@@ -81,7 +79,7 @@ const Servicios = () => {
         }
 
         try {
-        await axios.put(`${API}/servicios/${editandoId}`, {
+        await axios.put(`http://localhost:5000/servicios/${editandoId}`, {
             nombre: nombre.trim(),
             activo,
             duracionturno: duracionInt,

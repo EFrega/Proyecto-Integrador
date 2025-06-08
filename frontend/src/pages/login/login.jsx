@@ -3,8 +3,6 @@ import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import './login.css';
 
-const API = process.env.REACT_APP_API_URL;
-
 const Login = ({ setIsLoggedIn }) => {
     const [usuario, setUsuario] = useState('');
     const [contrasena, setContrasena] = useState('');
@@ -16,7 +14,7 @@ const Login = ({ setIsLoggedIn }) => {
         setError('');
 
         try {
-            const response = await axios.post(`${API}/login`, {
+            const response = await axios.post('http://localhost:5000/login', {
                 usuario,
                 contrasena,
             });
