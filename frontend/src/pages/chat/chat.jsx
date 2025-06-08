@@ -6,7 +6,7 @@ import { Card, Button, Form, ListGroup, Row, Col, InputGroup } from 'react-boots
 
 const socket = io('http://localhost:5000');
 
-const Chat = () => {
+const Chat = ({ setTieneMensajesNuevos }) => {
   const [chats, setChats] = useState([]);
   const [contactos, setContactos] = useState([]);
   const [chatActivo, setChatActivo] = useState(null);
@@ -108,16 +108,36 @@ const Chat = () => {
 
   useEffect(() => {
     socket.on('nuevo-mensaje', (msg) => {
+
       if (msg.idchat === chatActivo?.idchat) {
+        // Si estoy viendo ese chat → agregar al chat abierto
         setMensajes(prev => [...prev, msg]);
         scrollAlFinal();
+      } else {
+        // Si es otro chat → marcar como nuevo
+        setChatsConMensajesNuevos(prev => {
+          if (!prev.includes(msg.idchat)) {
+            const nuevos = [...prev, msg.idchat];
+            //setTieneMensajesNuevos(true);  // la función que te pasó el Dashboard
+            return nuevos;
+          }
+          return prev;
+        });
+
+        // También recargar lista de chats por si es un chat nuevo
+        if (idusuario) {
+          cargarChats(idusuario);
+        }
       }
     });
 
     return () => {
       socket.off('nuevo-mensaje');
     };
-  }, [chatActivo]);
+  }, [chatActivo, idusuario, setTieneMensajesNuevos]);
+
+
+  const [chatsConMensajesNuevos, setChatsConMensajesNuevos] = useState([]);
 
   const cargarChats = async (id) => {
     try {
@@ -131,6 +151,16 @@ const Chat = () => {
   const abrirChat = async (chat) => {
     try {
       setChatActivo(chat);
+
+      // Si tenía mensajes nuevos, los marco como leídos:
+      setChatsConMensajesNuevos(prev => prev.filter(id => id !== chat.idchat));
+
+      // Si ya no queda ninguno → desactivar bandera global:
+      setTimeout(() => {
+        setTieneMensajesNuevos(prev => (chatsConMensajesNuevos.length > 1));
+      }, 100);
+
+
       const res = await axios.get(`http://localhost:5000/chat/mensajes/${chat.idchat}`);
       setMensajes(res.data);
       scrollAlFinal();
@@ -138,6 +168,7 @@ const Chat = () => {
       console.error('Error al cargar mensajes:', error);
     }
   };
+
 
   const iniciarChat = async (idReceptor) => {
     try {
@@ -204,6 +235,10 @@ const Chat = () => {
               action
               active={chatActivo?.idchat === chat.idchat}
               onClick={() => abrirChat(chat)}
+              style={{
+                fontWeight: chatsConMensajesNuevos.includes(chat.idchat) ? 'bold' : 'normal',
+                color: chatsConMensajesNuevos.includes(chat.idchat) ? 'red' : 'inherit'
+              }}
             >
               {chat.nombreOtro} {chat.apellidoOtro}
             </ListGroup.Item>

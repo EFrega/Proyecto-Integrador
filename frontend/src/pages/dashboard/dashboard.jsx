@@ -20,11 +20,45 @@ import { FaCalendarTimes } from 'react-icons/fa';
 import Agendas from '../agendas/agendas';
 import AgendaRegular from '../agendaRegular/agendaRegular';
 import Chat from '../chat/chat';
+import { io } from 'socket.io-client';
 
+/*************  ✨ Windsurf Command ⭐  *************/
+/**
+ * Dashboard principal de la aplicación
+ *
+ * Contiene una barra de navegación lateral con enlaces a diferentes
+ * secciones de la aplicación, y un contenedor principal que
+ * muestra el contenido seleccionado.
+ *
+ * @param {object} props
+ * @param {function} props.setIsLoggedIn función para establecer el estado de
+ *                                        la sesión
+ */
+
+/*******  8576031f-7df4-48fa-8354-860cd4c687fc  *******/
 const Dashboard = ({ setIsLoggedIn }) => {
   const [visibleIcons, setVisibleIcons] = useState([]);
   const [vista, setVista] = useState('inicio');
   const [roles, setRoles] = useState({});
+  const [tieneMensajesNuevos, setTieneMensajesNuevos] = useState(false);
+
+  useEffect(() => {
+    const socket = io('http://localhost:5000');
+
+    socket.on('nuevo-mensaje', (msg) => {
+      const idusuario = JSON.parse(localStorage.getItem('usuario') || '{}').idcontacto;
+
+      if (msg.idsystemuserreceptor === idusuario) {
+        setTieneMensajesNuevos(true);
+      }
+    });
+
+    return () => {
+      socket.off('nuevo-mensaje');
+      socket.disconnect();
+    };
+  }, []);
+
 
   const handleLogout = () => {
     localStorage.clear();
@@ -55,7 +89,18 @@ const Dashboard = ({ setIsLoggedIn }) => {
     const allIcons = [
       { id: 'home', component: <FaHome className="mb-4 text-secondary hover-icon" title="Inicio" key="home" onClick={() => setVista('inicio')} /> },
       { id: 'calendar', component: <FaCalendarAlt className="mb-4 text-secondary hover-icon" title="Gestión de Agendas" key="agendas" onClick={() => setVista('agendas')} /> },
-      { id: 'comments', component: <FaComments className="mb-4 text-secondary hover-icon" title="Chat" key="comments" onClick={() => setVista('chat')} /> },
+      { id: 'comments', component: (
+        <FaComments
+          className={`mb-4 hover-icon ${tieneMensajesNuevos ? 'text-danger' : 'text-secondary'}`}
+          title="Chat"
+          key="comments"
+          onClick={() => {
+            setVista('chat');
+            setTieneMensajesNuevos(false);  // al entrar a chat, limpio
+          }}
+          color={tieneMensajesNuevos ? 'red' : 'gray'}   // 🔥 CAMBIA DE COLOR
+        />
+      )},
       { id: 'file', component: <FaFileAlt className="mb-4 text-secondary hover-icon" key="file" onClick={() => setVista('inicio')} /> },
       { id: 'folder', component: <FaFolder className="mb-4 text-secondary hover-icon" key="folder" onClick={() => setVista('inicio')} /> },
       { id: 'excepcionesProf', component: <FaCalendarTimes className="mb-4 text-secondary hover-icon" key="excepciones" onClick={() => setVista('excepcionesProf')} /> },
@@ -79,7 +124,7 @@ const Dashboard = ({ setIsLoggedIn }) => {
     const filteredIcons = allIcons.filter(icon => allowedIds.includes(icon.id));
     setVisibleIcons(filteredIcons);
 
-  }, []); // --> dependencia vacía, porque usás variables locales dentro
+  }, [tieneMensajesNuevos]); // --> dependencia vacía, porque usás variables locales dentro
 
 
   return (
@@ -110,7 +155,7 @@ const Dashboard = ({ setIsLoggedIn }) => {
             <Navbar.Brand className="text-primary fw-bold">Clínica<span className="text-dark">Medica</span></Navbar.Brand>
             <Nav className="d-flex align-items-center gap-3">
               {!(roles.roladministrativo || roles.rolsuperadmin) && (
-                <div className="rounded-circle bg-danger d-flex justify-content-center align-items-center" style={{ width: '30px', height: '30px' }}>
+                <div className={`rounded-circle d-flex justify-content-center align-items-center ${tieneMensajesNuevos ? 'bg-danger' : 'bg-secondary'}`} style={{ width: '30px', height: '30px' }}>
                   <FaComments color="white" />
                 </div>
               )}
@@ -147,7 +192,7 @@ const Dashboard = ({ setIsLoggedIn }) => {
             ) : vista === 'agendaRegular' ? (
               <AgendaRegular />
             ) : vista === 'chat' ? (
-              <Chat />
+              <Chat setTieneMensajesNuevos={setTieneMensajesNuevos} />
             ) :(
               <h4 className="text-primary">Inicio</h4>
             )}
