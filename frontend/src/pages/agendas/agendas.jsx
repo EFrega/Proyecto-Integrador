@@ -3,6 +3,8 @@ import axios from 'axios';
 import { Table, Button, Form, Spinner, Alert, Row, Col } from 'react-bootstrap';
 import { FaTrash } from 'react-icons/fa';
 
+const API = process.env.REACT_APP_API_URL;
+
 const Feriados = () => {
     const [feriados, setFeriados] = useState([]);
     const [cargando, setCargando] = useState(true);
@@ -17,7 +19,7 @@ const Feriados = () => {
     const cargarFeriados = async () => {
         try {
             setCargando(true);
-            const res = await axios.get('http://localhost:5000/agendas');
+            const res = await axios.get(`${API}/agendas`);
             setFeriados(res.data);
         } catch (error) {
             setMensaje('Error al cargar los feriados.');
@@ -37,7 +39,7 @@ const Feriados = () => {
 
         try {
             setGuardando(true);
-            const res = await axios.post('http://localhost:5000/agendas', {
+            const res = await axios.post(`${API}/agendas`, {
                 dia: nuevoFeriado.dia,
                 motivoferiado: nuevoFeriado.motivoferiado.trim(),
             });
@@ -54,7 +56,7 @@ const Feriados = () => {
 
     const eliminarFeriado = async (dia) => {
         try {
-            await axios.delete(`http://localhost:5000/agendas/${dia}`);
+            await axios.delete(`${API}/agendas/${dia}`);
             setFeriados(feriados.filter(f => f.dia !== dia));
             setMensaje('Feriado eliminado.');
         } catch {

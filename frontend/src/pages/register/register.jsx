@@ -4,6 +4,8 @@ import './register.css';
 import { Link, useNavigate } from 'react-router-dom';
 import { Form, Button, Row, Col } from 'react-bootstrap';
 
+const API = process.env.REACT_APP_API_URL;
+
 const Registro = () => {
     const [formData, setFormData] = useState({
         nombre: '',
@@ -40,7 +42,7 @@ const Registro = () => {
         }
 
         try {
-            await axios.post('http://localhost:5000/register', formData);
+            await axios.post(`${API}/register`, formData);
             alert('¡Registro exitoso!');
             navigate('/');
         } catch (err) {
