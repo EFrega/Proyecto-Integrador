@@ -5,6 +5,8 @@ import { Table, Button, Form, Container, Alert, Modal, Row, Col } from 'react-bo
 import { FaTrashAlt, FaEdit } from 'react-icons/fa';
 import moment from 'moment';
 
+const API = process.env.REACT_APP_API_URL;
+
 const tiposLicencia = [
   { tipo: 'Vacaciones anuales pagas (<5 años)', dias: 14 },
   { tipo: 'Vacaciones anuales pagas (5-10 años)', dias: 21 },
@@ -46,7 +48,7 @@ const ExcepcionesProf = () => {
 
   const fetchExcepciones = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/excepcionesProf');
+      const res = await axios.get(`${API}/excepcionesProf`);
       setExcepciones(res.data);
     } catch (error) {
       setMensaje('Error al cargar las excepciones.');
@@ -55,7 +57,7 @@ const ExcepcionesProf = () => {
 
   const fetchProfesionales = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/profesionales');
+      const res = await axios.get(`${API}/profesionales`);
       setProfesionales(res.data);
     } catch (error) {
       setMensaje('Error al cargar los profesionales.');
@@ -87,7 +89,7 @@ const ExcepcionesProf = () => {
 
   const guardarExcepcion = async () => {
     try {
-      await axios.post('http://localhost:5000/excepcionesProf', form);
+      await axios.post(`${API}/excepcionesProf`, form);
       setMensaje('Excepción guardada correctamente.');
       fetchExcepciones();
       limpiarFormulario();
@@ -98,7 +100,7 @@ const ExcepcionesProf = () => {
 
   const eliminarExcepcion = async (idprofesional, dia_inicio) => {
     try {
-      await axios.delete(`http://localhost:5000/excepcionesProf/${idprofesional}/${dia_inicio}`);
+      await axios.delete(`${API}/excepcionesProf/${idprofesional}/${dia_inicio}`);
       setMensaje('Excepción eliminada correctamente.');
       fetchExcepciones();
       limpiarFormulario();
@@ -124,7 +126,7 @@ const ExcepcionesProf = () => {
   const actualizarExcepcion = async () => {
     try {
       console.log('Actualizando con:', registroActual, form);
-      await axios.put(`http://localhost:5000/excepcionesProf/${registroActual.idprofesional}/${registroActual.dia_inicio}`, form);
+      await axios.put(`${API}/excepcionesProf/${registroActual.idprofesional}/${registroActual.dia_inicio}`, form);
       setMensaje('Excepción actualizada correctamente.');
       fetchExcepciones();
       setModalVisible(false);
