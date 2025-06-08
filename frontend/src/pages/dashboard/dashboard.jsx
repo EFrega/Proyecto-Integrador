@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Container, Row, Col, Navbar, Nav } from 'react-bootstrap';
+import { Container, Navbar, Nav } from 'react-bootstrap';
 import {
   FaHome,
   FaCalendarAlt,
@@ -14,59 +14,24 @@ import {
 } from 'react-icons/fa';
 import './dashboard.css';
 import Roles from '../roles/Roles';
-import CargarServicio from '../cargaServicios/cargarServicios'; // Ajustá la ruta si está en otro directorio
-import ExcepcionesProf from '../excepcionesProf/excepcionesProf'; // ajustá la ruta si es diferente
+import CargarServicio from '../cargaServicios/cargarServicios';
+import ExcepcionesProf from '../excepcionesProf/excepcionesProf';
 import { FaCalendarTimes } from 'react-icons/fa';
 import Agendas from '../agendas/agendas';
 import AgendaRegular from '../agendaRegular/agendaRegular';
 import Chat from '../chat/chat';
-import { io } from 'socket.io-client';
 
-/*************  ✨ Windsurf Command ⭐  *************/
-/**
- * Dashboard principal de la aplicación
- *
- * Contiene una barra de navegación lateral con enlaces a diferentes
- * secciones de la aplicación, y un contenedor principal que
- * muestra el contenido seleccionado.
- *
- * @param {object} props
- * @param {function} props.setIsLoggedIn función para establecer el estado de
- *                                        la sesión
- */
-
-/*******  8576031f-7df4-48fa-8354-860cd4c687fc  *******/
-const Dashboard = ({ setIsLoggedIn }) => {
+const Dashboard = ({ setIsLoggedIn, tieneMensajesNuevos, setTieneMensajesNuevos }) => {
   const [visibleIcons, setVisibleIcons] = useState([]);
   const [vista, setVista] = useState('inicio');
   const [roles, setRoles] = useState({});
-  const [tieneMensajesNuevos, setTieneMensajesNuevos] = useState(false);
-
-  useEffect(() => {
-    const socket = io('http://localhost:5000');
-
-    socket.on('nuevo-mensaje', (msg) => {
-      const idusuario = JSON.parse(localStorage.getItem('usuario') || '{}').idcontacto;
-
-      if (msg.idsystemuserreceptor === idusuario) {
-        setTieneMensajesNuevos(true);
-      }
-    });
-
-    return () => {
-      socket.off('nuevo-mensaje');
-      socket.disconnect();
-    };
-  }, []);
-
-
+  
   const handleLogout = () => {
     localStorage.clear();
     setIsLoggedIn(false);
     window.location.href = '/';
   };
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     const isLoggedIn = localStorage.getItem('isLoggedIn');
     if (!isLoggedIn) {
@@ -82,7 +47,7 @@ const Dashboard = ({ setIsLoggedIn }) => {
       parsedRoles = {};
     }
 
-    setRoles(parsedRoles); // actualizar el state (ok)
+    setRoles(parsedRoles);
 
     const bool = (val) => val === true || val === 1 || val === "1";
 
@@ -96,9 +61,8 @@ const Dashboard = ({ setIsLoggedIn }) => {
           key="comments"
           onClick={() => {
             setVista('chat');
-            setTieneMensajesNuevos(false);  // al entrar a chat, limpio
+            setTieneMensajesNuevos(false);
           }}
-          color={tieneMensajesNuevos ? 'red' : 'gray'}   // 🔥 CAMBIA DE COLOR
         />
       )},
       { id: 'file', component: <FaFileAlt className="mb-4 text-secondary hover-icon" key="file" onClick={() => setVista('inicio')} /> },
@@ -124,13 +88,11 @@ const Dashboard = ({ setIsLoggedIn }) => {
     const filteredIcons = allIcons.filter(icon => allowedIds.includes(icon.id));
     setVisibleIcons(filteredIcons);
 
-  }, [tieneMensajesNuevos]); // --> dependencia vacía, porque usás variables locales dentro
-
+  }, [tieneMensajesNuevos, setTieneMensajesNuevos]);
 
   return (
     <div className="d-flex min-vh-100 flex-column">
       <div className="d-flex flex-grow-1">
-        {/* Sidebar */}
         <div className="bg-white border-end d-flex flex-column align-items-center p-2" style={{ width: '60px' }}>
           {visibleIcons.map(icon => icon.component)}
 
@@ -149,7 +111,6 @@ const Dashboard = ({ setIsLoggedIn }) => {
           />
         </div>
 
-        {/* Main content */}
         <div className="flex-grow-1 d-flex flex-column">
           <Navbar bg="white" expand="lg" className="shadow-sm px-4 py-2 justify-content-between">
             <Navbar.Brand className="text-primary fw-bold">Clínica<span className="text-dark">Medica</span></Navbar.Brand>
@@ -186,41 +147,17 @@ const Dashboard = ({ setIsLoggedIn }) => {
             ) : vista === 'servicios' ? (
               <CargarServicio />
             ) : vista === 'excepcionesProf' ? (
-              <ExcepcionesProf/>
+              <ExcepcionesProf />
             ) : vista === 'agendas' ? (
               <Agendas />
             ) : vista === 'agendaRegular' ? (
               <AgendaRegular />
             ) : vista === 'chat' ? (
               <Chat setTieneMensajesNuevos={setTieneMensajesNuevos} />
-            ) :(
+            ) : (
               <h4 className="text-primary">Inicio</h4>
             )}
           </Container>
-
-          <footer className="bg-dark text-light py-4 mt-auto">
-            <Container>
-              <Row>
-                <Col md={4}><h5>ClínicaMedica</h5></Col>
-                <Col md={4}>
-                  <p>Información Institucional</p>
-                  <p>Especialidades médicas</p>
-                  <p>Calidad y seguridad del paciente</p>
-                </Col>
-                <Col md={4}>
-                  <p>Información Útil</p>
-                  <p>Coberturas médicas</p>
-                  <p>Solicite turno</p>
-                  <p>Preguntas frecuentes</p>
-                </Col>
-              </Row>
-              <Row className="text-center mt-3">
-                <Col>
-                  <small>©2025 Diseñado y desarrollado por <a className="text-info text-decoration-underline" href="https://hehex.dev" target="_blank" rel="noreferrer">HiFive Developers</a></small>
-                </Col>
-              </Row>
-            </Container>
-          </footer>
         </div>
       </div>
     </div>

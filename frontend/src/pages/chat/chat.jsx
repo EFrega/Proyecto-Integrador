@@ -1,10 +1,8 @@
 import './chat.css';
-import { io } from 'socket.io-client';
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import axios from 'axios';
 import { Card, Button, Form, ListGroup, Row, Col, InputGroup } from 'react-bootstrap';
-
-const socket = io('http://localhost:5000');
+import socket from '../socket/socket'; // 👉 usamos socket global
 
 const Chat = ({ setTieneMensajesNuevos }) => {
   const [chats, setChats] = useState([]);
@@ -17,11 +15,12 @@ const Chat = ({ setTieneMensajesNuevos }) => {
   const contenedorMensajesRef = useRef(null);
   const [rolusuario, setRolusuario] = useState('');
   const [busqueda, setBusqueda] = useState('');
+  const [chatsConMensajesNuevos, setChatsConMensajesNuevos] = useState([]);
 
   const handleBuscar = (e) => {
     const texto = e.target.value.toLowerCase();
     setBusqueda(texto);
-    cargarContactos(idusuario, texto); // Siempre llamo con la búsqueda actualizada
+    cargarContactos(idusuario, texto);
   };
 
   const cargarContactos = useCallback(async (idactual, filtroBusqueda = '') => {
@@ -34,7 +33,6 @@ const Chat = ({ setTieneMensajesNuevos }) => {
 
     setRolusuario(rol);
 
-    // Si es admin o superadmin → no buscar nada
     if (rol === 'roladministrativo') {
       setContactos([]);
       return;
@@ -47,17 +45,13 @@ const Chat = ({ setTieneMensajesNuevos }) => {
       };
 
       const res = await axios.get(`http://localhost:5000/contactos`, { params });
-
-      // Siempre asegurar que sea array
       const contactosData = Array.isArray(res.data) ? res.data : [];
 
-      // Si no hay búsqueda, setear tal cual
       if (filtroBusqueda.trim() === '') {
         setContactos(contactosData);
         return;
       }
 
-      // Filtro según rol
       const filtro = filtroBusqueda.toLowerCase();
 
       const filtrados = contactosData.filter(c => {
@@ -77,7 +71,6 @@ const Chat = ({ setTieneMensajesNuevos }) => {
           );
         }
 
-        // Por seguridad
         return false;
       });
 
@@ -87,10 +80,8 @@ const Chat = ({ setTieneMensajesNuevos }) => {
     }
   }, []);
 
-
   useEffect(() => {
     const storedUsuario = localStorage.getItem('usuario');
-    console.log('storedUsuario:', storedUsuario);
     if (storedUsuario) {
       try {
         const usuarioParseado = JSON.parse(storedUsuario);
@@ -107,37 +98,35 @@ const Chat = ({ setTieneMensajesNuevos }) => {
   }, [cargarContactos, idusuario]);
 
   useEffect(() => {
-    socket.on('nuevo-mensaje', (msg) => {
-
+    const handleNuevoMensaje = (msg) => {
       if (msg.idchat === chatActivo?.idchat) {
-        // Si estoy viendo ese chat → agregar al chat abierto
         setMensajes(prev => [...prev, msg]);
         scrollAlFinal();
+        setTieneMensajesNuevos(false);
       } else {
-        // Si es otro chat → marcar como nuevo
         setChatsConMensajesNuevos(prev => {
           if (!prev.includes(msg.idchat)) {
             const nuevos = [...prev, msg.idchat];
-            //setTieneMensajesNuevos(true);  // la función que te pasó el Dashboard
+
+            setTieneMensajesNuevos(true); // ✅ ACTUALIZADO
+
             return nuevos;
           }
           return prev;
         });
 
-        // También recargar lista de chats por si es un chat nuevo
         if (idusuario) {
           cargarChats(idusuario);
         }
       }
-    });
+    };
+
+    socket.on('nuevo-mensaje', handleNuevoMensaje);
 
     return () => {
-      socket.off('nuevo-mensaje');
+      socket.off('nuevo-mensaje', handleNuevoMensaje);
     };
   }, [chatActivo, idusuario, setTieneMensajesNuevos]);
-
-
-  const [chatsConMensajesNuevos, setChatsConMensajesNuevos] = useState([]);
 
   const cargarChats = async (id) => {
     try {
@@ -152,14 +141,15 @@ const Chat = ({ setTieneMensajesNuevos }) => {
     try {
       setChatActivo(chat);
 
-      // Si tenía mensajes nuevos, los marco como leídos:
-      setChatsConMensajesNuevos(prev => prev.filter(id => id !== chat.idchat));
+      setChatsConMensajesNuevos(prev => {
+        const nuevos = prev.filter(id => id !== chat.idchat);
 
-      // Si ya no queda ninguno → desactivar bandera global:
-      setTimeout(() => {
-        setTieneMensajesNuevos(prev => (chatsConMensajesNuevos.length > 1));
-      }, 100);
+        if (nuevos.length === 0) {
+          setTieneMensajesNuevos(false); // ✅ ACTUALIZADO
+        }
 
+        return nuevos;
+      });
 
       const res = await axios.get(`http://localhost:5000/chat/mensajes/${chat.idchat}`);
       setMensajes(res.data);
@@ -168,7 +158,6 @@ const Chat = ({ setTieneMensajesNuevos }) => {
       console.error('Error al cargar mensajes:', error);
     }
   };
-
 
   const iniciarChat = async (idReceptor) => {
     try {
@@ -289,7 +278,6 @@ const Chat = ({ setTieneMensajesNuevos }) => {
                   backgroundColor: '#fff'
                 }}
               >
-                {/* Columna de texto */}
                 <div className="fw-medium text-dark">
                   {rolusuario === 'rolpaciente' && (
                     <>
@@ -303,7 +291,6 @@ const Chat = ({ setTieneMensajesNuevos }) => {
                   )}
                 </div>
 
-                {/* Botón a la derecha */}
                 <div className="ms-3">
                   <Button
                     variant="primary"
@@ -320,7 +307,6 @@ const Chat = ({ setTieneMensajesNuevos }) => {
             <p className="text-muted">No hay otros contactos disponibles</p>
           )}
         </ListGroup>
-
       </Col>
 
       <Col md={8}>
