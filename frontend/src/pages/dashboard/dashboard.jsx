@@ -24,6 +24,7 @@ import Chat from '../chat/chat';
 const Dashboard = ({ setIsLoggedIn }) => {
   const [visibleIcons, setVisibleIcons] = useState([]);
   const [vista, setVista] = useState('inicio');
+  const [roles, setRoles] = useState({});
 
   const handleLogout = () => {
     localStorage.clear();
@@ -31,6 +32,7 @@ const Dashboard = ({ setIsLoggedIn }) => {
     window.location.href = '/';
   };
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     const isLoggedIn = localStorage.getItem('isLoggedIn');
     if (!isLoggedIn) {
@@ -38,13 +40,15 @@ const Dashboard = ({ setIsLoggedIn }) => {
       return;
     }
 
-    let roles = {};
+    let parsedRoles = {};
     try {
       const rawRoles = localStorage.getItem('roles');
-      roles = rawRoles && rawRoles !== 'undefined' ? JSON.parse(rawRoles) : {};
+      parsedRoles = rawRoles && rawRoles !== 'undefined' ? JSON.parse(rawRoles) : {};
     } catch (error) {
-      roles = {};
+      parsedRoles = {};
     }
+
+    setRoles(parsedRoles); // actualizar el state (ok)
 
     const bool = (val) => val === true || val === 1 || val === "1";
 
@@ -62,19 +66,21 @@ const Dashboard = ({ setIsLoggedIn }) => {
 
     let allowedIds = [];
 
-    if (bool(roles.rolsuperadmin)) {
-      allowedIds = ['home', 'calendar', 'agendaRegular', 'comments', 'file', 'folder', 'servicios', 'turnos', 'excepcionesProf'];
-    } else if (bool(roles.roladministrativo)) {
-      allowedIds = ['home', 'calendar', 'agendaRegular', 'comments', 'servicios', 'turnos','excepcionesProf'];
-    } else if (bool(roles.rolmedico) || bool(roles.rolpaciente)) {
-      allowedIds = ['home', 'comments','turnos'];
+    if (bool(parsedRoles.rolsuperadmin)) {
+      allowedIds = ['home', 'calendar', 'agendaRegular', 'file', 'folder', 'servicios', 'turnos', 'excepcionesProf'];
+    } else if (bool(parsedRoles.roladministrativo)) {
+      allowedIds = ['home', 'calendar', 'agendaRegular', 'servicios', 'turnos', 'excepcionesProf'];
+    } else if (bool(parsedRoles.rolmedico) || bool(parsedRoles.rolpaciente)) {
+      allowedIds = ['home', 'comments', 'turnos'];
     } else {
       allowedIds = ['home', 'comments'];
     }
 
     const filteredIcons = allIcons.filter(icon => allowedIds.includes(icon.id));
     setVisibleIcons(filteredIcons);
-  }, []);
+
+  }, []); // --> dependencia vacía, porque usás variables locales dentro
+
 
   return (
     <div className="d-flex min-vh-100 flex-column">
@@ -103,9 +109,11 @@ const Dashboard = ({ setIsLoggedIn }) => {
           <Navbar bg="white" expand="lg" className="shadow-sm px-4 py-2 justify-content-between">
             <Navbar.Brand className="text-primary fw-bold">Clínica<span className="text-dark">Medica</span></Navbar.Brand>
             <Nav className="d-flex align-items-center gap-3">
-              <div className="rounded-circle bg-danger d-flex justify-content-center align-items-center" style={{ width: '30px', height: '30px' }}>
-                <FaComments color="white" />
-              </div>
+              {!(roles.roladministrativo || roles.rolsuperadmin) && (
+                <div className="rounded-circle bg-danger d-flex justify-content-center align-items-center" style={{ width: '30px', height: '30px' }}>
+                  <FaComments color="white" />
+                </div>
+              )}
               <div className="rounded-circle bg-info d-flex justify-content-center align-items-center" style={{ width: '30px', height: '30px' }}>
                 <FaEnvelope color="white" />
               </div>

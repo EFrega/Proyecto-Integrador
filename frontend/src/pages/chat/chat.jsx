@@ -1,8 +1,8 @@
 import './chat.css';
 import { io } from 'socket.io-client';
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import axios from 'axios';
-import { Card, Button, Form, ListGroup, Row, Col } from 'react-bootstrap';
+import { Card, Button, Form, ListGroup, Row, Col, InputGroup } from 'react-bootstrap';
 
 const socket = io('http://localhost:5000');
 
@@ -15,6 +15,78 @@ const Chat = () => {
   const [idusuario, setIdusuario] = useState(null);
   const [usuario, setUsuario] = useState({});
   const contenedorMensajesRef = useRef(null);
+  const [rolusuario, setRolusuario] = useState('');
+  const [busqueda, setBusqueda] = useState('');
+
+  const handleBuscar = (e) => {
+    const texto = e.target.value.toLowerCase();
+    setBusqueda(texto);
+    cargarContactos(idusuario, texto); // Siempre llamo con la búsqueda actualizada
+  };
+
+  const cargarContactos = useCallback(async (idactual, filtroBusqueda = '') => {
+    const roles = JSON.parse(localStorage.getItem('roles') || '{}');
+
+    let rol = '';
+    if (roles.rolpaciente) rol = 'rolpaciente';
+    else if (roles.rolmedico) rol = 'rolmedico';
+    else if (roles.roladministrativo || roles.rolsuperadmin) rol = 'roladministrativo';
+
+    setRolusuario(rol);
+
+    // Si es admin o superadmin → no buscar nada
+    if (rol === 'roladministrativo') {
+      setContactos([]);
+      return;
+    }
+
+    try {
+      const params = {
+        excluir: idactual,
+        rolusuario: rol
+      };
+
+      const res = await axios.get(`http://localhost:5000/contactos`, { params });
+
+      // Siempre asegurar que sea array
+      const contactosData = Array.isArray(res.data) ? res.data : [];
+
+      // Si no hay búsqueda, setear tal cual
+      if (filtroBusqueda.trim() === '') {
+        setContactos(contactosData);
+        return;
+      }
+
+      // Filtro según rol
+      const filtro = filtroBusqueda.toLowerCase();
+
+      const filtrados = contactosData.filter(c => {
+        if (rol === 'rolpaciente') {
+          return (
+            c.nombre?.toLowerCase().includes(filtro) ||
+            c.apellido?.toLowerCase().includes(filtro) ||
+            c.nombre_servicio?.toLowerCase().includes(filtro)
+          );
+        }
+
+        if (rol === 'rolmedico') {
+          return (
+            c.nombre?.toLowerCase().includes(filtro) ||
+            c.apellido?.toLowerCase().includes(filtro) ||
+            c.docum?.toLowerCase().includes(filtro)
+          );
+        }
+
+        // Por seguridad
+        return false;
+      });
+
+      setContactos(filtrados);
+    } catch (error) {
+      console.error('Error al cargar contactos:', error);
+    }
+  }, []);
+
 
   useEffect(() => {
     const storedUsuario = localStorage.getItem('usuario');
@@ -32,7 +104,7 @@ const Chat = () => {
         console.error('No se pudo parsear localStorage usuario:', e);
       }
     }
-  }, []);
+  }, [cargarContactos, idusuario]);
 
   useEffect(() => {
     socket.on('nuevo-mensaje', (msg) => {
@@ -43,7 +115,7 @@ const Chat = () => {
     });
 
     return () => {
-      socket.off('nuevo-mensaje'); // 🧼 Limpieza segura
+      socket.off('nuevo-mensaje');
     };
   }, [chatActivo]);
 
@@ -53,15 +125,6 @@ const Chat = () => {
       setChats(res.data);
     } catch (error) {
       console.error('Error al cargar chats:', error);
-    }
-  };
-
-  const cargarContactos = async (idactual) => {
-    try {
-      const res = await axios.get(`http://localhost:5000/contactos?excluir=${idactual}`);
-      setContactos(res.data);
-    } catch (error) {
-      console.error('Error al cargar contactos:', error);
     }
   };
 
@@ -99,11 +162,10 @@ const Chat = () => {
       msgtimesent: new Date().toISOString()
     };
 
-    socket.emit('enviar-mensaje', nuevo); // solo lo emitís
+    socket.emit('enviar-mensaje', nuevo);
     setNuevoMensaje('');
-    scrollAlFinal(); // (opcional, podés esperar a que llegue el mensaje)
+    scrollAlFinal();
   };
-
 
   const agruparPorFecha = (mensajes) => {
     const agrupados = {};
@@ -131,8 +193,6 @@ const Chat = () => {
     }, 100);
   };
 
-  const nombreContacto = (c) => `${c.nombre} ${c.apellido}`;
-
   return (
     <Row className="p-4">
       <Col md={4}>
@@ -151,6 +211,36 @@ const Chat = () => {
         </ListGroup>
 
         <h6 className="mt-4 mb-3 fw-bold text-secondary">Iniciar nuevo chat</h6>
+        <Form className="mb-3">
+          <Row className="mb-3">
+            <Col md={12}>
+              <InputGroup>
+                <Form.Control
+                  type="text"
+                  placeholder={
+                    rolusuario === 'rolpaciente'
+                      ? 'Buscar por nombre, apellido o servicio...'
+                      : rolusuario === 'rolmedico'
+                      ? 'Buscar por nombre, apellido o documento...'
+                      : 'Buscar por nombre, apellido o documento...'
+                  }
+                  value={busqueda}
+                  onChange={handleBuscar}
+                />
+                <Button
+                  variant="outline-secondary"
+                  onClick={() => {
+                    setBusqueda('');
+                    cargarContactos(idusuario);
+                  }}
+                >
+                  Limpiar
+                </Button>
+              </InputGroup>
+            </Col>
+          </Row>
+        </Form>
+
         <ListGroup className="chat-iniciar-lista">
           {contactos.length > 0 ? (
             contactos.map(c => (
@@ -164,7 +254,22 @@ const Chat = () => {
                   backgroundColor: '#fff'
                 }}
               >
-                <div className="fw-medium text-dark">{nombreContacto(c)}</div>
+                {/* Columna de texto */}
+                <div className="fw-medium text-dark">
+                  {rolusuario === 'rolpaciente' && (
+                    <>
+                      {c.nombre} {c.apellido} ({c.nombre_servicio})
+                    </>
+                  )}
+                  {rolusuario === 'rolmedico' && (
+                    <>
+                      {c.nombre} {c.apellido} ({c.docum})
+                    </>
+                  )}
+                </div>
+
+                {/* Botón a la derecha */}
+                <div className="ms-3">
                   <Button
                     variant="primary"
                     size="sm"
@@ -173,7 +278,7 @@ const Chat = () => {
                   >
                     Iniciar
                   </Button>
-
+                </div>
               </ListGroup.Item>
             ))
           ) : (
@@ -228,7 +333,6 @@ const Chat = () => {
         ) : (
           <p className="text-danger">Seleccioná un chat para comenzar.</p>
         )}
-
       </Col>
     </Row>
   );
