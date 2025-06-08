@@ -4,6 +4,10 @@ FROM node:20-alpine as build
 # Establecer directorio de trabajo
 WORKDIR /app
 
+# Declarar ARG para pasar variables de entorno al build
+ARG REACT_APP_API_URL
+ENV REACT_APP_API_URL=$REACT_APP_API_URL
+
 # Copiar package.json y package-lock.json
 COPY package*.json ./
 
