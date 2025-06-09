@@ -19,7 +19,7 @@ const Login = ({ setIsLoggedIn }) => {
                 contrasena,
             });
 
-            const { token, usuario: nombreUsuario, roles } = response.data;
+            const { token, idusuario, idcontacto, nombre, apellido, usuario: nombreUsuario, roles } = response.data;
 
             if (!roles || typeof roles !== 'object') {
                 console.error('Roles inválidos:', roles);
@@ -30,7 +30,13 @@ const Login = ({ setIsLoggedIn }) => {
             // Guardamos datos en localStorage
             localStorage.setItem('token', token);
             localStorage.setItem('isLoggedIn', 'true');
-            localStorage.setItem('usuario', nombreUsuario);
+            localStorage.setItem('usuario', JSON.stringify({
+                idusuario,
+                idcontacto,
+                nombre,
+                apellido,
+                nombreUsuario
+            }));
             localStorage.setItem('roles', JSON.stringify(roles));
 
             setIsLoggedIn(true);

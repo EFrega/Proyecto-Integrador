@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Container, Row, Col, Navbar, Nav } from 'react-bootstrap';
+import { Container, Navbar, Nav } from 'react-bootstrap';
 import {
   FaHome,
   FaCalendarAlt,
@@ -14,16 +14,18 @@ import {
 } from 'react-icons/fa';
 import './dashboard.css';
 import Roles from '../roles/Roles';
-import CargarServicio from '../cargaServicios/cargarServicios'; // Ajustá la ruta si está en otro directorio
-import ExcepcionesProf from '../excepcionesProf/excepcionesProf'; // ajustá la ruta si es diferente
+import CargarServicio from '../cargaServicios/cargarServicios';
+import ExcepcionesProf from '../excepcionesProf/excepcionesProf';
 import { FaCalendarTimes } from 'react-icons/fa';
 import Agendas from '../agendas/agendas';
 import AgendaRegular from '../agendaRegular/agendaRegular';
+import Chat from '../chat/chat';
 
-const Dashboard = ({ setIsLoggedIn }) => {
+const Dashboard = ({ setIsLoggedIn, tieneMensajesNuevos, setTieneMensajesNuevos }) => {
   const [visibleIcons, setVisibleIcons] = useState([]);
   const [vista, setVista] = useState('inicio');
-
+  const [roles, setRoles] = useState({});
+  
   const handleLogout = () => {
     localStorage.clear();
     setIsLoggedIn(false);
@@ -37,20 +39,32 @@ const Dashboard = ({ setIsLoggedIn }) => {
       return;
     }
 
-    let roles = {};
+    let parsedRoles = {};
     try {
       const rawRoles = localStorage.getItem('roles');
-      roles = rawRoles && rawRoles !== 'undefined' ? JSON.parse(rawRoles) : {};
+      parsedRoles = rawRoles && rawRoles !== 'undefined' ? JSON.parse(rawRoles) : {};
     } catch (error) {
-      roles = {};
+      parsedRoles = {};
     }
+
+    setRoles(parsedRoles);
 
     const bool = (val) => val === true || val === 1 || val === "1";
 
     const allIcons = [
       { id: 'home', component: <FaHome className="mb-4 text-secondary hover-icon" title="Inicio" key="home" onClick={() => setVista('inicio')} /> },
       { id: 'calendar', component: <FaCalendarAlt className="mb-4 text-secondary hover-icon" title="Gestión de Agendas" key="agendas" onClick={() => setVista('agendas')} /> },
-      { id: 'comments', component: <FaComments className="mb-4 text-secondary hover-icon" title="Chat" key="comments" onClick={() => setVista('inicio')} /> },
+      { id: 'comments', component: (
+        <FaComments
+          className={`mb-4 hover-icon ${tieneMensajesNuevos ? 'text-danger' : 'text-secondary'}`}
+          title="Chat"
+          key="comments"
+          onClick={() => {
+            setVista('chat');
+            setTieneMensajesNuevos(false);
+          }}
+        />
+      )},
       { id: 'file', component: <FaFileAlt className="mb-4 text-secondary hover-icon" key="file" onClick={() => setVista('inicio')} /> },
       { id: 'folder', component: <FaFolder className="mb-4 text-secondary hover-icon" key="folder" onClick={() => setVista('inicio')} /> },
       { id: 'excepcionesProf', component: <FaCalendarTimes className="mb-4 text-secondary hover-icon" key="excepciones" onClick={() => setVista('excepcionesProf')} /> },
@@ -61,24 +75,24 @@ const Dashboard = ({ setIsLoggedIn }) => {
 
     let allowedIds = [];
 
-    if (bool(roles.rolsuperadmin)) {
-      allowedIds = ['home', 'calendar', 'agendaRegular', 'comments', 'file', 'folder', 'servicios', 'turnos', 'excepcionesProf'];
-    } else if (bool(roles.roladministrativo)) {
-      allowedIds = ['home', 'calendar', 'agendaRegular', 'comments', 'servicios', 'turnos','excepcionesProf'];
-    } else if (bool(roles.rolmedico) || bool(roles.rolpaciente)) {
-      allowedIds = ['home', 'turnos'];
+    if (bool(parsedRoles.rolsuperadmin)) {
+      allowedIds = ['home', 'calendar', 'agendaRegular', 'file', 'folder', 'servicios', 'turnos', 'excepcionesProf'];
+    } else if (bool(parsedRoles.roladministrativo)) {
+      allowedIds = ['home', 'calendar', 'agendaRegular', 'servicios', 'turnos', 'excepcionesProf'];
+    } else if (bool(parsedRoles.rolmedico) || bool(parsedRoles.rolpaciente)) {
+      allowedIds = ['home', 'comments', 'turnos'];
     } else {
-      allowedIds = ['home'];
+      allowedIds = ['home', 'comments'];
     }
 
     const filteredIcons = allIcons.filter(icon => allowedIds.includes(icon.id));
     setVisibleIcons(filteredIcons);
-  }, []);
+
+  }, [tieneMensajesNuevos, setTieneMensajesNuevos]);
 
   return (
     <div className="d-flex min-vh-100 flex-column">
       <div className="d-flex flex-grow-1">
-        {/* Sidebar */}
         <div className="bg-white border-end d-flex flex-column align-items-center p-2" style={{ width: '60px' }}>
           {visibleIcons.map(icon => icon.component)}
 
@@ -97,20 +111,33 @@ const Dashboard = ({ setIsLoggedIn }) => {
           />
         </div>
 
-        {/* Main content */}
         <div className="flex-grow-1 d-flex flex-column">
           <Navbar bg="white" expand="lg" className="shadow-sm px-4 py-2 justify-content-between">
             <Navbar.Brand className="text-primary fw-bold">Clínica<span className="text-dark">Medica</span></Navbar.Brand>
             <Nav className="d-flex align-items-center gap-3">
-              <div className="rounded-circle bg-danger d-flex justify-content-center align-items-center" style={{ width: '30px', height: '30px' }}>
-                <FaComments color="white" />
-              </div>
+              {!(roles.roladministrativo || roles.rolsuperadmin) && (
+                <div className={`rounded-circle d-flex justify-content-center align-items-center ${tieneMensajesNuevos ? 'bg-danger' : 'bg-secondary'}`} style={{ width: '30px', height: '30px' }}>
+                  <FaComments color="white" />
+                </div>
+              )}
               <div className="rounded-circle bg-info d-flex justify-content-center align-items-center" style={{ width: '30px', height: '30px' }}>
                 <FaEnvelope color="white" />
               </div>
               <span className="text-muted small">
-                {localStorage.getItem('usuario') || 'Usuario'}
+                {(() => {
+                  try {
+                    const usuarioRaw = localStorage.getItem('usuario');
+                    const usuario = typeof usuarioRaw === 'string' && usuarioRaw.startsWith('{')
+                      ? JSON.parse(usuarioRaw)
+                      : { nombre: usuarioRaw };
+
+                    return `${usuario?.nombre ?? 'Usuario'} ${usuario?.apellido ?? ''}`.trim();
+                  } catch (e) {
+                    return 'Usuario';
+                  }
+                })()}
               </span>
+
             </Nav>
           </Navbar>
 
@@ -120,39 +147,17 @@ const Dashboard = ({ setIsLoggedIn }) => {
             ) : vista === 'servicios' ? (
               <CargarServicio />
             ) : vista === 'excepcionesProf' ? (
-              <ExcepcionesProf/>
+              <ExcepcionesProf />
             ) : vista === 'agendas' ? (
               <Agendas />
             ) : vista === 'agendaRegular' ? (
               <AgendaRegular />
-            ) :(
+            ) : vista === 'chat' ? (
+              <Chat setTieneMensajesNuevos={setTieneMensajesNuevos} />
+            ) : (
               <h4 className="text-primary">Inicio</h4>
             )}
           </Container>
-
-          <footer className="bg-dark text-light py-4 mt-auto">
-            <Container>
-              <Row>
-                <Col md={4}><h5>ClínicaMedica</h5></Col>
-                <Col md={4}>
-                  <p>Información Institucional</p>
-                  <p>Especialidades médicas</p>
-                  <p>Calidad y seguridad del paciente</p>
-                </Col>
-                <Col md={4}>
-                  <p>Información Útil</p>
-                  <p>Coberturas médicas</p>
-                  <p>Solicite turno</p>
-                  <p>Preguntas frecuentes</p>
-                </Col>
-              </Row>
-              <Row className="text-center mt-3">
-                <Col>
-                  <small>©2025 Diseñado y desarrollado por <a className="text-info text-decoration-underline" href="https://hehex.dev" target="_blank" rel="noreferrer">HiFive Developers</a></small>
-                </Col>
-              </Row>
-            </Container>
-          </footer>
         </div>
       </div>
     </div>

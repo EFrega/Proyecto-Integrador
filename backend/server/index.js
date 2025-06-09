@@ -6,6 +6,10 @@ const cors = require('cors');
 const fs = require('fs');
 const sequelize = require('../config/database');
 
+const ChatMsgs = require('../models/chatmsgs')(sequelize, require('sequelize').DataTypes);
+const Usuario = require('../models/systemusers');
+const usuarioModelo = Usuario(sequelize, require('sequelize').DataTypes);
+
 const loginRoutes = require('../routes/loginRoute');
 const registerRoutes = require('../routes/registerRoute');
 const usuariosRoutes = require('../routes/usuariosRoute');
@@ -15,37 +19,53 @@ const serviciosRoutes = require('../routes/serviciosRoute');
 const excepcionesRoute = require('../routes/excepcionesRoute');
 const feriadosRoutes = require('../routes/feriadosRoute');
 const agendaRegularRoutes = require('../routes/agendaregularRoute');
+const chatRoute = require('../routes/chatRoute');
 
 const authenticateToken = require('../middlewares/auth');
-const Usuario = require('../models/systemusers');
-const usuarioModelo = Usuario(sequelize, require('sequelize').DataTypes);
 
-console.log("Modelo Usuario en index.js:", Usuario);
-
+// 🟢 Inicialización de Express y servidor HTTP
 const app = express();
 const server = http.createServer(app);
-const io = socketIo(server);
+const io = socketIo(server, {
+  cors: {
+    origin: '*',
+  }
+});
 
-// Middleware
+// Middlewares
 app.use(express.json());
 app.use(cors());
 
-// Ruta principal
+// Ruta de prueba
 app.get('/', (req, res) => {
-    res.send('¡Servidor de gestión de turnos en funcionamiento!');
-    //logToFile('Se visitó la ruta principal ("/")');
+  res.send('¡Servidor de gestión de turnos en funcionamiento!');
 });
 
 // WebSocket
-io.on('connection', (socket) => {
-    console.log('Un usuario se ha conectado');
-    //logToFile('Un usuario se ha conectado');
+io.on('connection', socket => {
+  console.log('🟢 Cliente conectado:', socket.id);
 
-    socket.on('disconnect', () => {
-        console.log('Un usuario se ha desconectado');
-        //logToFile('Un usuario se ha desconectado');
-    });
+  socket.on('enviar-mensaje', async (msg) => {
+    try {
+      const nuevo = await ChatMsgs.create({
+        idchat: msg.idchat,
+        idsystemuseremisor: msg.idsystemuseremisor,
+        msgtexto: msg.msgtexto,
+        msgtimesent: msg.msgtimesent || new Date(),
+        msgstatus: 1 // asumimos "pendiente"
+      });
+
+      io.emit('nuevo-mensaje', nuevo); // reenvía a todos
+    } catch (error) {
+      console.error('❌ Error al guardar mensaje:', error);
+    }
+  });
+
+  socket.on('disconnect', () => {
+    console.log('🔴 Cliente desconectado:', socket.id);
+  });
 });
+
 
 // Rutas principales
 app.use('/login', loginRoutes);
@@ -57,50 +77,37 @@ app.use('/servicios', serviciosRoutes);
 app.use('/excepcionesProf', excepcionesRoute);
 app.use('/agendas', feriadosRoutes);
 app.use('/agendaregular', agendaRegularRoutes);
+app.use('/chat', chatRoute);
 
-// Ruta protegida de ejemplo
+// Ruta protegida
 app.get('/usuarios/:id', authenticateToken, async (req, res) => {
-    const { id } = req.params;
+  const { id } = req.params;
 
-    try {
-        const usuario = await usuarioModelo.findOne({ where: { idUsuario: id } });
-
-        if (!usuario) {
-            return res.status(404).json({ message: 'Usuario no encontrado' });
-        }
-
-        res.json(usuario);
-    } catch (err) {
-        return res.status(500).send('Error en el servidooor');
+  try {
+    const usuario = await usuarioModelo.findOne({ where: { idUsuario: id } });
+    if (!usuario) {
+      return res.status(404).json({ message: 'Usuario no encontrado' });
     }
+    res.json(usuario);
+  } catch (err) {
+    return res.status(500).send('Error en el servidor');
+  }
 });
-
-// Puerto
-const PORT = process.env.PORT || 5000;
-server.listen(PORT, () => {
-    console.log(`Servidor corriendo en http://localhost:${PORT}`);
-   // logToFile(`Servidor corriendo en http://localhost:${PORT}`);
-});
-
-// Logging
-/*function logToFile(message) {
-    const logMessage = `${new Date().toISOString()} - ${message}\n`;
-    fs.appendFile('logs.txt', logMessage, (err) => {
-        if (err) {
-            console.error('Error al escribir en el archivo de logs:', err);
-        }
-    });
-}*/
 
 // Conexión a la base de datos
 sequelize.authenticate()
-    .then(() => {
-        console.log('Conexión con la base de datos establecida correctamente.');
-        //logToFile('Conexión con la base de datos establecida correctamente.');
-    })
-    .catch(err => {
-        console.error('No se pudo conectar a la base de datos:', err);
-        //logToFile(`No se pudo conectar a la base de datos: ${err}`);
-    });
+  .then(() => {
+    console.log('Conexión con la base de datos establecida correctamente.');
+  })
+  .catch(err => {
+    console.error('No se pudo conectar a la base de datos:', err);
+  });
 
-    module.exports = { app, server };
+// Puerto y arranque
+const PORT = process.env.PORT || 5000;
+server.listen(PORT, () => {
+  console.log(`Servidor corriendo en http://localhost:${PORT}`);
+});
+
+// Exportación para otros módulos si es necesario
+module.exports = { app, server };
