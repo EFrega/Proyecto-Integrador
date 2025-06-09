@@ -19,6 +19,7 @@ const serviciosRoutes = require('../routes/serviciosRoute');
 const excepcionesRoute = require('../routes/excepcionesRoute');
 const feriadosRoutes = require('../routes/feriadosRoute');
 const agendaRegularRoutes = require('../routes/agendaregularRoute');
+const fichaRoute = require('../routes/fichaRoute');
 const chatRoute = require('../routes/chatRoute');
 
 const authenticateToken = require('../middlewares/auth');
@@ -78,6 +79,7 @@ app.use('/excepcionesProf', excepcionesRoute);
 app.use('/agendas', feriadosRoutes);
 app.use('/agendaregular', agendaRegularRoutes);
 app.use('/chat', chatRoute);
+app.use('/ficha', fichaRoute);
 
 // Ruta protegida
 app.get('/usuarios/:id', authenticateToken, async (req, res) => {
