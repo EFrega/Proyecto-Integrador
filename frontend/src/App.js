@@ -6,22 +6,22 @@ import {
   Route,
   Navigate
 } from 'react-router-dom';
-import Login from './pages/login/login';  // Importa el componente Login
-import Dashboard from './pages/dashboard/dashboard'; // importa el componente Dashboard
-import Registro from './pages/register/register'; // importa el componente Register
-
+import Login from './pages/login/login';
+import Dashboard from './pages/dashboard/dashboard';
+import Registro from './pages/register/register';
+import socket from './pages/socket/socket';
 const API = process.env.REACT_APP_API_URL;
-
 function App() {
   const [, setMessage] = useState('');
-  const [isLoggedIn, setIsLoggedIn] = useState(false);  // Estado para gestionar si el usuario está logueado
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [tieneMensajesNuevos, setTieneMensajesNuevos] = useState(false); // 👉 nuevo
 
   useEffect(() => {
     const storedLogin = localStorage.getItem('isLoggedIn');
     if (storedLogin === 'true') {
       setIsLoggedIn(true);
     }    
-    // Esta parte es opcional, depende de si quieres mostrar un mensaje del servidor
+  
     axios.get(`${API}`)
       .then(response => {
         setMessage(response.data);
@@ -31,9 +31,23 @@ function App() {
       });
   }, []);
 
-/*  const handleLoginSuccess = () => {
-    setIsLoggedIn(true);  // Cambia el estado a "logueado"
-  };*/
+  useEffect(() => {
+    const idusuario = JSON.parse(localStorage.getItem('usuario') || '{}').idcontacto;
+
+    const handleNuevoMensaje = (msg) => {
+      console.log('[App] Recibido nuevo mensaje:', msg);
+      if (msg.idsystemuserreceptor === idusuario) {
+        console.log('[App] Mensaje para mí → actualizo icono global');
+        setTieneMensajesNuevos(true);
+      }
+    };
+
+    socket.on('nuevo-mensaje', handleNuevoMensaje);
+
+    return () => {
+      socket.off('nuevo-mensaje', handleNuevoMensaje);
+    };
+  }, []);
 
   return (
     <Router>
@@ -49,7 +63,11 @@ function App() {
           path="/dashboard"
           element={
             isLoggedIn ? (
-              <Dashboard setIsLoggedIn={setIsLoggedIn} />
+              <Dashboard
+                setIsLoggedIn={setIsLoggedIn}
+                tieneMensajesNuevos={tieneMensajesNuevos}
+                setTieneMensajesNuevos={setTieneMensajesNuevos}
+              />
             ) : (
               <Navigate to="/" />
             )

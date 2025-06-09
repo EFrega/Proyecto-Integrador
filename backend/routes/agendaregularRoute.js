@@ -2,9 +2,11 @@ const express = require('express');
 const router = express.Router();
 const sequelize = require('../config/database');
 const AgendaModel = require('../models/agendaproregular');
+const ProfServiciosModel = require('../models/profservicios');
 const { DataTypes } = require('sequelize');
 
 const AgendaProRegular = AgendaModel(sequelize, DataTypes);
+const ProfServicios = ProfServiciosModel(sequelize, DataTypes);
 
 router.post('/', async (req, res) => {
   const { agenda } = req.body;
@@ -28,6 +30,14 @@ router.post('/', async (req, res) => {
       if (!creado) {
         await registro.update({ ...horarios }, { transaction: t });
       }
+
+            // Actualizar tabla ProfServicios
+        await ProfServicios.findOrCreate({
+          where: { idprofesional, idservicio },
+          defaults: { activo: true },
+          transaction: t
+        });
+
     }
 
     await t.commit();
@@ -56,6 +66,9 @@ router.delete('/:idprofesional/:idservicio', async (req, res) => {
   const { idprofesional, idservicio } = req.params;
   try {
     await AgendaProRegular.destroy({
+      where: { idprofesional, idservicio }
+    });
+    await ProfServicios.destroy({
       where: { idprofesional, idservicio }
     });
     res.json({ message: 'Bloque eliminado correctamente' });

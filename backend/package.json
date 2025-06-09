@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "description": "Backend del proyecto integrador",
   "main": "server/index.js",
-
   "scripts": {
   "start": "node server/index.js",
   "dev": "nodemon server/index.js",
@@ -20,7 +19,6 @@
   "test:protected": "cross-env NODE_ENV=test jest protectedRoute.test.js",
   "test:ci": "cross-env NODE_ENV=test jest --ci --coverage --watchAll=false"
 },
-  
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -31,7 +29,7 @@
     "jsonwebtoken": "^9.0.0",
     "mysql2": "^3.2.0",
     "sequelize": "^6.30.0",
-    "socket.io": "^4.6.1"
+    "socket.io": "^4.8.1"
   },
   "devDependencies": {
     "cross-env": "^7.0.3",

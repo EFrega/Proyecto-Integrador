@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const sequelize = require('../config/database');  // Importamos la instancia de sequelize
 const Usuario = require('../models/systemusers');  // Importamos directamente la función
 const usuarioModelo = Usuario(sequelize, require('sequelize').DataTypes);  // Ejecutamos la función y obtenemos el modelo
+const Contactos = require('../models/contactos')(sequelize, require('sequelize').DataTypes);
 console.log("Modelo Usuario en loginRoute:", Usuario); // Esto debería mostrar el modelo o undefined
 const router = express.Router();
 
@@ -40,9 +41,14 @@ router.post('/', async (req, res) => {
             { expiresIn: '1h' }  // El token expira en una hora
         );
 
+        const contacto = await Contactos.findByPk(usuarioDb.idcontacto);
         console.log('Token generado:', token);
         res.json({
             token,
+            idusuario: usuarioDb.idusuario,
+            idcontacto: usuarioDb.idcontacto,
+            nombre: contacto?.nombre || '',
+            apellido: contacto?.apellido || '',
             usuario: usuarioDb.usuario,
             roles: {
                 rolpaciente: usuarioDb.rolpaciente,
