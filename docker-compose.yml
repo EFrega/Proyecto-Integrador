@@ -64,9 +64,6 @@
 # networks:
 #   proyecto-network:
 #     driver: bridge
-
-version: '3.8'
-
 services:
   # Base de datos local
   database:
@@ -74,12 +71,13 @@ services:
     container_name: proyecto_db
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: Sabbah2505
-      MYSQL_DATABASE: pp4_clinica
-      MYSQL_USER: pp4_root
-      MYSQL_PASSWORD: Sabbah2505
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_HOST: ${DB_HOST}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
     ports:
-      - "3306:3306"
+      - "${DB_PORT}:3306"
     volumes:
       - db_data:/var/lib/mysql
       - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
