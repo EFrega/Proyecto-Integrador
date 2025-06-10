@@ -28,9 +28,10 @@ const authenticateToken = require('../middlewares/auth');
 const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {
-  cors: {
-    origin: '*',
-  }
+
+    cors: {
+        origin: '*',
+    }
 });
 
 // Middlewares
@@ -39,32 +40,34 @@ app.use(cors());
 
 // Ruta de prueba
 app.get('/', (req, res) => {
-  res.send('¡Servidor de gestión de turnos en funcionamiento!');
+
+    res.send('¡Servidor de gestión de turnos en funcionamiento!');
 });
 
 // WebSocket
 io.on('connection', socket => {
-  console.log('🟢 Cliente conectado:', socket.id);
 
-  socket.on('enviar-mensaje', async (msg) => {
-    try {
-      const nuevo = await ChatMsgs.create({
-        idchat: msg.idchat,
-        idsystemuseremisor: msg.idsystemuseremisor,
-        msgtexto: msg.msgtexto,
-        msgtimesent: msg.msgtimesent || new Date(),
-        msgstatus: 1 // asumimos "pendiente"
-      });
+    console.log('🟢 Cliente conectado:', socket.id);
 
-      io.emit('nuevo-mensaje', nuevo); // reenvía a todos
-    } catch (error) {
-      console.error('❌ Error al guardar mensaje:', error);
-    }
-  });
+    socket.on('enviar-mensaje', async (msg) => {
+        try {
+        const nuevo = await ChatMsgs.create({
+            idchat: msg.idchat,
+            idsystemuseremisor: msg.idsystemuseremisor,
+            msgtexto: msg.msgtexto,
+            msgtimesent: msg.msgtimesent || new Date(),
+            msgstatus: 1 // asumimos "pendiente"
+        });
 
-  socket.on('disconnect', () => {
-    console.log('🔴 Cliente desconectado:', socket.id);
-  });
+        io.emit('nuevo-mensaje', nuevo); // reenvía a todos
+        } catch (error) {
+        console.error('❌ Error al guardar mensaje:', error);
+        }
+    });
+
+    socket.on('disconnect', () => {
+        console.log('🔴 Cliente desconectado:', socket.id);
+    });
 });
 
 
@@ -83,12 +86,17 @@ app.use('/ficha', fichaRoute);
 
 // Ruta protegida
 app.get('/usuarios/:id', authenticateToken, async (req, res) => {
-  const { id } = req.params;
 
-  try {
+    const { id } = req.params;
+
+try {
     const usuario = await usuarioModelo.findOne({ where: { idUsuario: id } });
     if (!usuario) {
-      return res.status(404).json({ message: 'Usuario no encontrado' });
+        return res.status(404).json({ message: 'Usuario no encontrado' });
+    }
+    res.json(usuario);
+    } catch (err) {
+    return res.status(500).send('Error en el servidor');
     }
     res.json(usuario);
   } catch (err) {
@@ -98,17 +106,19 @@ app.get('/usuarios/:id', authenticateToken, async (req, res) => {
 
 // Conexión a la base de datos
 sequelize.authenticate()
-  .then(() => {
-    console.log('Conexión con la base de datos establecida correctamente.');
-  })
-  .catch(err => {
-    console.error('No se pudo conectar a la base de datos:', err);
-  });
+
+    .then(() => {
+        console.log('Conexión con la base de datos establecida correctamente.');
+    })
+    .catch(err => {
+        console.error('No se pudo conectar a la base de datos:', err);
+    });
 
 // Puerto y arranque
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
-  console.log(`Servidor corriendo en http://localhost:${PORT}`);
+
+    console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });
 
 // Exportación para otros módulos si es necesario

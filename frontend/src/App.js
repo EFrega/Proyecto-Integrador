@@ -9,20 +9,24 @@ import {
 import Login from './pages/login/login';
 import Dashboard from './pages/dashboard/dashboard';
 import Registro from './pages/register/register';
-import socket from './pages/socket/socket'; 
 
+import socket from './pages/socket/socket';
+const API = process.env.REACT_APP_API_URL;
 function App() {
   const [, setMessage] = useState('');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [tieneMensajesNuevos, setTieneMensajesNuevos] = useState(false); // 👉 nuevo
+    const [tieneMensajesNuevos, setTieneMensajesNuevos] = useState(false); // 👉 nuevo
+
 
   useEffect(() => {
     const storedLogin = localStorage.getItem('isLoggedIn');
     if (storedLogin === 'true') {
       setIsLoggedIn(true);
-    }
 
-    axios.get('http://localhost:5000')
+    }    
+  
+    axios.get(`${API}`)
+
       .then(response => {
         setMessage(response.data);
       })

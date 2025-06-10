@@ -26,7 +26,7 @@ const Dashboard = ({ setIsLoggedIn, tieneMensajesNuevos, setTieneMensajesNuevos 
   const [visibleIcons, setVisibleIcons] = useState([]);
   const [vista, setVista] = useState('inicio');
   const [roles, setRoles] = useState({});
-  
+
   const handleLogout = () => {
     localStorage.clear();
     setIsLoggedIn(false);
@@ -34,7 +34,7 @@ const Dashboard = ({ setIsLoggedIn, tieneMensajesNuevos, setTieneMensajesNuevos 
   };
 
   useEffect(() => {
-    const isLoggedIn = localStorage.getItem('isLoggedIn');
+    const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
     if (!isLoggedIn) {
       window.location.href = '/';
       return;
@@ -84,7 +84,7 @@ const Dashboard = ({ setIsLoggedIn, tieneMensajesNuevos, setTieneMensajesNuevos 
     } else if (bool(parsedRoles.rolmedico) || bool(parsedRoles.rolpaciente)) {
       allowedIds = ['home', 'comments', 'turnos', 'fichaMedica'];
     } else {
-      allowedIds = ['home', 'comments', 'fichaMedica'];
+      allowedIds = ['home', 'comments','fichaMedica'];
     }
 
     const filteredIcons = allIcons.filter(icon => allowedIds.includes(icon.id));

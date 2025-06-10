@@ -31,12 +31,13 @@ router.post('/', async (req, res) => {
         await registro.update({ ...horarios }, { transaction: t });
       }
 
-      // Actualizar tabla ProfServicios
-      await ProfServicios.findOrCreate({
-        where: { idprofesional, idservicio },
-        defaults: { activo: true },
-        transaction: t
-      });
+
+            // Actualizar tabla ProfServicios
+        await ProfServicios.findOrCreate({
+          where: { idprofesional, idservicio },
+          defaults: { activo: true },
+          transaction: t
+        });
 
     }
 

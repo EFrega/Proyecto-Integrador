@@ -11,55 +11,57 @@ const SystemUsers = SystemUsersModel(sequelize, require('sequelize').DataTypes);
 
 // Obtener ficha médica por ID de contacto
 router.get('/:idcontacto', async (req, res) => {
-  try {
-    console.log('Buscando ficha para contacto ID:', req.params.idcontacto); // DEBUG
-    const ficha = await FichaMedica.findOne({ where: { idcontacto: req.params.idcontacto } });
-    if (!ficha) return res.status(404).json({});
-    res.json(ficha);
-  } catch (err) {
-    console.error('Error al buscar ficha médica:', err);
-    res.status(500).json({ message: 'Error al buscar ficha médica' });
-  }
+
+    try {
+        console.log('Buscando ficha para contacto ID:', req.params.idcontacto); // DEBUG
+        const ficha = await FichaMedica.findOne({ where: { idcontacto: req.params.idcontacto } });
+        if (!ficha) return res.status(404).json({});
+        res.json(ficha);
+    } catch (err) {
+        console.error('Error al buscar ficha médica:', err);
+        res.status(500).json({ message: 'Error al buscar ficha médica' });
+    }
 });
 
 // Guardar o actualizar ficha médica
 router.post('/', async (req, res) => {
-  const { idusuario, idcontacto, gruposang, cobertura, histerenfmlia, observficha } = req.body;
 
-  try {
-    const user = await SystemUsers.findByPk(idusuario);
-    if (!user) return res.status(403).json({ message: 'Usuario no autorizado' });
+    const { idusuario, idcontacto, gruposang, cobertura, histerenfmlia, observficha } = req.body;
 
-    const updateData = {};
+    try {
+        const user = await SystemUsers.findByPk(idusuario);
+        if (!user) return res.status(403).json({ message: 'Usuario no autorizado' });
 
-    // Reglas de autorización
-    if (user.rolsuperadmin || user.roladministrativo || user.rolmedico) {
-      updateData.gruposang = gruposang;
-      updateData.cobertura = cobertura;
+        const updateData = {};
+
+        // Reglas de autorización
+        if (user.rolsuperadmin || user.roladministrativo || user.rolmedico) {
+        updateData.gruposang = gruposang;
+        updateData.cobertura = cobertura;
+        }
+
+        if (user.rolmedico) {
+        updateData.histerenfmlia = histerenfmlia;
+        updateData.observficha = observficha;
+        }
+
+        if (user.rolpaciente && user.idcontacto === idcontacto) {
+        updateData.cobertura = cobertura;
+        }
+
+        const existingFicha = await FichaMedica.findOne({ where: { idcontacto } });
+
+        if (existingFicha) {
+        await existingFicha.update(updateData);
+        } else {
+        await FichaMedica.create({ idcontacto, ...updateData });
+        }
+
+        res.json({ message: 'Ficha médica guardada correctamente' });
+    } catch (error) {
+        console.error('Error al guardar ficha médica:', error);
+        res.status(500).json({ message: 'Error al guardar ficha médica' });
     }
-
-    if (user.rolmedico) {
-      updateData.histerenfmlia = histerenfmlia;
-      updateData.observficha = observficha;
-    }
-
-    if (user.rolpaciente && user.idcontacto === idcontacto) {
-      updateData.cobertura = cobertura;
-    }
-
-    const existingFicha = await FichaMedica.findOne({ where: { idcontacto } });
-
-    if (existingFicha) {
-      await existingFicha.update(updateData);
-    } else {
-      await FichaMedica.create({ idcontacto, ...updateData });
-    }
-
-    res.json({ message: 'Ficha médica guardada correctamente' });
-  } catch (error) {
-    console.error('Error al guardar ficha médica:', error);
-    res.status(500).json({ message: 'Error al guardar ficha médica' });
-  }
 });
 
 module.exports = router;

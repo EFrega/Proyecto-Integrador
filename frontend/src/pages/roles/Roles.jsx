@@ -5,7 +5,7 @@ import {
   Container, Row, Col, InputGroup, Modal
 } from 'react-bootstrap';
 import { FaEdit, FaEye, FaKey } from 'react-icons/fa';
-
+const API = process.env.REACT_APP_API_URL;
 const Roles = () => {
   const [usuariosOriginal, setUsuariosOriginal] = useState([]);
   const [usuariosFiltrados, setUsuariosFiltrados] = useState([]);
@@ -37,7 +37,7 @@ const Roles = () => {
   const usuariosPorPagina = 10;
 
   useEffect(() => {
-    axios.get('http://localhost:5000/usuarios')
+    axios.get(`${API}/usuarios`)
       .then((res) => {
         let data = res.data;
 
@@ -63,14 +63,14 @@ const Roles = () => {
 
   const guardarNuevaContrasena = async () => {
     try {
-      await axios.put(`http://localhost:5000/usuarios/resetear-contrasena/${usuarioPwdId}`, {
+      await axios.put(`${API}/usuarios/resetear-contrasena/${usuarioPwdId}`, {
         nuevaContrasena
       });
       alert('Contraseña actualizada correctamente');
       setMostrarModalPwd(false);
 
       // Vuelve a cargar todos los usuarios, manteniendo filtros
-      const res = await axios.get('http://localhost:5000/usuarios');
+      const res = await axios.get(`${API}/usuarios`);
       let data = res.data;
 
       if (!roles.roladministrativo && !roles.rolsuperadmin && usuarioLogueado !== 'admin') {
@@ -116,7 +116,7 @@ const Roles = () => {
 
     try {
       // 1. Guardar cambios en roles de usuarios
-      await axios.put('http://localhost:5000/usuarios/roles', {
+      await axios.put(`${API}/usuarios/roles`, {
         usuarios: usuariosFiltrados
       });
 
@@ -129,7 +129,7 @@ const Roles = () => {
 
         if (cambioEnRolMedico) {
           await axios.put(
-            `http://localhost:5000/profesionales/actualizar-medico/${user.idusuario}`,
+            `${API}/profesionales/actualizar-medico/${user.idusuario}`,
             { rolmedico: user.rolmedico }
           );
         }
@@ -172,7 +172,7 @@ const Roles = () => {
 
   const abrirFormularioEdicion = async (idusuario) => {
     try {
-      const res = await axios.get(`http://localhost:5000/contactos/${idusuario}`);
+      const res = await axios.get(`${API}/contactos/${idusuario}`);
       setContacto({ ...res.data, idusuario });
       setMostrarModal(true);
     } catch (err) {
@@ -189,7 +189,7 @@ const Roles = () => {
   };
   const guardarContacto = async () => {
     try {
-      await axios.put(`http://localhost:5000/contactos/${contacto.idcontacto}`, contacto);
+      await axios.put(`${API}/contactos/${contacto.idcontacto}`, contacto);
       alert('Contacto actualizado correctamente');
 
       // Actualizamos datos y reordenamos visualmente
@@ -220,7 +220,7 @@ const Roles = () => {
   };
   const verContacto = async (idusuario) => {
     try {
-      const res = await axios.get(`http://localhost:5000/contactos/${idusuario}`);
+      const res = await axios.get(`${API}/contactos/${idusuario}`);
       setContactoVista(res.data);
       setModalVista(true);
     } catch (err) {
