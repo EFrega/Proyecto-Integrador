@@ -20,6 +20,7 @@ import { FaCalendarTimes } from 'react-icons/fa';
 import Agendas from '../agendas/agendas';
 import AgendaRegular from '../agendaRegular/agendaRegular';
 import Chat from '../chat/chat';
+import FichaMedica from '../fichaMedica/fichaMedica';
 
 const Dashboard = ({ setIsLoggedIn, tieneMensajesNuevos, setTieneMensajesNuevos }) => {
   const [visibleIcons, setVisibleIcons] = useState([]);
@@ -72,18 +73,19 @@ const Dashboard = ({ setIsLoggedIn, tieneMensajesNuevos, setTieneMensajesNuevos 
       { id: 'servicios', component: <FaClipboardList className="mb-4 text-secondary hover-icon" title="Gestión de Servicios" key="servicios" onClick={() => setVista('servicios')} /> },
       { id: 'turnos', component: <FaTicketAlt className="mb-4 text-secondary hover-icon" title="Gestión de Turnos" key="turnos" onClick={() => setVista('turnos')} /> },
       { id: 'agendaRegular', component: <FaCalendarAlt className="mb-4 text-secondary hover-icon" title="Agenda Regular" key="agendaRegular" onClick={() => setVista('agendaRegular')} /> },
+      { id: 'fichaMedica', component: <FaFileAlt className="mb-4 text-secondary hover-icon" title="Ficha Médica" key="fichaMedica" onClick={() => setVista('fichaMedica')} /> },
     ];
 
     let allowedIds = [];
 
     if (bool(parsedRoles.rolsuperadmin)) {
-      allowedIds = ['home', 'calendar', 'agendaRegular', 'file', 'folder', 'servicios', 'turnos', 'excepcionesProf'];
+      allowedIds = ['home', 'calendar', 'agendaRegular', 'file', 'fichaMedica','folder', 'servicios', 'turnos', 'excepcionesProf'];
     } else if (bool(parsedRoles.roladministrativo)) {
-      allowedIds = ['home', 'calendar', 'agendaRegular', 'servicios', 'turnos', 'excepcionesProf'];
+      allowedIds = ['home', 'calendar', 'agendaRegular', 'fichaMedica','servicios', 'turnos', 'excepcionesProf'];
     } else if (bool(parsedRoles.rolmedico) || bool(parsedRoles.rolpaciente)) {
-      allowedIds = ['home', 'comments', 'turnos'];
+      allowedIds = ['home', 'comments', 'turnos', 'fichaMedica'];
     } else {
-      allowedIds = ['home', 'comments'];
+      allowedIds = ['home', 'comments','fichaMedica'];
     }
 
     const filteredIcons = allIcons.filter(icon => allowedIds.includes(icon.id));
@@ -153,6 +155,8 @@ const Dashboard = ({ setIsLoggedIn, tieneMensajesNuevos, setTieneMensajesNuevos 
               <Agendas />
             ) : vista === 'agendaRegular' ? (
               <AgendaRegular />
+            ) : vista === 'fichaMedica' ? (
+              <FichaMedica />
             ) : vista === 'chat' ? (
               <Chat setTieneMensajesNuevos={setTieneMensajesNuevos} />
             ) : (
