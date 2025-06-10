@@ -1,20 +1,21 @@
 services:
   # Base de datos local (comentada - descomenta para usar MySQL en Docker)
-  # database:
-  #   image: mysql:8.0
-  #   container_name: proyecto_db
-  #   restart: unless-stopped
-  #   environment:
-  #     MYSQL_ROOT_PASSWORD: Sabbah2505
-  #     MYSQL_DATABASE: pp4_clinica
-  #     MYSQL_USER: pp4_root
-  #     MYSQL_PASSWORD: Sabbah2505
-  #   ports:
-  #     - "3306:3306"
-  #   volumes:
-  #     - db_data:/var/lib/mysql
-  #   networks:
-  #     - proyecto-network
+  database:
+    image: mysql:8.0
+    container_name: proyecto_db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: Sabbah2505
+      MYSQL_DATABASE: pp4_clinica
+      MYSQL_USER: pp4_root
+      MYSQL_PASSWORD: Sabbah2505
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - proyecto-network
 
   # Backend
   backend:
@@ -33,8 +34,8 @@ services:
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
       JWT_SECRET: ${JWT_SECRET}
-    # depends_on:        # Comenta esta línea cuando uses DB externa
-    #   - database       # Comenta esta línea cuando uses DB externa
+    depends_on:        # Comenta esta línea cuando uses DB externa
+      - database       # Comenta esta línea cuando uses DB externa
     volumes:
       - ./backend/server/logs.txt:/app/server/logs.txt
     networks:
@@ -57,8 +58,8 @@ services:
       - proyecto-network
 
 # Volúmenes (comentado - descomenta si usas MySQL en Docker)
-# volumes:
-#   db_data:
+volumes:
+  db_data:
 
 networks:
   proyecto-network:

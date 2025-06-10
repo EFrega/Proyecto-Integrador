@@ -5,9 +5,7 @@ import {
   Container, Row, Col, InputGroup, Modal
 } from 'react-bootstrap';
 import { FaEdit, FaEye, FaKey } from 'react-icons/fa';
-
 const API = process.env.REACT_APP_API_URL;
-
 const Roles = () => {
   const [usuariosOriginal, setUsuariosOriginal] = useState([]);
   const [usuariosFiltrados, setUsuariosFiltrados] = useState([]);
@@ -30,7 +28,7 @@ const Roles = () => {
   const [verConfirmar, setVerConfirmar] = useState(false);
 
   const roles = JSON.parse(localStorage.getItem('roles') || '{}');
-  const usuarioLogueado = localStorage.getItem('usuario') || '';
+  const usuarioLogueado = JSON.parse(localStorage.getItem('usuario') || '{}').nombreUsuario || '';
   const puedeEditarRoles = roles.roladministrativo || roles.rolsuperadmin;
 
   const puedeVerSuperadmin = roles.rolsuperadmin;
