@@ -28,6 +28,7 @@ const authenticateToken = require('../middlewares/auth');
 const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {
+
     cors: {
         origin: '*',
     }
@@ -39,11 +40,13 @@ app.use(cors());
 
 // Ruta de prueba
 app.get('/', (req, res) => {
+
     res.send('¡Servidor de gestión de turnos en funcionamiento!');
 });
 
 // WebSocket
 io.on('connection', socket => {
+
     console.log('🟢 Cliente conectado:', socket.id);
 
     socket.on('enviar-mensaje', async (msg) => {
@@ -83,6 +86,7 @@ app.use('/ficha', fichaRoute);
 
 // Ruta protegida
 app.get('/usuarios/:id', authenticateToken, async (req, res) => {
+
     const { id } = req.params;
 
 try {
@@ -94,10 +98,15 @@ try {
     } catch (err) {
     return res.status(500).send('Error en el servidor');
     }
+    res.json(usuario);
+  } catch (err) {
+    return res.status(500).send('Error en el servidor');
+  }
 });
 
 // Conexión a la base de datos
 sequelize.authenticate()
+
     .then(() => {
         console.log('Conexión con la base de datos establecida correctamente.');
     })
@@ -108,6 +117,7 @@ sequelize.authenticate()
 // Puerto y arranque
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
+
     console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });
 

@@ -8,6 +8,7 @@ const SystemUsers = require('../models/systemusers')(sequelize, require('sequeli
 const Contactos = require('../models/contactos')(sequelize, require('sequelize').DataTypes);
 
 router.get('/chats/:idusuario', async (req, res) => {
+
     const idusuario = parseInt(req.params.idusuario);
 
     try {
@@ -83,6 +84,7 @@ router.post('/chats', async (req, res) => {
 
         let contactoOtro = null;
         if (usuarioOtro?.idcontacto) {
+
         contactoOtro = await Contactos.findOne({
             where: { idcontacto: usuarioOtro.idcontacto },
             attributes: ['nombre', 'apellido']

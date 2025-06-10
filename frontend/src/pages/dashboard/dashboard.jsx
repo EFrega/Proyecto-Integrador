@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Container, Row, Col, Navbar, Nav } from 'react-bootstrap';
+import { Container, Navbar, Nav } from 'react-bootstrap';
 import {
   FaHome,
   FaCalendarAlt,
@@ -47,7 +47,6 @@ const Dashboard = ({ setIsLoggedIn, tieneMensajesNuevos, setTieneMensajesNuevos 
     } catch (error) {
       parsedRoles = {};
     }
-
 
     setRoles(parsedRoles);
 

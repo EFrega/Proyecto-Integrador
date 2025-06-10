@@ -5,6 +5,7 @@ import { Card, Button, Form, ListGroup, Row, Col, InputGroup } from 'react-boots
 import socket from '../socket/socket'; // 👉 usamos socket global
 
 const Chat = ({ setTieneMensajesNuevos }) => {
+
   const API = process.env.REACT_APP_API_URL;
   const [chats, setChats] = useState([]);
   const [contactos, setContactos] = useState([]);
@@ -45,7 +46,9 @@ const Chat = ({ setTieneMensajesNuevos }) => {
         rolusuario: rol
       };
 
+
       const res = await axios.get(`${API}/contactos`, { params });
+
       const contactosData = Array.isArray(res.data) ? res.data : [];
 
       if (filtroBusqueda.trim() === '') {
@@ -131,7 +134,9 @@ const Chat = ({ setTieneMensajesNuevos }) => {
 
   const cargarChats = async (id) => {
     try {
+
       const res = await axios.get(`${API}/chat/chats/${id}`);
+
       setChats(res.data);
     } catch (error) {
       console.error('Error al cargar chats:', error);
@@ -152,7 +157,9 @@ const Chat = ({ setTieneMensajesNuevos }) => {
         return nuevos;
       });
 
+
       const res = await axios.get(`${API}/chat/mensajes/${chat.idchat}`);
+
       setMensajes(res.data);
       scrollAlFinal();
     } catch (error) {
@@ -162,7 +169,9 @@ const Chat = ({ setTieneMensajesNuevos }) => {
 
   const iniciarChat = async (idReceptor) => {
     try {
+
       const res = await axios.post(`${API}/chat/chats`, {
+
         id1: idusuario,
         id2: idReceptor
       });

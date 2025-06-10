@@ -19,6 +19,7 @@
   "test:protected": "cross-env NODE_ENV=test jest protectedRoute.test.js",
   "test:ci": "cross-env NODE_ENV=test jest --ci --coverage --watchAll=false"
 },
+
   "keywords": [],
   "author": "",
   "license": "ISC",

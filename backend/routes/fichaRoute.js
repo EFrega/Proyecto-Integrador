@@ -11,6 +11,7 @@ const SystemUsers = SystemUsersModel(sequelize, require('sequelize').DataTypes);
 
 // Obtener ficha médica por ID de contacto
 router.get('/:idcontacto', async (req, res) => {
+
     try {
         console.log('Buscando ficha para contacto ID:', req.params.idcontacto); // DEBUG
         const ficha = await FichaMedica.findOne({ where: { idcontacto: req.params.idcontacto } });
@@ -24,6 +25,7 @@ router.get('/:idcontacto', async (req, res) => {
 
 // Guardar o actualizar ficha médica
 router.post('/', async (req, res) => {
+
     const { idusuario, idcontacto, gruposang, cobertura, histerenfmlia, observficha } = req.body;
 
     try {

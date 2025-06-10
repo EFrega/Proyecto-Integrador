@@ -4,7 +4,6 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Form, Button, Container, Row, Col, InputGroup, Table } from 'react-bootstrap';
 
-
 function FichaMedica() {
     const API = process.env.REACT_APP_API_URL;
     const [contactos, setContactos] = useState([]);
