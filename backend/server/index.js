@@ -86,22 +86,17 @@ app.use('/ficha', fichaRoute);
 
 // Ruta protegida
 app.get('/usuarios/:id', authenticateToken, async (req, res) => {
-
     const { id } = req.params;
 
-try {
-    const usuario = await usuarioModelo.findOne({ where: { idUsuario: id } });
-    if (!usuario) {
-        return res.status(404).json({ message: 'Usuario no encontrado' });
-    }
-    res.json(usuario);
+    try {
+        const usuario = await usuarioModelo.findOne({ where: { idUsuario: id } });
+        if (!usuario) {
+            return res.status(404).json({ message: 'Usuario no encontrado' });
+        }
+        return res.json(usuario);
     } catch (err) {
-    return res.status(500).send('Error en el servidor');
+        return res.status(500).json({ error: 'Error en el servidor', detalle: err.message });
     }
-    res.json(usuario);
-  } catch (err) {
-    return res.status(500).send('Error en el servidor');
-  }
 });
 
 // Conexión a la base de datos

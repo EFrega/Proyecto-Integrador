@@ -64,6 +64,8 @@
 # networks:
 #   proyecto-network:
 #     driver: bridge
+
+# ----------------------------------------------------------------------------------------------
 services:
   # Base de datos local
   database:
