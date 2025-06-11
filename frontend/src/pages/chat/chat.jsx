@@ -82,7 +82,7 @@ const Chat = ({ setTieneMensajesNuevos }) => {
     } catch (error) {
       console.error('Error al cargar contactos:', error);
     }
-  }, []);
+  }, [API]);
 
   useEffect(() => {
     const storedUsuario = localStorage.getItem('usuario');
@@ -132,16 +132,14 @@ const Chat = ({ setTieneMensajesNuevos }) => {
     };
   }, [chatActivo, idusuario, setTieneMensajesNuevos]);
 
-  const cargarChats = async (id) => {
+  const cargarChats = useCallback(async (id) => {
     try {
-
       const res = await axios.get(`${API}/chat/chats/${id}`);
-
       setChats(res.data);
     } catch (error) {
       console.error('Error al cargar chats:', error);
     }
-  };
+  }, [API]);
 
   const abrirChat = async (chat) => {
     try {

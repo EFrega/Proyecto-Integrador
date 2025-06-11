@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
 import { Table, Button, Form, Spinner, Alert, Row, Col } from 'react-bootstrap';
 import { FaEdit } from 'react-icons/fa';
@@ -13,11 +13,7 @@ const Servicios = () => {
     const [editandoId, setEditandoId] = useState(null);
     const [servicioEditado, setServicioEditado] = useState({});
 
-    useEffect(() => {
-        cargarServicios();
-    }, []);
-
-    const cargarServicios = async () => {
+    const cargarServicios = useCallback(async () => {
         try {
         setCargando(true);
         const res = await axios.get(`${API}/servicios`);
@@ -28,7 +24,11 @@ const Servicios = () => {
         } finally {
         setCargando(false);
         }
-    };
+    }, [API]);
+    
+    useEffect(() => {
+        cargarServicios();
+    }, [cargarServicios]);
 
     const handleAgregarServicio = async (e) => {
         e.preventDefault();
