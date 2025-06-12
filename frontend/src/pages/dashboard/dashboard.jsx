@@ -10,7 +10,8 @@ import {
   FaUsers,
   FaEnvelope,
   FaClipboardList,
-  FaTicketAlt
+  FaTicketAlt,
+  FaListAlt // este ícono lo vamos a usar para "Mis Turnos"
 } from 'react-icons/fa';
 import './dashboard.css';
 import Roles from '../roles/Roles';
@@ -21,6 +22,12 @@ import Agendas from '../agendas/agendas';
 import AgendaRegular from '../agendaRegular/agendaRegular';
 import Chat from '../chat/chat';
 import FichaMedica from '../fichaMedica/fichaMedica';
+
+// 👉 IMPORTAMOS los nuevos componentes de turnos:
+import ReservaTurnos from '../reservaTurnos/reservaTurnos';
+import ReservaTurnosAdmin from '../reservaTurnosAdmin/reservaTurnosAdmin';
+import MisTurnos from '../misTurnos/misTurnos';
+import MisTurnosAdmin from '../misTurnosAdmin/misTurnosAdmin';
 
 const Dashboard = ({ setIsLoggedIn, tieneMensajesNuevos, setTieneMensajesNuevos }) => {
   const [visibleIcons, setVisibleIcons] = useState([]);
@@ -70,7 +77,8 @@ const Dashboard = ({ setIsLoggedIn, tieneMensajesNuevos, setTieneMensajesNuevos 
       { id: 'folder', component: <FaFolder className="mb-4 text-secondary hover-icon" key="folder" onClick={() => setVista('inicio')} /> },
       { id: 'excepcionesProf', component: <FaCalendarTimes className="mb-4 text-secondary hover-icon" key="excepciones" onClick={() => setVista('excepcionesProf')} /> },
       { id: 'servicios', component: <FaClipboardList className="mb-4 text-secondary hover-icon" title="Gestión de Servicios" key="servicios" onClick={() => setVista('servicios')} /> },
-      { id: 'turnos', component: <FaTicketAlt className="mb-4 text-secondary hover-icon" title="Gestión de Turnos" key="turnos" onClick={() => setVista('turnos')} /> },
+      { id: 'turnos', component: <FaTicketAlt className="mb-4 text-secondary hover-icon" title="Reservar Turnos" key="turnos" onClick={() => setVista('turnos')} /> },
+      { id: 'misTurnos', component: <FaListAlt className="mb-4 text-secondary hover-icon" title="Mis Turnos" key="misTurnos" onClick={() => setVista('misTurnos')} /> },
       { id: 'agendaRegular', component: <FaCalendarAlt className="mb-4 text-secondary hover-icon" title="Agenda Regular" key="agendaRegular" onClick={() => setVista('agendaRegular')} /> },
       { id: 'fichaMedica', component: <FaFileAlt className="mb-4 text-secondary hover-icon" title="Ficha Médica" key="fichaMedica" onClick={() => setVista('fichaMedica')} /> },
     ];
@@ -78,11 +86,11 @@ const Dashboard = ({ setIsLoggedIn, tieneMensajesNuevos, setTieneMensajesNuevos 
     let allowedIds = [];
 
     if (bool(parsedRoles.rolsuperadmin)) {
-      allowedIds = ['home', 'calendar', 'agendaRegular', 'file', 'fichaMedica','folder', 'servicios', 'turnos', 'excepcionesProf'];
+      allowedIds = ['home', 'calendar', 'agendaRegular', 'file', 'fichaMedica','folder', 'servicios', 'turnos', 'misTurnos', 'excepcionesProf'];
     } else if (bool(parsedRoles.roladministrativo)) {
-      allowedIds = ['home', 'calendar', 'agendaRegular', 'fichaMedica','servicios', 'turnos', 'excepcionesProf'];
+      allowedIds = ['home', 'calendar', 'agendaRegular', 'fichaMedica','servicios', 'turnos', 'misTurnos', 'excepcionesProf'];
     } else if (bool(parsedRoles.rolmedico) || bool(parsedRoles.rolpaciente)) {
-      allowedIds = ['home', 'comments', 'turnos', 'fichaMedica'];
+      allowedIds = ['home', 'comments', 'turnos', 'misTurnos', 'fichaMedica'];
     } else {
       allowedIds = ['home', 'comments','fichaMedica'];
     }
@@ -158,6 +166,14 @@ const Dashboard = ({ setIsLoggedIn, tieneMensajesNuevos, setTieneMensajesNuevos 
               <FichaMedica />
             ) : vista === 'chat' ? (
               <Chat setTieneMensajesNuevos={setTieneMensajesNuevos} />
+            ) : vista === 'turnos' ? (
+              (roles.roladministrativo || roles.rolsuperadmin)
+                ? <ReservaTurnosAdmin />
+                : <ReservaTurnos />
+            ) : vista === 'misTurnos' ? (
+              (roles.roladministrativo || roles.rolsuperadmin)
+                ? <MisTurnosAdmin />
+                : <MisTurnos />
             ) : (
               <h4 className="text-primary">Inicio</h4>
             )}

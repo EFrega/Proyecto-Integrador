@@ -31,7 +31,7 @@ function FichaMedica() {
         });
 
         setUsuarioActual({ idusuario: 1, rolsuperadmin: true });
-    }, []);
+    }, [API]);
 
     const handleBuscar = (e) => {
         const valor = e.target.value;

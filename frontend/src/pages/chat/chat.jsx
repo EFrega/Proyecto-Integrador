@@ -84,6 +84,15 @@ const Chat = ({ setTieneMensajesNuevos }) => {
     }
   }, [API]);
 
+  const cargarChats = useCallback(async (id) => {
+    try {
+      const res = await axios.get(`${API}/chat/chats/${id}`);
+      setChats(res.data);
+    } catch (error) {
+      console.error('Error al cargar chats:', error);
+    }
+  }, [API]);
+
   useEffect(() => {
     const storedUsuario = localStorage.getItem('usuario');
     if (storedUsuario) {
@@ -99,7 +108,7 @@ const Chat = ({ setTieneMensajesNuevos }) => {
         console.error('No se pudo parsear localStorage usuario:', e);
       }
     }
-  }, [cargarContactos, idusuario]);
+  }, [cargarChats, cargarContactos, idusuario]);
 
   useEffect(() => {
     const handleNuevoMensaje = (msg) => {
@@ -130,16 +139,7 @@ const Chat = ({ setTieneMensajesNuevos }) => {
     return () => {
       socket.off('nuevo-mensaje', handleNuevoMensaje);
     };
-  }, [chatActivo, idusuario, setTieneMensajesNuevos]);
-
-  const cargarChats = useCallback(async (id) => {
-    try {
-      const res = await axios.get(`${API}/chat/chats/${id}`);
-      setChats(res.data);
-    } catch (error) {
-      console.error('Error al cargar chats:', error);
-    }
-  }, [API]);
+  }, [chatActivo, idusuario, setTieneMensajesNuevos, cargarChats]);
 
   const abrirChat = async (chat) => {
     try {
