@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Form, Button, Container, Row, Col, InputGroup, Table } from 'react-bootstrap';
+import { Form, Button, Container, Row, Col, InputGroup, Table, Pagination } from 'react-bootstrap';
 
 function FichaMedica() {
     const API = process.env.REACT_APP_API_URL;
@@ -16,6 +16,10 @@ function FichaMedica() {
         histerenfmlia: '',
         observficha: ''
     });
+
+    // Pagination states
+    const [currentPage, setCurrentPage] = useState(1);
+    const [contactsPerPage] = useState(9);
 
     const [usuarioActual, setUsuarioActual] = useState(null);
 
@@ -42,6 +46,7 @@ function FichaMedica() {
         );
         console.log('Contactos filtrados:', filtrados);
         setContactosFiltrados(filtrados);
+        setCurrentPage(1); // Reset to first page when searching
     };
 
     const seleccionarContacto = async (contacto) => {
@@ -89,8 +94,86 @@ function FichaMedica() {
         }
     };
 
+    // Pagination logic
+    const indexOfLastContact = currentPage * contactsPerPage;
+    const indexOfFirstContact = indexOfLastContact - contactsPerPage;
+    const currentContacts = contactosFiltrados.slice(indexOfFirstContact, indexOfLastContact);
+    const totalPages = Math.ceil(contactosFiltrados.length / contactsPerPage);
+
+    const handlePageChange = (pageNumber) => {
+        setCurrentPage(pageNumber);
+    };
+
+    const renderPaginationItems = () => {
+        let items = [];
+        const maxVisiblePages = 5;
+        let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+        let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
+        // Adjust start page if we're near the end
+        if (endPage - startPage + 1 < maxVisiblePages) {
+            startPage = Math.max(1, endPage - maxVisiblePages + 1);
+        }
+
+        // Previous button
+        items.push(
+            <Pagination.Prev
+                key="prev"
+                disabled={currentPage === 1}
+                onClick={() => handlePageChange(currentPage - 1)}
+            />
+        );
+
+        // First page
+        if (startPage > 1) {
+            items.push(
+                <Pagination.Item key={1} onClick={() => handlePageChange(1)}>
+                    1
+                </Pagination.Item>
+            );
+            if (startPage > 2) {
+                items.push(<Pagination.Ellipsis key="ellipsis1" />);
+            }
+        }
+
+        // Page numbers
+        for (let i = startPage; i <= endPage; i++) {
+            items.push(
+                <Pagination.Item
+                    key={i}
+                    active={i === currentPage}
+                    onClick={() => handlePageChange(i)}
+                >
+                    {i}
+                </Pagination.Item>
+            );
+        }
+
+        // Last page
+        if (endPage < totalPages) {
+            if (endPage < totalPages - 1) {
+                items.push(<Pagination.Ellipsis key="ellipsis2" />);
+            }
+            items.push(
+                <Pagination.Item key={totalPages} onClick={() => handlePageChange(totalPages)}>
+                    {totalPages}
+                </Pagination.Item>
+            );
+        }
+
+        // Next button
+        items.push(
+            <Pagination.Next
+                key="next"
+                disabled={currentPage === totalPages}
+                onClick={() => handlePageChange(currentPage + 1)}
+            />
+        );
+
+        return items;
+    };
+
     return (
-        // <Container>
         <div className="p-4 bg-white shadow rounded">
         
         <h3>Gestión de Fichas Médicas</h3>
@@ -109,6 +192,7 @@ function FichaMedica() {
                 onClick={() => {
                     setBusqueda('');
                     setContactosFiltrados(contactos);
+                    setCurrentPage(1);
                 }}
                 >
                 Limpiar
@@ -119,8 +203,9 @@ function FichaMedica() {
 
         <Row>
             <Col md={6}>
+                
+                
                 <Table table-striped-columns bordered hover >
-                    {/* La clse remueve el estilo stripped en filas de esta tabla para evitar problemas de visualización */}
                     <thead className="table-dark text-center">
                     <tr>
                         <th>Nombre</th>
@@ -129,8 +214,13 @@ function FichaMedica() {
                     </tr>
                     </thead>
                     <tbody className="table-group-divider">
-                    {contactosFiltrados.map(contacto => (
-                        <tr key={contacto.idcontacto} onClick={() => seleccionarContacto(contacto)}>
+                    {currentContacts.map(contacto => (
+                        <tr 
+                            key={contacto.idcontacto} 
+                            onClick={() => seleccionarContacto(contacto)}
+                            style={{ cursor: 'pointer' }}
+                            className={contactoSeleccionado?.idcontacto === contacto.idcontacto ? 'table-active' : ''}
+                        >
                         <td>{contacto.nombre}</td>
                         <td>{contacto.apellido}</td>
                         <td>{contacto.docum}</td>
@@ -138,13 +228,25 @@ function FichaMedica() {
                     ))}
                     </tbody>
                 </Table>
+                
+
+                {totalPages > 1 && (
+                    <div className="d-flex justify-content-between">
+                        <small className="text-muted">
+                        Mostrando {indexOfFirstContact + 1} a {Math.min(indexOfLastContact, contactosFiltrados.length)} de {contactosFiltrados.length} contactos
+                        </small>
+                        <Pagination size="sm">
+                            {renderPaginationItems()}
+                        </Pagination>
+                    </div>
+                )}
             </Col>
         
 
         {contactoSeleccionado && (
             <>
-            <Col md={6} className="px-5">
-            <h5>Ficha de: {contactoSeleccionado.nombre} {contactoSeleccionado.apellido}</h5>
+            <Col md={6} className="px-5 mt-0">
+            <h5 className="mt-0">Ficha de: {contactoSeleccionado.nombre} {contactoSeleccionado.apellido}</h5>
             <Form className="w-100">
                 <Form.Group controlId="gruposang">
                 <Form.Label>Grupo Sanguíneo</Form.Label>
@@ -193,7 +295,6 @@ function FichaMedica() {
         )}
         </Row>
         </div>
-        // </Container>
     );
 }
 
