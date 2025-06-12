@@ -90,7 +90,9 @@ function FichaMedica() {
     };
 
     return (
-        <Container>
+        // <Container>
+        <div className="p-4 bg-white shadow rounded">
+        
         <h3>Gestión de Fichas Médicas</h3>
 
         <Row className="mb-3">
@@ -115,33 +117,35 @@ function FichaMedica() {
             </Col>
         </Row>
 
-        <Table striped bordered hover>
-            <thead>
-            <tr>
-                <th>Nombre</th>
-                <th>Apellido</th>
-                <th>Documento</th>
-                <th>Acción</th>
-            </tr>
-            </thead>
-            <tbody>
-            {contactosFiltrados.map(contacto => (
-                <tr key={contacto.idcontacto}>
-                <td>{contacto.nombre}</td>
-                <td>{contacto.apellido}</td>
-                <td>{contacto.docum}</td>
-                <td>
-                    <Button onClick={() => seleccionarContacto(contacto)}>Seleccionar</Button>
-                </td>
-                </tr>
-            ))}
-            </tbody>
-        </Table>
+        <Row>
+            <Col md={6}>
+                <Table table-striped-columns bordered hover >
+                    {/* La clse remueve el estilo stripped en filas de esta tabla para evitar problemas de visualización */}
+                    <thead className="table-dark text-center">
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Apellido</th>
+                        <th>Documento</th>
+                    </tr>
+                    </thead>
+                    <tbody className="table-group-divider">
+                    {contactosFiltrados.map(contacto => (
+                        <tr key={contacto.idcontacto} onClick={() => seleccionarContacto(contacto)}>
+                        <td>{contacto.nombre}</td>
+                        <td>{contacto.apellido}</td>
+                        <td>{contacto.docum}</td>
+                        </tr>
+                    ))}
+                    </tbody>
+                </Table>
+            </Col>
+        
 
         {contactoSeleccionado && (
             <>
+            <Col md={6} className="px-5">
             <h5>Ficha de: {contactoSeleccionado.nombre} {contactoSeleccionado.apellido}</h5>
-            <Form>
+            <Form className="w-100">
                 <Form.Group controlId="gruposang">
                 <Form.Label>Grupo Sanguíneo</Form.Label>
                 <Form.Control
@@ -184,9 +188,12 @@ function FichaMedica() {
 
                 <Button className="mt-2" onClick={handleGuardar}>Guardar Ficha</Button>
             </Form>
+            </Col>
             </>
         )}
-        </Container>
+        </Row>
+        </div>
+        // </Container>
     );
 }
 
