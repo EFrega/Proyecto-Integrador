@@ -23,66 +23,71 @@ function FichaMedica() {
 
     const [usuarioActual, setUsuarioActual] = useState(null);
 
-    // useCallback para memorizar una función que carga una ficha médica por ID de contacto
-    // La función se vuelve a crear solo cuando cambia la variable de entorno API
-    // Se utiliza esta técnica para evitar que se cree una nueva función en cada renderizado
-    // y así evitar que se dispare useEffect innecesariamente
-    const cargarFicha = useCallback(async (idcontacto) => {
-        try {
-            // Se obtiene la ficha médica por ID de contacto
-            const res = await axios.get(`${API}/ficha/${idcontacto}`);
-            // Se actualiza el estado con la ficha médica obtenida
-            // Si no se obtiene nada, se establece un objeto vacío
-            setFormData(res.data || {
-                gruposang: '',
-                cobertura: '',
-                histenfermflia: '',
-                observficha: ''
+// Fixed cargarFicha function - remove setContactoSeleccionado from here
+const cargarFicha = useCallback(async (idcontacto) => {
+    try {
+        // Se obtiene la ficha médica por ID de contacto
+        const res = await axios.get(`${API}/ficha/${idcontacto}`);
+        // Se actualiza el estado con la ficha médica obtenida
+        // Si no se obtiene nada, se establece un objeto vacío
+        setFormData(res.data || {
+            gruposang: '',
+            cobertura: '',
+            histenfermflia: '',
+            observficha: ''
+        });
+        // REMOVE THIS LINE - it's overwriting contactoSeleccionado with incomplete data
+        // setContactoSeleccionado({ idcontacto });
+    } catch (error) {
+        // Si ocurre un error, se muestra en consola
+        console.error('Error al cargar ficha:', error);
+        // Se establece el estado con un objeto vacío
+        setFormData({
+            gruposang: '',
+            cobertura: '',
+            histenfermflia: '',
+            observficha: ''
+        });
+    }
+}, [API]);
+
+
+useEffect(() => {
+    const usuarioGuardado = localStorage.getItem('usuario');
+    const rolesGuardados = localStorage.getItem('roles');
+    if (!usuarioGuardado || !rolesGuardados) {
+        alert('Debe iniciar sesión');
+        return;
+    }
+
+    const usuario = JSON.parse(usuarioGuardado);
+    const roles = JSON.parse(rolesGuardados);
+
+    console.log('Usuario:', usuario);
+    console.log('Roles:', roles);
+
+    setUsuarioActual({ ...usuario, roles });
+
+    if (roles.rolpaciente) {
+        // For patients, set the contact info and load their medical record
+        setContactoSeleccionado({
+            idcontacto: usuario.idcontacto,
+            nombre: usuario.nombre,
+            apellido: usuario.apellido,
+            docum: usuario.docum
+        });
+        cargarFicha(usuario.idcontacto);
+    } else {
+        axios.get(`${API}/contactos`)
+            .then(res => {
+                setContactos(res.data);
+                setContactosFiltrados(res.data);
+            })
+            .catch(err => {
+                console.error('Error al obtener contactos:', err);
             });
-            // Se actualiza el estado con el contacto seleccionado
-            setContactoSeleccionado({ idcontacto });
-        } catch (error) {
-            // Si ocurre un error, se muestra en consola
-            console.error('Error al cargar ficha:', error);
-            // Se establece el estado con un objeto vacío
-            setFormData({
-                gruposang: '',
-                cobertura: '',
-                histenfermflia: '',
-                observficha: ''
-            });
-        }
-    }, [API]);
-
-    useEffect(() => {
-        const usuarioGuardado = localStorage.getItem('usuario');
-        const rolesGuardados = localStorage.getItem('roles');
-        if (!usuarioGuardado || !rolesGuardados) {
-            alert('Debe iniciar sesión');
-            return;
-        }
-
-        const usuario = JSON.parse(usuarioGuardado);
-        const roles = JSON.parse(rolesGuardados);
-
-        console.log('Usuario:', usuario);
-        console.log('Roles:', roles);
-
-        setUsuarioActual({ ...usuario, roles });
-
-        if (roles.rolpaciente) {
-            cargarFicha(usuario.idcontacto);
-        } else {
-            axios.get(`${API}/contactos`)
-                .then(res => {
-                    setContactos(res.data);
-                    setContactosFiltrados(res.data);
-                })
-                .catch(err => {
-                    console.error('Error al obtener contactos:', err);
-                });
-        }
-    }, [API, cargarFicha]);
+    }
+}, [API, cargarFicha]);
 
     const handleBuscar = (e) => {
         const valor = e.target.value;
