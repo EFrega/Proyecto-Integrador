@@ -14,7 +14,7 @@ module.exports = (sequelize, DataTypes) => {
         cobertura: {
             type: DataTypes.STRING(100)
         },
-        histerenfmlia: {
+        histenfermflia: {
             type: DataTypes.TEXT
         },
         observficha: {
