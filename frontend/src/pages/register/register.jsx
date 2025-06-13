@@ -107,7 +107,7 @@ const Registro = () => {
                                         <FormControl name="telemergencia" placeholder="Tel. emergencia" onChange={handleChange} />
                                     </FormGroup>
                                 </Row>
-                                <div className='d-flex justify-content-center align-selft-stretch border-1'></div>
+                                <hr />
                                 <Row className='mb-3'>
                                     <FormGroup as={Col} md="6" className="mb-3" controlId='formEmail'>
                                         <FormLabel>Email</FormLabel>
