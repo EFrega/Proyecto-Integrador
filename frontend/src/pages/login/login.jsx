@@ -43,7 +43,7 @@ const Login = ({ setIsLoggedIn }) => {
 
             setIsLoggedIn(true);
 
-            alert('¡Login exitoso!');
+            //alert('¡Login exitoso!');
             setUsuario('');
             setContrasena('');
             navigate('/dashboard');

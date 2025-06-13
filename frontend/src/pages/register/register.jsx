@@ -41,6 +41,10 @@ const Registro = () => {
             return setError('Las contraseñas no coinciden');
         }
 
+        if (formData.contrasena.length < 6) {
+            return setError('La contraseña debe tener al menos 6 caracteres');
+        }
+
         try {
             await axios.post(`${API}/register`, formData);
             alert('¡Registro exitoso!');
@@ -94,13 +98,13 @@ const Registro = () => {
                                     </FormGroup>
                                     <FormGroup as={Col} md="6" className='mb-3' controlId='formDireccion'>
                                         <FormLabel>Dirección</FormLabel>
-                                        <FormControl name="direccion" placeholder="Dirección" onChange={handleChange} />
+                                        <FormControl name="direccion" placeholder="Dirección" onChange={handleChange} required />
                                     </FormGroup>
                                 </Row>
                                 <Row className='mb-3'>
                                     <FormGroup as={Col} md="6" className="mb-3" controlId='formTelContacto'>
                                         <FormLabel>Teléfono de contacto</FormLabel>
-                                        <FormControl name="telcontacto" placeholder="Tel. contacto" onChange={handleChange} />
+                                        <FormControl name="telcontacto" placeholder="Tel. contacto" onChange={handleChange} required />
                                     </FormGroup>
                                     <FormGroup as={Col} md="6" className="mb-3" controlId='formTelEmerg'>
                                         <FormLabel>Teléfono de emergencia</FormLabel>
