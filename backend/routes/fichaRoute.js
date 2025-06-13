@@ -26,7 +26,7 @@ router.get('/:idcontacto', async (req, res) => {
 // Guardar o actualizar ficha médica
 router.post('/', async (req, res) => {
 
-    const { idusuario, idcontacto, gruposang, cobertura, histerenfmlia, observficha } = req.body;
+    const { idusuario, idcontacto, gruposang, cobertura, histenfermflia, observficha } = req.body;
 
     try {
         const user = await SystemUsers.findByPk(idusuario);
@@ -41,12 +41,18 @@ router.post('/', async (req, res) => {
         }
 
         if (user.rolmedico) {
-        updateData.histerenfmlia = histerenfmlia;
+        updateData.histenfermflia = histenfermflia;
         updateData.observficha = observficha;
         }
 
         if (user.rolpaciente && user.idcontacto === idcontacto) {
         updateData.cobertura = cobertura;
+        }
+
+        // Si no se puede guardar ningún campo
+        if (Object.keys(updateData).length === 0) {
+            return res.status(403).json({ message: 'No tiene permisos para modificar ningún campo', camposGuardados: [] });
+
         }
 
         const existingFicha = await FichaMedica.findOne({ where: { idcontacto } });
@@ -57,7 +63,10 @@ router.post('/', async (req, res) => {
         await FichaMedica.create({ idcontacto, ...updateData });
         }
 
-        res.json({ message: 'Ficha médica guardada correctamente' });
+        res.json({
+            message: 'Ficha médica guardada',
+            camposGuardados: Object.keys(updateData)
+        });
     } catch (error) {
         console.error('Error al guardar ficha médica:', error);
         res.status(500).json({ message: 'Error al guardar ficha médica' });
