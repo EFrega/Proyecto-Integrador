@@ -217,8 +217,12 @@ useEffect(() => {
     return (
         <div className="p-4 bg-white shadow rounded">
         
+        {usuarioActual && !usuarioActual.roles.rolpaciente && (
         <h3>Gestión de Fichas Médicas</h3>
+        )}
 
+        {/* oculta si el usuario es paciente o no tiene permisos */}
+        {usuarioActual && !usuarioActual.roles.rolpaciente && (
         <Row className="mb-3">
             <Col md={6}>
             <InputGroup>
@@ -241,8 +245,10 @@ useEffect(() => {
             </InputGroup>
             </Col>
         </Row>
+        )}
 
         <Row>
+            {usuarioActual && !usuarioActual.roles.rolpaciente && (
             <Col md={6}>
                 
                 
@@ -282,6 +288,7 @@ useEffect(() => {
                     </div>
                 )}
             </Col>
+            )}
         
 
         {contactoSeleccionado && (
@@ -309,25 +316,31 @@ useEffect(() => {
                 />
                 </Form.Group>
 
-                <Form.Group controlId="histenfermflia">
-                <Form.Label>Historial Familiar</Form.Label>
-                <Form.Control
-                    as="textarea"
-                    name="histenfermflia"
-                    value={formData.histenfermflia}
-                    onChange={handleChange}
-                />
-                </Form.Group>
+               {/* si el usuario es roladministrativo o rolsuperadmin no debe visualizar los campos de histenfermflia ni observficha*/}
+                {usuarioActual && !(usuarioActual.roles.roladministrativo || usuarioActual.roles.rolsuperadmin) && (
+                    <>
+                        <Form.Group controlId="histenfermflia">
+                            <Form.Label>Historial Familiar</Form.Label>
+                            <Form.Control
+                                as="textarea"
+                                name="histenfermflia"
+                                value={formData.histenfermflia}
+                                onChange={handleChange}
+                            />
+                        </Form.Group>
 
-                <Form.Group controlId="observficha">
-                <Form.Label>Observaciones</Form.Label>
-                <Form.Control
-                    as="textarea"
-                    name="observficha"
-                    value={formData.observficha}
-                    onChange={handleChange}
-                />
-                </Form.Group>
+                        <Form.Group controlId="observficha">
+                            <Form.Label>Observaciones</Form.Label>
+                            <Form.Control
+                                as="textarea"
+                                name="observficha"
+                                value={formData.observficha}
+                                onChange={handleChange}
+                            />
+                        </Form.Group>
+                    </>
+                )}
+
 
                 <Button className="mt-2" onClick={handleGuardar}>Guardar Ficha</Button>
             </Form>
