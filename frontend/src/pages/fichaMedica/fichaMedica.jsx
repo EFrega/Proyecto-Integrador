@@ -1,6 +1,4 @@
-// src/pages/fichaMedica.jsx
-
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { Form, Button, Container, Row, Col, InputGroup, Table } from 'react-bootstrap';
 
@@ -13,58 +11,76 @@ function FichaMedica() {
     const [formData, setFormData] = useState({
         gruposang: '',
         cobertura: '',
-        histerenfmlia: '',
+        histenfermflia: '',
         observficha: ''
     });
 
     const [usuarioActual, setUsuarioActual] = useState(null);
 
-    useEffect(() => {
-        axios.get(`${API}/contactos`)
-        .then(res => {
-            console.log('Contactos recibidos:', res.data);
-            setContactos(res.data);
-            setContactosFiltrados(res.data);
-        })
-        .catch(err => {
-            console.error('Error al obtener contactos:', err);
-        });
+    const cargarFicha = useCallback(async (idcontacto) => {
+        try {
+            const res = await axios.get(`${API}/ficha/${idcontacto}`);
+            setFormData(res.data || {
+                gruposang: '',
+                cobertura: '',
+                histenfermflia: '',
+                observficha: ''
+            });
+            setContactoSeleccionado({ idcontacto });
+        } catch (error) {
+            console.error('Error al cargar ficha:', error);
+            setFormData({
+                gruposang: '',
+                cobertura: '',
+                histenfermflia: '',
+                observficha: ''
+            });
+        }
+    }, [API]);
 
-        setUsuarioActual({ idusuario: 1, rolsuperadmin: true });
-    }, []);
+    useEffect(() => {
+        const usuarioGuardado = localStorage.getItem('usuario');
+        const rolesGuardados = localStorage.getItem('roles');
+        if (!usuarioGuardado || !rolesGuardados) {
+            alert('Debe iniciar sesión');
+            return;
+        }
+
+        const usuario = JSON.parse(usuarioGuardado);
+        const roles = JSON.parse(rolesGuardados);
+
+        console.log('Usuario:', usuario);
+        console.log('Roles:', roles);
+
+        setUsuarioActual({ ...usuario, roles });
+
+        if (roles.rolpaciente) {
+            cargarFicha(usuario.idcontacto);
+        } else {
+            axios.get(`${API}/contactos`)
+                .then(res => {
+                    setContactos(res.data);
+                    setContactosFiltrados(res.data);
+                })
+                .catch(err => {
+                    console.error('Error al obtener contactos:', err);
+                });
+        }
+    }, [API, cargarFicha]);
 
     const handleBuscar = (e) => {
         const valor = e.target.value;
         setBusqueda(valor);
 
         const filtrados = contactos.filter(c =>
-        `${c.nombre} ${c.apellido} ${c.docum}`.toLowerCase().includes(valor.toLowerCase())
+            `${c.nombre} ${c.apellido} ${c.docum}`.toLowerCase().includes(valor.toLowerCase())
         );
-        console.log('Contactos filtrados:', filtrados);
         setContactosFiltrados(filtrados);
     };
 
     const seleccionarContacto = async (contacto) => {
         setContactoSeleccionado(contacto);
-        try {
-        console.log('Buscando ficha para ID:', contacto.idcontacto);
-        const res = await axios.get(`/ficha/${contacto.idcontacto}`);
-        console.log('Ficha médica recibida:', res.data);
-        setFormData(res.data);
-        } catch (error) {
-        if (error.response && error.response.status === 404) {
-            console.log('No hay ficha médica para este contacto');
-            setFormData({
-            gruposang: '',
-            cobertura: '',
-            histerenfmlia: '',
-            observficha: ''
-            });
-        } else {
-            console.error('Error real al buscar ficha médica:', error);
-            alert('Error al consultar ficha médica');
-        }
-        }
+        cargarFicha(contacto.idcontacto);
     };
 
     const handleChange = (e) => {
@@ -76,116 +92,129 @@ function FichaMedica() {
         if (!contactoSeleccionado || !usuarioActual) return;
 
         try {
-        await axios.post('/ficha', {
-            idusuario: usuarioActual.idusuario,
-            idcontacto: contactoSeleccionado.idcontacto,
-            ...formData
-        });
+            const res = await axios.post(`${API}/ficha`, {
+                idusuario: usuarioActual.idusuario,
+                idcontacto: contactoSeleccionado.idcontacto,
+                ...formData
+            });
 
-        alert('Ficha médica guardada correctamente');
+            const { message, camposGuardados } = res.data;
+
+            if (!camposGuardados || camposGuardados.length === 0) {
+                alert(message || 'No tiene permisos para realizar cambios.');
+            } else if (camposGuardados.length < Object.keys(formData).length) {
+                alert(`${message || 'Algunos datos fueron guardados'}: ${camposGuardados.join(', ')}`);
+            } else {
+                alert(message || 'Ficha médica guardada correctamente.');
+            }
+
         } catch (err) {
-        console.error('Error al guardar ficha médica:', err);
-        alert('Error al guardar ficha médica');
+            console.error('Error al guardar ficha médica:', err);
+            alert('Error al guardar ficha médica');
         }
     };
 
     return (
         <Container>
-        <h3>Gestión de Fichas Médicas</h3>
+            <h3>Gestión de Fichas Médicas</h3>
 
-        <Row className="mb-3">
-            <Col md={6}>
-            <InputGroup>
-                <Form.Control
-                type="text"
-                placeholder="Buscar por nombre, apellido o documento"
-                value={busqueda}
-                onChange={handleBuscar}
-                />
-                <Button
-                variant="outline-secondary"
-                onClick={() => {
-                    setBusqueda('');
-                    setContactosFiltrados(contactos);
-                }}
-                >
-                Limpiar
-                </Button>
-            </InputGroup>
-            </Col>
-        </Row>
+            {usuarioActual && usuarioActual.roles && !usuarioActual.roles.rolpaciente && (
+                <>
+                    <Row className="mb-3">
+                        <Col md={6}>
+                            <InputGroup>
+                                <Form.Control
+                                    type="text"
+                                    placeholder="Buscar por nombre, apellido o documento"
+                                    value={busqueda}
+                                    onChange={handleBuscar}
+                                />
+                                <Button
+                                    variant="outline-secondary"
+                                    onClick={() => {
+                                        setBusqueda('');
+                                        setContactosFiltrados(contactos);
+                                    }}
+                                >
+                                    Limpiar
+                                </Button>
+                            </InputGroup>
+                        </Col>
+                    </Row>
 
-        <Table striped bordered hover>
-            <thead>
-            <tr>
-                <th>Nombre</th>
-                <th>Apellido</th>
-                <th>Documento</th>
-                <th>Acción</th>
-            </tr>
-            </thead>
-            <tbody>
-            {contactosFiltrados.map(contacto => (
-                <tr key={contacto.idcontacto}>
-                <td>{contacto.nombre}</td>
-                <td>{contacto.apellido}</td>
-                <td>{contacto.docum}</td>
-                <td>
-                    <Button onClick={() => seleccionarContacto(contacto)}>Seleccionar</Button>
-                </td>
-                </tr>
-            ))}
-            </tbody>
-        </Table>
+                    <Table striped bordered hover>
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Apellido</th>
+                                <th>Documento</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {contactosFiltrados.map(contacto => (
+                                <tr key={contacto.idcontacto}>
+                                    <td>{contacto.nombre}</td>
+                                    <td>{contacto.apellido}</td>
+                                    <td>{contacto.docum}</td>
+                                    <td>
+                                        <Button onClick={() => seleccionarContacto(contacto)}>Seleccionar</Button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </Table>
+                </>
+            )}
 
-        {contactoSeleccionado && (
-            <>
-            <h5>Ficha de: {contactoSeleccionado.nombre} {contactoSeleccionado.apellido}</h5>
-            <Form>
-                <Form.Group controlId="gruposang">
-                <Form.Label>Grupo Sanguíneo</Form.Label>
-                <Form.Control
-                    type="text"
-                    name="gruposang"
-                    value={formData.gruposang}
-                    onChange={handleChange}
-                />
-                </Form.Group>
+            {contactoSeleccionado && (
+                <>
+                    <h5>Ficha de: {contactoSeleccionado.nombre || 'Paciente'} {contactoSeleccionado.apellido || ''}</h5>
+                    <Form>
+                        <Form.Group controlId="gruposang">
+                            <Form.Label>Grupo Sanguíneo</Form.Label>
+                            <Form.Control
+                                type="text"
+                                name="gruposang"
+                                value={formData.gruposang}
+                                onChange={handleChange}
+                            />
+                        </Form.Group>
 
-                <Form.Group controlId="cobertura">
-                <Form.Label>Cobertura</Form.Label>
-                <Form.Control
-                    type="text"
-                    name="cobertura"
-                    value={formData.cobertura}
-                    onChange={handleChange}
-                />
-                </Form.Group>
+                        <Form.Group controlId="cobertura">
+                            <Form.Label>Cobertura</Form.Label>
+                            <Form.Control
+                                type="text"
+                                name="cobertura"
+                                value={formData.cobertura}
+                                onChange={handleChange}
+                            />
+                        </Form.Group>
 
-                <Form.Group controlId="histerenfmlia">
-                <Form.Label>Historial Familiar</Form.Label>
-                <Form.Control
-                    as="textarea"
-                    name="histerenfmlia"
-                    value={formData.histerenfmlia}
-                    onChange={handleChange}
-                />
-                </Form.Group>
+                        <Form.Group controlId="histenfermflia">
+                            <Form.Label>Historial Familiar</Form.Label>
+                            <Form.Control
+                                as="textarea"
+                                name="histenfermflia"
+                                value={formData.histenfermflia}
+                                onChange={handleChange}
+                            />
+                        </Form.Group>
 
-                <Form.Group controlId="observficha">
-                <Form.Label>Observaciones</Form.Label>
-                <Form.Control
-                    as="textarea"
-                    name="observficha"
-                    value={formData.observficha}
-                    onChange={handleChange}
-                />
-                </Form.Group>
+                        <Form.Group controlId="observficha">
+                            <Form.Label>Observaciones</Form.Label>
+                            <Form.Control
+                                as="textarea"
+                                name="observficha"
+                                value={formData.observficha}
+                                onChange={handleChange}
+                            />
+                        </Form.Group>
 
-                <Button className="mt-2" onClick={handleGuardar}>Guardar Ficha</Button>
-            </Form>
-            </>
-        )}
+                        <Button className="mt-2" onClick={handleGuardar}>Guardar Ficha</Button>
+                    </Form>
+                </>
+            )}
         </Container>
     );
 }
