@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import './login.css';
+import { Navbar, Container, Row, Col, Card, Form, Button, Alert, CardBody, FormLabel, FormControl, FormGroup } from 'react-bootstrap';
+
 const API = process.env.REACT_APP_API_URL;
 const Login = ({ setIsLoggedIn }) => {
     const [usuario, setUsuario] = useState('');
@@ -41,7 +43,7 @@ const Login = ({ setIsLoggedIn }) => {
 
             setIsLoggedIn(true);
 
-            alert('¡Login exitoso!');
+            //alert('¡Login exitoso!');
             setUsuario('');
             setContrasena('');
             navigate('/dashboard');
@@ -55,33 +57,79 @@ const Login = ({ setIsLoggedIn }) => {
     };
 
     return (
-        <div className="login-container">
-            <h2>Iniciar sesión</h2>
-            <form onSubmit={handleSubmit}>
-                <div>
-                    <label>Usuario</label>
-                    <input
-                        type="text"
-                        value={usuario}
-                        onChange={(e) => setUsuario(e.target.value)}
-                        required
-                    />
-                </div>
-                <div>
-                    <label>Contraseña</label>
-                    <input
-                        type="password"
-                        value={contrasena}
-                        onChange={(e) => setContrasena(e.target.value)}
-                        required
-                    />
-                </div>
-                {error && <p className="error">{error}</p>}
-                <div>
-                    <button type="submit">Iniciar sesión</button>
-                </div>
-            </form>
-            <p>¿No tienes cuenta? <Link to="/register">Registrarse</Link></p>
+        <div className='d-flex min-vh-100 flex-column'>
+            <Navbar expand="lg" className='shadow bg-light px-4 py-2 justify-content-between'>
+                <Navbar.Brand className='text-primary'>
+                    <img src='logo.png' alt='logo' width={30} height={30} fluid className='d-inline-block align-top' />{' '}
+                    Clínica<b>Médica</b>
+                </Navbar.Brand>
+            </Navbar>
+            <div className='login-wrapper'>
+                <Container>
+                    <Row className='justify-content-center'>
+                        <Col xs={12} sm={8} md={6} lg={4}>
+                            <Card className='p-4 shadow bg-white bg-opacity-75 border-0 rounded'>
+                                <CardBody>
+                                    <h3 className='text-center mb-4'>Inicie sesión</h3>
+                                    <Form onSubmit={handleSubmit}>
+                                        <FormGroup className='mb-3' controlId='formUsuario'>
+                                            <FormLabel>Usuario</FormLabel>
+                                            <FormControl
+                                                type='text'
+                                                value={usuario}
+                                                onChange={(e) => setUsuario(e.target.value)}
+                                                placeholder='Ingrese su usuario'
+                                                required />
+                                        </FormGroup>
+                                        <FormGroup className='mb-3' controlId='formContrasena'>
+                                            <FormLabel>Contraseña</FormLabel>
+                                            <FormControl
+                                                type='password'
+                                                value={contrasena}
+                                                onChange={(e) => setContrasena(e.target.value)}
+                                                placeholder='Ingrese su contraseña'
+                                                required />
+                                        </FormGroup>
+                                        <Button type='submit' variant='primary' className='w-100'>Iniciar sesión</Button>
+                                    </Form>
+                                    <div className='text-center mt-3'>
+                                        {error && <Alert variant='danger'>{error} </Alert>}
+                                    </div>
+                                    <div className='text-center mt-3'>
+                                        ¿No tiene una cuenta?{' '} <Link to="/register" className="text-decoration-none">Registrese</Link>
+                                    </div>
+                                </CardBody>
+                            </Card>
+                        </Col>
+                    </Row>
+                </Container>
+            </div>
+            <footer className="text-bg-dark py-4 mt-auto">
+                <Container>
+                    <Row>
+                        <Col md={4}>
+                            <h5><img src="logo.png" alt='logo' width={30} height={30} fluid className="d-inline-block align-top" />{' '} Clínica<b>Médica</b></h5>
+                        </Col>
+                        <Col md={4}>
+                            <p><b>Información Institucional</b></p>
+                            <p>Especialidades médicas</p>
+                            <p>Calidad y seguridad del paciente</p>
+                        </Col>
+                        <Col md={4}>
+                            <p><b>Información Útil</b></p>
+                            <p>Coberturas médicas</p>
+                            <p>Solicite turno</p>
+                            <p>Preguntas frecuentes</p>
+                        </Col>
+                    </Row>
+                    <Row className="text-center mt-3">
+                        <Col>
+                            <small>©2025 Diseñado y desarrollado por <a className="text-info text-decoration-underline" href="https://www.linkedin.com/company/hifive-developers/" target="_blank" rel="noreferrer">HiFive Developers</a></small>
+                        </Col>
+                    </Row>
+                </Container>
+            </footer>
+
         </div>
     );
 };

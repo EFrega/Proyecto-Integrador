@@ -1,51 +1,14 @@
-/* src/components/login/Login.css */
-
-/* Contenedor principal para centrar todo en la pantalla */
-.login-container {
-    display: flex;                   /* Usamos Flexbox para centrar */
-    justify-content: center;         /* Centra horizontalmente */
-    align-items: center;             /* Centra verticalmente */
-    height: 100vh;                   /* Establece la altura al 100% de la vista */
-    background-color: #f4f4f9;       /* Fondo suave */
-    flex-direction: column;          /* Asegura que los elementos estén apilados verticalmente */
-}
-
-form {
-    background-color: white;         /* Fondo blanco para el formulario */
-    padding: 20px;                   /* Espaciado interno */
-    border-radius: 8px;              /* Bordes redondeados */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Sombra sutil */
-    width: 300px;                    /* Ancho del formulario */
-}
-
-h2 {
-    text-align: center;              /* Centra el título */
-    margin-bottom: 20px;             /* Espacio abajo del título */
-}
-
-input {
-    width: 90%;                     /* El input ocupa todo el ancho del formulario */
-    padding: 10px;                   /* Espaciado interno */
-    margin-bottom: 15px;             /* Espacio entre campos */
-    border: 1px solid #ccc;          /* Borde suave */
-    border-radius: 4px;              /* Bordes redondeados */
-}
-
-button {
-    width: 100%;                     /* El botón ocupa todo el ancho del formulario */
-    padding: 10px;                   /* Espaciado interno */
-    background-color: #4CAF50;       /* Color de fondo */
-    color: white;                    /* Texto blanco */
-    border: none;                    /* Sin borde */
-    border-radius: 4px;              /* Bordes redondeados */
-    cursor: pointer;                 /* Cursor de mano */
-}
-
-button:hover {
-    background-color: #45a049;       /* Cambio de color al pasar el mouse */
-}
-
-p {
-    color: red;                      /* Color rojo para mostrar errores */
-    text-align: center;              /* Centra el mensaje de error */
+/* src/pages/login/login.css */
+.login-wrapper {
+    background-color: #f8f9fa;
+    background: url('../../assets/cm-03.jpg');
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
 }
