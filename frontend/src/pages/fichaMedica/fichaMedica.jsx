@@ -1,6 +1,6 @@
 // src/pages/fichaMedica.jsx
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { Form, Button, Container, Row, Col, InputGroup, Table, Pagination } from 'react-bootstrap';
 
@@ -13,7 +13,7 @@ function FichaMedica() {
     const [formData, setFormData] = useState({
         gruposang: '',
         cobertura: '',
-        histerenfmlia: '',
+        histenfermflia: '',
         observficha: ''
     });
 
@@ -23,19 +23,66 @@ function FichaMedica() {
 
     const [usuarioActual, setUsuarioActual] = useState(null);
 
-    useEffect(() => {
-        axios.get(`${API}/contactos`)
-        .then(res => {
-            console.log('Contactos recibidos:', res.data);
-            setContactos(res.data);
-            setContactosFiltrados(res.data);
-        })
-        .catch(err => {
-            console.error('Error al obtener contactos:', err);
-        });
+    // useCallback para memorizar una función que carga una ficha médica por ID de contacto
+    // La función se vuelve a crear solo cuando cambia la variable de entorno API
+    // Se utiliza esta técnica para evitar que se cree una nueva función en cada renderizado
+    // y así evitar que se dispare useEffect innecesariamente
+    const cargarFicha = useCallback(async (idcontacto) => {
+        try {
+            // Se obtiene la ficha médica por ID de contacto
+            const res = await axios.get(`${API}/ficha/${idcontacto}`);
+            // Se actualiza el estado con la ficha médica obtenida
+            // Si no se obtiene nada, se establece un objeto vacío
+            setFormData(res.data || {
+                gruposang: '',
+                cobertura: '',
+                histenfermflia: '',
+                observficha: ''
+            });
+            // Se actualiza el estado con el contacto seleccionado
+            setContactoSeleccionado({ idcontacto });
+        } catch (error) {
+            // Si ocurre un error, se muestra en consola
+            console.error('Error al cargar ficha:', error);
+            // Se establece el estado con un objeto vacío
+            setFormData({
+                gruposang: '',
+                cobertura: '',
+                histenfermflia: '',
+                observficha: ''
+            });
+        }
+    }, [API]);
 
-        setUsuarioActual({ idusuario: 1, rolsuperadmin: true });
-    }, []);
+    useEffect(() => {
+        const usuarioGuardado = localStorage.getItem('usuario');
+        const rolesGuardados = localStorage.getItem('roles');
+        if (!usuarioGuardado || !rolesGuardados) {
+            alert('Debe iniciar sesión');
+            return;
+        }
+
+        const usuario = JSON.parse(usuarioGuardado);
+        const roles = JSON.parse(rolesGuardados);
+
+        console.log('Usuario:', usuario);
+        console.log('Roles:', roles);
+
+        setUsuarioActual({ ...usuario, roles });
+
+        if (roles.rolpaciente) {
+            cargarFicha(usuario.idcontacto);
+        } else {
+            axios.get(`${API}/contactos`)
+                .then(res => {
+                    setContactos(res.data);
+                    setContactosFiltrados(res.data);
+                })
+                .catch(err => {
+                    console.error('Error al obtener contactos:', err);
+                });
+        }
+    }, [API, cargarFicha]);
 
     const handleBuscar = (e) => {
         const valor = e.target.value;
@@ -44,32 +91,13 @@ function FichaMedica() {
         const filtrados = contactos.filter(c =>
         `${c.nombre} ${c.apellido} ${c.docum}`.toLowerCase().includes(valor.toLowerCase())
         );
-        console.log('Contactos filtrados:', filtrados);
         setContactosFiltrados(filtrados);
         setCurrentPage(1); // Reset to first page when searching
     };
 
     const seleccionarContacto = async (contacto) => {
         setContactoSeleccionado(contacto);
-        try {
-        console.log('Buscando ficha para ID:', contacto.idcontacto);
-        const res = await axios.get(`/ficha/${contacto.idcontacto}`);
-        console.log('Ficha médica recibida:', res.data);
-        setFormData(res.data);
-        } catch (error) {
-        if (error.response && error.response.status === 404) {
-            console.log('No hay ficha médica para este contacto');
-            setFormData({
-            gruposang: '',
-            cobertura: '',
-            histerenfmlia: '',
-            observficha: ''
-            });
-        } else {
-            console.error('Error real al buscar ficha médica:', error);
-            alert('Error al consultar ficha médica');
-        }
-        }
+        cargarFicha(contacto.idcontacto);
     };
 
     const handleChange = (e) => {
@@ -81,16 +109,24 @@ function FichaMedica() {
         if (!contactoSeleccionado || !usuarioActual) return;
 
         try {
-        await axios.post('/ficha', {
-            idusuario: usuarioActual.idusuario,
-            idcontacto: contactoSeleccionado.idcontacto,
-            ...formData
-        });
+            const res = await axios.post(`${API}/ficha`, {
+                idusuario: usuarioActual.idusuario,
+                idcontacto: contactoSeleccionado.idcontacto,
+                ...formData
+            });
 
-        alert('Ficha médica guardada correctamente');
+            const { message, camposGuardados } = res.data;
+
+            if (!camposGuardados || camposGuardados.length === 0) {
+                alert(message || 'No tiene permisos para realizar cambios.');
+            } else if (camposGuardados.length < Object.keys(formData).length) {
+                alert(`${message || 'Algunos datos fueron guardados'}: ${camposGuardados.join(', ')}`);
+            } else {
+                alert(message || 'Ficha médica guardada correctamente.');
+            }
         } catch (err) {
-        console.error('Error al guardar ficha médica:', err);
-        alert('Error al guardar ficha médica');
+            console.error('Error al guardar ficha médica:', err);
+            alert('Error al guardar ficha médica');
         }
     };
 
@@ -246,7 +282,7 @@ function FichaMedica() {
         {contactoSeleccionado && (
             <>
             <Col md={6} className="px-5 mt-0">
-            <h5 className="mt-0">Ficha de: {contactoSeleccionado.nombre} {contactoSeleccionado.apellido}</h5>
+            <h5>Ficha de: {contactoSeleccionado.nombre || 'Paciente'} {contactoSeleccionado.apellido || ''}</h5>
             <Form className="w-100">
                 <Form.Group controlId="gruposang">
                 <Form.Label>Grupo Sanguíneo</Form.Label>
@@ -268,12 +304,12 @@ function FichaMedica() {
                 />
                 </Form.Group>
 
-                <Form.Group controlId="histerenfmlia">
+                <Form.Group controlId="histenfermflia">
                 <Form.Label>Historial Familiar</Form.Label>
                 <Form.Control
                     as="textarea"
-                    name="histerenfmlia"
-                    value={formData.histerenfmlia}
+                    name="histenfermflia"
+                    value={formData.histenfermflia}
                     onChange={handleChange}
                 />
                 </Form.Group>
