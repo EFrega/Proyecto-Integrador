@@ -182,6 +182,19 @@ PROYECTO-INTEGRADOR/
 
 ---
 
+## Usuarios del sistema en la DB remota:
+
+-  Paciente: 
+    pgrifin@example.com / password
+-  Medico: 
+    fgordon@example.com / password 
+-  Tester:
+    test@test.com / 123456
+-  Superadmin:
+    admin / password
+
+---
+
 ## ✨ Autor
 
 Proyecto desarrollado como parte del Ciclo Formativo en Desarrollo de Software por **HiFive Developers**.
