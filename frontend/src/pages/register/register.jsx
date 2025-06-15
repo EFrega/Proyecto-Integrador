@@ -109,38 +109,38 @@ const Registro = () => {
                                         <FormControl type="date" name="fechanacim" placeholder="Fecha de nacimiento" onChange={handleChange} required />
                                     </FormGroup> */}
                                     <FormGroup as={Col} md="6" className='mb-3' controlId='formDireccion'>
-                                        {/* <FormLabel>Dirección</FormLabel> */}
+                                        <FormLabel className='visually-hidden'>Dirección</FormLabel>
                                         <FormControl name="direccion" placeholder="Dirección" onChange={handleChange} required />
                                     </FormGroup>
                                 </Row>
-                                <Row className='mb-3'>
-                                    <FormGroup as={Col} md="6" className="mb-3" controlId='formTelContacto'>
-                                        {/* <FormLabel>Teléfono de contacto</FormLabel> */}
+                                <Row className='mb-1'>
+                                    <FormGroup as={Col} md="6" className="mb-1" controlId='formTelContacto'>
+                                        <FormLabel className='visually-hidden'>Teléfono de contacto</FormLabel>
                                         <FormControl name="telcontacto" placeholder="Tel. contacto" onChange={handleChange} required />
                                     </FormGroup>
-                                    <FormGroup as={Col} md="6" className="mb-3" controlId='formTelEmerg'>
-                                        {/* <FormLabel>Teléfono de emergencia</FormLabel> */}
+                                    <FormGroup as={Col} md="6" className="mb-1" controlId='formTelEmerg'>
+                                        <FormLabel className='visually-hidden'>Teléfono de emergencia</FormLabel>
                                         <FormControl name="telemergencia" placeholder="Tel. emergencia" onChange={handleChange} />
                                     </FormGroup>
                                 </Row>
                                 <hr />
                                 <Row className='mb-3'>
                                     <FormGroup as={Col} md="6" className="mb-3" controlId='formEmail'>
-                                        {/* <FormLabel>Email</FormLabel> */}
+                                        <FormLabel className='visually-hidden'>Email</FormLabel>
                                         <FormControl type="email" name="correo" placeholder="Email" onChange={handleChange} required />
                                     </FormGroup>
                                     <FormGroup as={Col} md="6" className="mb-3" controlId='formConfEmail'>
-                                        {/* <FormLabel>Confirmar email</FormLabel> */}
+                                        <FormLabel className='visually-hidden'>Confirmar email</FormLabel>
                                         <FormControl type="email" name="confirmarCorreo" placeholder="Confirmar email" onChange={handleChange} required />
                                     </FormGroup>
                                 </Row>
                                 <Row className='mb-3'>
                                     <FormGroup as={Col} md="6" className="mb-3" controlId='formContrasenaReg'>
-                                        {/* <FormLabel>Contraseña</FormLabel> */}
+                                        <FormLabel className='visually-hidden'>Contraseña</FormLabel>
                                         <FormControl type="password" name="contrasena" placeholder="Contraseña" onChange={handleChange} required />
                                     </FormGroup>
                                     <FormGroup as={Col} md="6" className="mb-3" controlId='formConfContrasenaReg'>
-                                        {/* <FormLabel>Confirmar contraseña</FormLabel> */}
+                                        <FormLabel className='visually-hidden'>Confirmar contraseña</FormLabel>
                                         <FormControl type="password" name="confirmarContrasena" placeholder="Confirmar contraseña" onChange={handleChange} required />
                                     </FormGroup>
                                 </Row>
