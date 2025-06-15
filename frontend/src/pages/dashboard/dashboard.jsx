@@ -21,6 +21,8 @@ import Agendas from '../agendas/agendas';
 import AgendaRegular from '../agendaRegular/agendaRegular';
 import Chat from '../chat/chat';
 import FichaMedica from '../fichaMedica/fichaMedica';
+// Importar el nuevo componente
+import VinTurnoHome from '../vinTurnoHome/vinturnohome';
 
 const Dashboard = ({ setIsLoggedIn, tieneMensajesNuevos, setTieneMensajesNuevos }) => {
   const [visibleIcons, setVisibleIcons] = useState([]);
@@ -31,6 +33,23 @@ const Dashboard = ({ setIsLoggedIn, tieneMensajesNuevos, setTieneMensajesNuevos 
     localStorage.clear();
     setIsLoggedIn(false);
     window.location.href = '/';
+  };
+
+  // Funciones para manejar las acciones de los turnos
+  const handleCancelarTurno = (turnoId) => {
+    console.log('Cancelar turno:', turnoId);
+    // Aquí iría la lógica para cancelar el turno
+  };
+
+  const handleModificarTurno = (turnoId) => {
+    console.log('Modificar turno:', turnoId);
+    // Aquí iría la lógica para modificar el turno
+  };
+
+  const handleConversar = (turnoId) => {
+    console.log('Iniciar conversación:', turnoId);
+    // Aquí iría la lógica para iniciar la conversación
+    setVista('chat');
   };
 
   useEffect(() => {
@@ -145,15 +164,6 @@ const Dashboard = ({ setIsLoggedIn, tieneMensajesNuevos, setTieneMensajesNuevos 
 
           <Container fluid className="flex-grow-1 p-4 bg-light">
           <div className="">  
-            {/* Esta sección renderiza el contenido correspondiente según la vista seleccionada */}
-            {/* Si vista es 'roles', se renderiza el componente Roles */}
-            {/* Si vista es 'servicios', se renderiza el componente CargarServicio */}
-            {/* Si vista es 'excepcionesProf', se renderiza el componente ExcepcionesProf */}
-            {/* Si vista es 'agendas', se renderiza el componente Agendas */}
-            {/* Si vista es 'agendaRegular', se renderiza el componente AgendaRegular */}
-            {/* Si vista es 'fichaMedica', se renderiza el componente FichaMedica */}
-            {/* Si vista es 'chat', se renderiza el componente Chat y se le pasa como prop la función setTieneMensajesNuevos */}
-            {/* Si no se cumple ninguna de las condiciones anteriores, se renderiza un título con el texto "Inicio" */}
             {vista === 'roles' ? (
               <Roles />
             ) : vista === 'servicios' ? (
@@ -172,8 +182,8 @@ const Dashboard = ({ setIsLoggedIn, tieneMensajesNuevos, setTieneMensajesNuevos 
               <div>
                 <h4 className="text-primary">Inicio</h4>
                 <Row className="g-4">
-                  {/* Tarjeta Consulta */}
-                  <Col md={4}>
+                  {/* Tarjeta Consulta fija */}
+                  {/* <Col md={4}>
                     <div className="border rounded-3 shadow-sm bg-white p-3 h-100">
                       <div className="d-flex align-items-center mb-2">
                         <div className="me-2">
@@ -195,39 +205,44 @@ const Dashboard = ({ setIsLoggedIn, tieneMensajesNuevos, setTieneMensajesNuevos 
                         </Button>
                       </div>
                     </div>
-                  </Col>
-
-                  {/* Tarjeta 1 */}
-                  <Col md={4}>
-                    <div className="border rounded-3 shadow-sm bg-white p-3 h-100">
-                      <div className="d-flex align-items-center mb-2">
-                        <div className="me-2">
-                          <i className="bi bi-calendar fs-4 text-primary"></i>
-                        </div>
-                        <strong>Presencial</strong>
-                        <div className="ms-auto">
-                          <i className="bi bi-chevron-right"></i>
-                        </div>
-                      </div>
-                      <div className="mb-2">
-                        <div className="fw-semibold">Nombre especialista</div>
-                        <div className="text-muted small">Especialidad</div>
-                        <div className="text-muted small">DD NN de MM AAAA hh:mm</div>
-                      </div>
-                      <div className="d-flex gap-2">
-                        <Button variant="outline-primary" className="flex-fill">
-                          <i className="bi bi-x-circle me-1"></i> Cancelar
-                        </Button>
-                        <Button variant="outline-primary" className="flex-fill">
-                          <i className="bi bi-pencil me-1"></i> Modificar
-                        </Button>
-                      </div>
-                    </div>
-                  </Col>
+                  </Col> */}
 
 
+                  {/* Usando el componente VinTurnoHome para una consulta */}
+                  <VinTurnoHome 
+                    tipo="Consulta"
+                    icono="bi bi-chat-left-dots"
+                    nombreEspecialista="Dr. García"
+                    especialidad="Cardiología"
+                    fecha="15 Jun de 2025 14:30"
+                    tipoTurno="consulta"
+                    onConversar={() => handleConversar('turno1')}
+                  />
 
-                  
+                  {/* Usando el componente VinTurnoHome para un turno presencial */}
+                  <VinTurnoHome 
+                    tipo="Presencial"
+                    icono="bi bi-calendar"
+                    nombreEspecialista="Dra. Martínez"
+                    especialidad="Dermatología"
+                    fecha="16 Jun de 2025 10:00"
+                    tipoTurno="presencial"
+                    onCancelar={() => handleCancelarTurno('turno2')}
+                    onModificar={() => handleModificarTurno('turno2')}
+                  />
+
+                  {/* Otro ejemplo con turno próximo pero con borde primary agregado */}
+                  <VinTurnoHome 
+                    tipo="Presencial"
+                    icono="bi bi-calendar"
+                    nombreEspecialista="Dr. López"
+                    especialidad="Traumatología"
+                    fecha="17 Jun de 2025 09:15"
+                    tipoTurno="presencial"
+                    className="border-primary"
+                    onCancelar={() => handleCancelarTurno('turno3')}
+                    onModificar={() => handleModificarTurno('turno3')}
+                  />
                 </Row>
               </div>
             )}

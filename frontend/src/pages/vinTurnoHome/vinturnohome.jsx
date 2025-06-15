@@ -35,24 +35,24 @@ const VinTurnoHome = ({
         {tipoTurno === "consulta" ? (
           <div className="d-flex">
             <Button 
-              variant="outline-primary" 
+              variant="outline-secondary" 
               className="flex-fill"
               onClick={onConversar}
             >
-              <i className="bi bi-chat-left-text me-1"></i> Conversar
+              <i className="bi bi-chat-left-text me-1"></i> Chatear
             </Button>
           </div>
         ) : (
           <div className="d-flex gap-2">
             <Button 
-              variant="outline-primary" 
+              variant="outline-danger" 
               className="flex-fill"
               onClick={onCancelar}
             >
               <i className="bi bi-x-circle me-1"></i> Cancelar
             </Button>
             <Button 
-              variant="outline-primary" 
+              variant="outline-secondary" 
               className="flex-fill"
               onClick={onModificar}
             >
