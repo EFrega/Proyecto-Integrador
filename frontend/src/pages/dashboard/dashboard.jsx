@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Container, Navbar, Nav } from 'react-bootstrap';
+import { Container, Navbar, Nav, Row, Col, Button } from 'react-bootstrap';
 import {
   FaHome,
   FaCalendarAlt,
@@ -144,6 +144,16 @@ const Dashboard = ({ setIsLoggedIn, tieneMensajesNuevos, setTieneMensajesNuevos 
           </Navbar>
 
           <Container fluid className="flex-grow-1 p-4 bg-light">
+          <div className="">  
+            {/* Esta sección renderiza el contenido correspondiente según la vista seleccionada */}
+            {/* Si vista es 'roles', se renderiza el componente Roles */}
+            {/* Si vista es 'servicios', se renderiza el componente CargarServicio */}
+            {/* Si vista es 'excepcionesProf', se renderiza el componente ExcepcionesProf */}
+            {/* Si vista es 'agendas', se renderiza el componente Agendas */}
+            {/* Si vista es 'agendaRegular', se renderiza el componente AgendaRegular */}
+            {/* Si vista es 'fichaMedica', se renderiza el componente FichaMedica */}
+            {/* Si vista es 'chat', se renderiza el componente Chat y se le pasa como prop la función setTieneMensajesNuevos */}
+            {/* Si no se cumple ninguna de las condiciones anteriores, se renderiza un título con el texto "Inicio" */}
             {vista === 'roles' ? (
               <Roles />
             ) : vista === 'servicios' ? (
@@ -159,8 +169,69 @@ const Dashboard = ({ setIsLoggedIn, tieneMensajesNuevos, setTieneMensajesNuevos 
             ) : vista === 'chat' ? (
               <Chat setTieneMensajesNuevos={setTieneMensajesNuevos} />
             ) : (
-              <h4 className="text-primary">Inicio</h4>
+              <div>
+                <h4 className="text-primary">Inicio</h4>
+                <Row className="g-4">
+                  {/* Tarjeta Consulta */}
+                  <Col md={4}>
+                    <div className="border rounded-3 shadow-sm bg-white p-3 h-100">
+                      <div className="d-flex align-items-center mb-2">
+                        <div className="me-2">
+                          <i className="bi bi-chat-left-dots fs-4 text-primary"></i>
+                        </div>
+                        <strong>Consulta</strong>
+                        <div className="ms-auto">
+                          <i className="bi bi-chevron-right"></i>
+                        </div>
+                      </div>
+                      <div className="mb-2">
+                        <div className="fw-semibold">Nombre especialista</div>
+                        <div className="text-muted small">Especialidad</div>
+                        <div className="text-muted small">DD NN de MM AAAA hh:mm</div>
+                      </div>
+                      <div className="d-flex">
+                        <Button variant="outline-primary" className="flex-fill">
+                          <i className="bi bi-chat-left-text me-1"></i> Conversar
+                        </Button>
+                      </div>
+                    </div>
+                  </Col>
+
+                  {/* Tarjeta 1 */}
+                  <Col md={4}>
+                    <div className="border rounded-3 shadow-sm bg-white p-3 h-100">
+                      <div className="d-flex align-items-center mb-2">
+                        <div className="me-2">
+                          <i className="bi bi-calendar fs-4 text-primary"></i>
+                        </div>
+                        <strong>Presencial</strong>
+                        <div className="ms-auto">
+                          <i className="bi bi-chevron-right"></i>
+                        </div>
+                      </div>
+                      <div className="mb-2">
+                        <div className="fw-semibold">Nombre especialista</div>
+                        <div className="text-muted small">Especialidad</div>
+                        <div className="text-muted small">DD NN de MM AAAA hh:mm</div>
+                      </div>
+                      <div className="d-flex gap-2">
+                        <Button variant="outline-primary" className="flex-fill">
+                          <i className="bi bi-x-circle me-1"></i> Cancelar
+                        </Button>
+                        <Button variant="outline-primary" className="flex-fill">
+                          <i className="bi bi-pencil me-1"></i> Modificar
+                        </Button>
+                      </div>
+                    </div>
+                  </Col>
+
+
+
+                  
+                </Row>
+              </div>
             )}
+          </div>
           </Container>
         </div>
       </div>
