@@ -70,10 +70,10 @@ const Login = ({ setIsLoggedIn }) => {
                         <Col xs={12} sm={8} md={6} lg={4}>
                             <Card className='p-4 shadow bg-white bg-opacity-75 border-0 rounded'>
                                 <CardBody>
-                                    <h3 className='text-center mb-4'>Inicie sesión</h3>
+                                    <h3 className='text-center mb-5'>Inicie sesión</h3>
                                     <Form onSubmit={handleSubmit}>
-                                        <FormGroup className='mb-3' controlId='formUsuario'>
-                                            <FormLabel>Usuario</FormLabel>
+                                        <FormGroup className='mb-4' controlId='formUsuario'>
+                                            <FormLabel className='visually-hidden'>Usuario</FormLabel>
                                             <FormControl
                                                 type='text'
                                                 value={usuario}
@@ -81,8 +81,8 @@ const Login = ({ setIsLoggedIn }) => {
                                                 placeholder='Ingrese su usuario'
                                                 required />
                                         </FormGroup>
-                                        <FormGroup className='mb-3' controlId='formContrasena'>
-                                            <FormLabel>Contraseña</FormLabel>
+                                        <FormGroup className='mb-4' controlId='formContrasena'>
+                                            <FormLabel className='visually-hidden'>Contraseña</FormLabel>
                                             <FormControl
                                                 type='password'
                                                 value={contrasena}
