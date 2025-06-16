@@ -134,10 +134,10 @@ const cargarTurnos = useCallback(async () => {
       allowedIds = ['home', 'calendar', 'agendaRegular', 'file', 'fichaMedica','folder', 'servicios', 'turnos', 'misTurnos', 'excepcionesProf'];
     } else if (bool(parsedRoles.roladministrativo)) {
       allowedIds = ['home', 'calendar', 'agendaRegular', 'fichaMedica','servicios', 'turnos', 'misTurnos', 'excepcionesProf'];
-    } else if (bool(parsedRoles.rolmedico) || bool(parsedRoles.rolpaciente)) {
+    } else if (bool(parsedRoles.rolpaciente)) {
       allowedIds = ['home', 'comments', 'fichaMedica', 'turnos', 'misTurnos'];
-    } else {
-      allowedIds = ['home', 'comments','fichaMedica'];
+    } else if (bool(parsedRoles.rolmedico)) {
+      allowedIds = ['home', 'comments', 'fichaMedica'];
     }
 
     const filteredIcons = allIcons.filter(icon => allowedIds.includes(icon.id));
