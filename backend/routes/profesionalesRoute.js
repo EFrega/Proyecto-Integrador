@@ -63,5 +63,25 @@ router.get('/', async (req, res) => {
   }
 });
 
+router.get('/por-servicio/:idservicio', async (req, res) => {
+  const { idservicio } = req.params;
+
+  try {
+    const [result] = await sequelize.query(`
+      SELECT p.idprofesional, p.matricula, c.nombre, c.apellido
+      FROM Profesionales p
+      JOIN Contactos c ON p.idcontacto = c.idcontacto
+      JOIN ProfServicios ps ON ps.idprofesional = p.idprofesional
+      WHERE ps.idservicio = ${idservicio}
+      AND ps.activo <> 0
+      AND p.activo <> 0
+    `);
+
+    res.json(result);
+  } catch (error) {
+    console.error('Error al obtener profesionales por servicio:', error);
+    res.status(500).json({ error: 'Error al obtener profesionales por servicio' });
+  }
+});
 
 module.exports = router;
