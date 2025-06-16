@@ -9,14 +9,25 @@ const MisTurnosAdmin = () => {
   const [turnos, setTurnos] = useState([]);
   const [busquedaPaciente, setBusquedaPaciente] = useState('');
 
+  const [servicios, setServicios] = useState([]);
+  const [idServicioSel, setIdServicioSel] = useState('');
+  const [profesionales, setProfesionales] = useState([]);
+  const [idProfesionalSel, setIdProfesionalSel] = useState('');
+
   useEffect(() => {
     axios.get(`${API}/contactos?rolusuario=rolmedico`).then(res => setPacientes(res.data));
+    axios.get(`${API}/servicios`).then(res => setServicios(res.data));
   }, [API]);
 
   const cargarTurnosPaciente = async () => {
     if (!pacienteSel) return;
 
-    const res = await axios.get(`${API}/turnos/mis-turnos/${pacienteSel.idcontacto}`);
+    let url = `${API}/turnos/mis-turnos/${pacienteSel.idcontacto}`;
+    if (idProfesionalSel) {
+      url += `?idprofesional=${idProfesionalSel}`;
+    }
+
+    const res = await axios.get(url);
     setTurnos(res.data);
   };
 
@@ -29,6 +40,17 @@ const MisTurnosAdmin = () => {
       cargarTurnosPaciente();
     } catch (err) {
       alert(err.response?.data?.message || 'Error al cancelar turno');
+    }
+  };
+
+  const handleServicioChange = async (idservicio) => {
+    setIdServicioSel(idservicio);
+    setIdProfesionalSel('');
+    if (idservicio) {
+      const res = await axios.get(`${API}/profesionales/por-servicio/${idservicio}`);
+      setProfesionales(res.data);
+    } else {
+      setProfesionales([]);
     }
   };
 
@@ -51,9 +73,7 @@ const MisTurnosAdmin = () => {
             />
             <Button
               variant="outline-secondary"
-              onClick={() => {
-                setBusquedaPaciente('');
-              }}
+              onClick={() => setBusquedaPaciente('')}
             >
               Limpiar
             </Button>
@@ -71,7 +91,7 @@ const MisTurnosAdmin = () => {
               style={{ cursor: 'pointer' }}
               onClick={() => {
                 setPacienteSel(p);
-                setTurnos([]); // limpiar antes de cargar nuevos turnos
+                setTurnos([]);
               }}
             >
               {p.nombre} {p.apellido} - {p.docum}
@@ -82,9 +102,35 @@ const MisTurnosAdmin = () => {
 
       {pacienteSel && (
         <>
-          <h5>Turnos reservados de {pacienteSel.nombre} {pacienteSel.apellido}</h5>
-          <Button className="mb-3" onClick={cargarTurnosPaciente}>Ver Turnos</Button>
+          <hr />
+          <Row>
+            <Col md={4}>
+              <Form.Label>Servicio</Form.Label>
+              <Form.Select value={idServicioSel} onChange={(e) => handleServicioChange(e.target.value)}>
+                <option value="">Seleccione un servicio</option>
+                {servicios.filter(s => s.activo).map(s => (
+                  <option key={s.idservicio} value={s.idservicio}>{s.nombre}</option>
+                ))}
+              </Form.Select>
+            </Col>
+            <Col md={4}>
+              <Form.Label>Profesional</Form.Label>
+              <Form.Select value={idProfesionalSel} onChange={(e) => setIdProfesionalSel(e.target.value)}>
+                <option value="">Seleccione un profesional</option>
+                {profesionales.map(p => (
+                  <option key={p.idprofesional} value={p.idprofesional}>
+                    {p.nombre} {p.apellido} - {p.matricula}
+                  </option>
+                ))}
+              </Form.Select>
+            </Col>
+            <Col md={4} className="d-flex align-items-end">
+              <Button onClick={cargarTurnosPaciente}>Ver Turnos</Button>
+            </Col>
+          </Row>
 
+          <hr />
+          <h5>Turnos reservados de {pacienteSel.nombre} {pacienteSel.apellido}</h5>
           {turnos.length === 0 ? (
             <p>No tiene turnos reservados.</p>
           ) : (

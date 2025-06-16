@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Form, Button, Container, Row, Col, Card, InputGroup } from 'react-bootstrap';
 
+
 const ReservaTurnosAdmin = () => {
   const API = process.env.REACT_APP_API_URL;
 
@@ -22,7 +23,6 @@ const ReservaTurnosAdmin = () => {
 
   useEffect(() => {
     axios.get(`${API}/servicios`).then(res => setServicios(res.data));
-    axios.get(`${API}/profesionales`).then(res => setProfesionales(res.data));
     axios.get(`${API}/contactos?rolusuario=rolmedico`).then(res => setPacientes(res.data)); // pedir pacientes
   }, [API]);
 
@@ -34,6 +34,21 @@ const ReservaTurnosAdmin = () => {
     setTurnosDiaSel([]);
     setDiaSel('');
   };
+
+const handleServicioChange = async (idServicioNuevo) => {
+  setIdServicioSel(idServicioNuevo);
+  setIdProfesionalSel('');
+  setDisponibilidad([]);
+  setTurnosDiaSel([]);
+  setDiaSel('');
+
+  if (idServicioNuevo) {
+    const res = await axios.get(`${API}/profesionales/por-servicio/${idServicioNuevo}`);
+    setProfesionales(res.data);
+  } else {
+    setProfesionales([]);
+  }
+};
 
   const reservarTurno = async (hora) => {
     try {
@@ -104,7 +119,7 @@ const ReservaTurnosAdmin = () => {
           <Row>
             <Col md={4}>
               <Form.Label>Servicio</Form.Label>
-              <Form.Select value={idServicioSel} onChange={(e) => setIdServicioSel(e.target.value)}>
+              <Form.Select value={idServicioSel} onChange={(e) => handleServicioChange(e.target.value)}>
                 <option value="">Seleccione...</option>
                 {servicios.filter(s => s.activo).map(s => (
                   <option key={s.idservicio} value={s.idservicio}>{s.nombre}</option>
