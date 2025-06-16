@@ -25,39 +25,36 @@ const VinTurnoHome = ({
     setShowCancelModal(true);
   };
 
-  const confirmarCancelacion = async () => {
-    try {
-      setLoading(true);
-      setError('');
-      
-      const response = await fetch(`/api/turnos/${id}/cancelar`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
+const confirmarCancelacion = async () => {
+  try {
+    setLoading(true);
+    setError('');
 
-      if (response.ok) {
-        setShowCancelModal(false);
-        if (onCancelar) onCancelar(id);
-        if (onTurnoActualizado) onTurnoActualizado();
-      } else {
-        const errorData = await response.json();
-        setError(errorData.error || 'Error al cancelar el turno');
+    const response = await fetch(`${process.env.REACT_APP_API_URL}/turnos/cancelar/${id}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
       }
-    } catch (error) {
-      console.error('Error al cancelar turno:', error);
-      setError('Error de conexión al cancelar el turno');
-    } finally {
-      setLoading(false);
-    }
-  };
+    });
 
-  // Función para modificar turno
-  const handleModificarClick = () => {
-    if (onModificar) onModificar(id);
-  };
+    if (response.ok) {
+      setShowCancelModal(false);
+
+      // Refrescar la lista completa de turnos desde el padre
+      if (onTurnoActualizado) onTurnoActualizado();
+    } else {
+      const errorData = await response.json();
+      setError(errorData.message || 'Error al cancelar el turno');
+    }
+  } catch (error) {
+    console.error('Error al cancelar turno:', error);
+    setError('Error de conexión al cancelar el turno');
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   // Función para conversar
   const handleConversarClick = () => {
@@ -153,14 +150,6 @@ const VinTurnoHome = ({
               >
                 <i className="bi bi-x-circle me-1"></i> 
                 {loading ? 'Procesando...' : 'Cancelar'}
-              </Button>
-              <Button 
-                variant="outline-secondary" 
-                className="flex-fill"
-                onClick={handleModificarClick}
-                disabled={loading || estado === 'cancelado'}
-              >
-                <i className="bi bi-pencil me-1"></i> Modificar
               </Button>
             </div>
           )}

@@ -1,23 +1,15 @@
-import React, { useEffect, useState } from 'react';
+// src/pages/dashboard/dashboard.jsx
+
+import React, { useEffect, useState, useCallback } from 'react';
 import { Container, Navbar, Nav, Row, Col } from 'react-bootstrap';
 import {
-  FaHome,
-  FaCalendarAlt,
-  FaComments,
-  FaFileAlt,
-  FaFolder,
-  FaSignOutAlt,
-  FaUsers,
-  FaEnvelope,
-  FaClipboardList,
-  FaTicketAlt,
-  FaListAlt
+  FaHome, FaCalendarAlt, FaComments, FaFileAlt, FaFolder, FaSignOutAlt,
+  FaUsers, FaEnvelope, FaClipboardList, FaTicketAlt, FaListAlt, FaCalendarTimes
 } from 'react-icons/fa';
 import './dashboard.css';
 import Roles from '../roles/Roles';
 import CargarServicio from '../cargaServicios/cargarServicios';
 import ExcepcionesProf from '../excepcionesProf/excepcionesProf';
-import { FaCalendarTimes } from 'react-icons/fa';
 import Agendas from '../agendas/agendas';
 import AgendaRegular from '../agendaRegular/agendaRegular';
 import Chat from '../chat/chat';
@@ -27,6 +19,7 @@ import ReservaTurnos from '../reservaTurnos/reservaTurnos';
 import MisTurnos from '../misTurnos/misTurnos';
 import ReservaTurnosAdmin from '../reservaTurnosAdmin/reservaTurnosAdmin';
 import MisTurnosAdmin from '../misTurnosAdmin/misTurnosAdmin';
+
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
 const Dashboard = ({ setIsLoggedIn, tieneMensajesNuevos, setTieneMensajesNuevos }) => {
@@ -34,17 +27,17 @@ const Dashboard = ({ setIsLoggedIn, tieneMensajesNuevos, setTieneMensajesNuevos 
   const [vista, setVista] = useState('inicio');
   const [roles, setRoles] = useState({});
   const [turnos, setTurnos] = useState([]);
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(true);
+
   const formatearFecha = (fecha) => {
     const date = new Date(fecha);
-    const opciones = {
+    return date.toLocaleDateString('es-ES', {
       day: '2-digit',
       month: 'short',
       year: 'numeric',
       hour: '2-digit',
       minute: '2-digit'
-    };
-    return date.toLocaleDateString('es-ES', opciones);
+    });
   };
 
   const handleLogout = () => {
@@ -53,103 +46,59 @@ const Dashboard = ({ setIsLoggedIn, tieneMensajesNuevos, setTieneMensajesNuevos 
     window.location.href = '/';
   };
 
-  // Funciones para manejar las acciones de los turnos
   const handleCancelarTurno = (turnoId) => {
     console.log('Cancelar turno:', turnoId);
-    // Aquí iría la lógica para cancelar el turno
   };
 
   const handleModificarTurno = (turnoId) => {
     console.log('Modificar turno:', turnoId);
-    // Aquí iría la lógica para modificar el turno
   };
 
   const handleConversar = (turnoId) => {
     console.log('Iniciar conversación:', turnoId);
-    // Aquí iría la lógica para iniciar la conversación
     setVista('chat');
   };
 
-// Función para cargar los turnos del usuario
-  // Función para cargar los turnos del usuario
-  const cargarTurnos = async () => {
-    try {
-      setLoading(true);
-      
-      // Obtener el idcontacto del usuario logueado
-      const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
-      const idcontacto = usuario.idcontacto;
-      
-      console.log('DEBUG - Usuario completo:', usuario);
-      console.log('DEBUG - idcontacto extraído:', idcontacto);
-      
-      if (!idcontacto) {
-        console.error('No se encontró idcontacto del usuario');
-        console.log('DEBUG - localStorage usuario:', localStorage.getItem('usuario'));
-        return;
-      }
+const cargarTurnos = useCallback(async () => {
+  try {
+    setLoading(true);
+    const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
+    const idcontacto = usuario.idcontacto;
+    if (!idcontacto) return;
 
-      // Realizar la consulta a la API
-      const url = `${API_URL}/api/turnos/usuario/${idcontacto}`;
-      console.log('DEBUG - URL de consulta:', url);
-      
-      const response = await fetch(url, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
+    const response = await fetch(`${API_URL}/turnos/mis-turnos/${idcontacto}`, {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      }
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      const hoy = new Date();
+      hoy.setHours(0, 0, 0, 0);
+
+      const turnosFiltrados = data.filter(turno => {
+        const fechaTurno = new Date(turno.dia);
+        return fechaTurno >= hoy && turno.reservado !== false;
       });
 
-      console.log('DEBUG - Response status:', response.status);
-      console.log('DEBUG - Response ok:', response.ok);
-
-      if (response.ok) {
-        const data = await response.json();
-        console.log('DEBUG - Data recibida del backend:', data);
-        console.log('DEBUG - Cantidad de turnos recibidos:', data.length);
-        
-        // Filtrar turnos que sean >= fecha actual (opcional, ya que el backend debería filtrar)
-        const fechaActual = new Date();
-        fechaActual.setHours(0, 0, 0, 0);
-        console.log('DEBUG - Fecha actual para filtro:', fechaActual);
-        
-        const turnosFiltrados = data.filter(turno => {
-          const fechaTurno = new Date(turno.dia);
-          console.log(`DEBUG - Comparando turno ${turno.idturno}: ${fechaTurno} >= ${fechaActual}`, fechaTurno >= fechaActual);
-          return fechaTurno >= fechaActual;
-        });
-        
-        console.log('DEBUG - Turnos después del filtrado:', turnosFiltrados);
-        console.log('DEBUG - Cantidad final:', turnosFiltrados.length);
-        
-        setTurnos(turnosFiltrados);
-      } else {
-        const errorText = await response.text();
-        console.error('Error al cargar turnos:', response.status, response.statusText);
-        console.error('Error body:', errorText);
-      }
-    } catch (error) {
-      console.error('Error al cargar turnos:', error);
-    } finally {
-      setLoading(false);
+      setTurnos(turnosFiltrados);
     }
-  };
+  } catch (error) {
+    console.error('Error al cargar turnos:', error);
+  } finally {
+    setLoading(false);
+  }
+}, []);
 
   useEffect(() => {
     const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-    if (!isLoggedIn) {
-      window.location.href = '/';
-      return;
-    }
+    if (!isLoggedIn) return (window.location.href = '/');
 
     let parsedRoles = {};
     try {
-      const rawRoles = localStorage.getItem('roles');
-      parsedRoles = rawRoles && rawRoles !== 'undefined' ? JSON.parse(rawRoles) : {};
-    } catch (error) {
-      parsedRoles = {};
-    }
+      parsedRoles = JSON.parse(localStorage.getItem('roles') || '{}');
+    } catch { parsedRoles = {}; }
 
     setRoles(parsedRoles);
 
@@ -186,37 +135,34 @@ const Dashboard = ({ setIsLoggedIn, tieneMensajesNuevos, setTieneMensajesNuevos 
     } else if (bool(parsedRoles.roladministrativo)) {
       allowedIds = ['home', 'calendar', 'agendaRegular', 'fichaMedica','servicios', 'turnos', 'misTurnos', 'excepcionesProf'];
     } else if (bool(parsedRoles.rolmedico) || bool(parsedRoles.rolpaciente)) {
-      allowedIds = ['home', 'comments', 'fichaMedica'];
+      allowedIds = ['home', 'comments', 'fichaMedica', 'turnos', 'misTurnos'];
     } else {
       allowedIds = ['home', 'comments','fichaMedica'];
     }
 
     const filteredIcons = allIcons.filter(icon => allowedIds.includes(icon.id));
-    // Cargar turnos al inicializar el componente
-    cargarTurnos();
     setVisibleIcons(filteredIcons);
 
-  }, [tieneMensajesNuevos, setTieneMensajesNuevos]);
+    if (parsedRoles.rolpaciente) {
+      cargarTurnos();
+    } else {
+      setLoading(false); // ✅ Para otros roles, salimos del loading
+    }
+  }, [tieneMensajesNuevos, setTieneMensajesNuevos, cargarTurnos]);
+
+  useEffect(() => {
+    if (vista === 'inicio' && roles.rolpaciente) {
+      cargarTurnos();
+    }
+  }, [vista, roles, cargarTurnos]);
 
   return (
     <div className="d-flex min-vh-100 flex-column">
       <div className="d-flex flex-grow-1">
         <div className="bg-white border-end d-flex flex-column align-items-center p-2 mt-4" style={{ width: '60px' }}>
           {visibleIcons.map(icon => icon.component)}
-
-          <FaUsers
-            className="fs-4 mb-4 text-secondary hover-icon"
-            title="Gestión de Usuarios"
-            style={{ cursor: 'pointer' }}
-            onClick={() => setVista('roles')}
-          />
-
-          <FaSignOutAlt
-            className="fs-4 mt-auto mb-2 text-danger hover-icon"
-            title="Cerrar sesión"
-            onClick={handleLogout}
-            style={{ cursor: 'pointer' }}
-          />
+          <FaUsers className="fs-4 mb-4 text-secondary hover-icon" title="Gestión de Usuarios" onClick={() => setVista('roles')} />
+          <FaSignOutAlt className="fs-4 mt-auto mb-2 text-danger hover-icon" title="Cerrar sesión" onClick={handleLogout} />
         </div>
 
         <div className="flex-grow-1 d-flex flex-column">
@@ -238,42 +184,26 @@ const Dashboard = ({ setIsLoggedIn, tieneMensajesNuevos, setTieneMensajesNuevos 
                     const usuario = typeof usuarioRaw === 'string' && usuarioRaw.startsWith('{')
                       ? JSON.parse(usuarioRaw)
                       : { nombre: usuarioRaw };
-
                     return `${usuario?.nombre ?? 'Usuario'} ${usuario?.apellido ?? ''}`.trim();
                   } catch (e) {
                     return 'Usuario';
                   }
                 })()}
               </span>
-
             </Nav>
           </Navbar>
 
           <Container fluid className="flex-grow-1 p-4 bg-light">
-          <div className="">  
-            {vista === 'roles' ? (
-              <Roles />
-            ) : vista === 'servicios' ? (
-              <CargarServicio />
-            ) : vista === 'excepcionesProf' ? (
-              <ExcepcionesProf />
-            ) : vista === 'agendas' ? (
-              <Agendas />
-            ) : vista === 'agendaRegular' ? (
-              <AgendaRegular />
-            ) : vista === 'fichaMedica' ? (
-              <FichaMedica />
-            ) : vista === 'chat' ? (
-              <Chat setTieneMensajesNuevos={setTieneMensajesNuevos} />
-            ) : vista === 'turnos' ? (
-              (roles.roladministrativo || roles.rolsuperadmin)
-                ? <ReservaTurnosAdmin />
-                : <ReservaTurnos />
-            ) : vista === 'misTurnos' ? (
-              (roles.roladministrativo || roles.rolsuperadmin)
-                ? <MisTurnosAdmin />
-                : <MisTurnos />
-            ) : (
+            {vista === 'roles' ? <Roles />
+            : vista === 'servicios' ? <CargarServicio />
+            : vista === 'excepcionesProf' ? <ExcepcionesProf />
+            : vista === 'agendas' ? <Agendas />
+            : vista === 'agendaRegular' ? <AgendaRegular />
+            : vista === 'fichaMedica' ? <FichaMedica />
+            : vista === 'chat' ? <Chat setTieneMensajesNuevos={setTieneMensajesNuevos} />
+            : vista === 'turnos' ? (roles.roladministrativo || roles.rolsuperadmin) ? <ReservaTurnosAdmin /> : <ReservaTurnos />
+            : vista === 'misTurnos' ? (roles.roladministrativo || roles.rolsuperadmin) ? <MisTurnosAdmin /> : <MisTurnos />
+            : (
               <div>
                 <h4 className="text-primary">Inicio</h4>
                 {loading ? (
@@ -284,38 +214,39 @@ const Dashboard = ({ setIsLoggedIn, tieneMensajesNuevos, setTieneMensajesNuevos 
                   </div>
                 ) : (
                   <Row className="g-4">
-                    {/* Consulta fija - siempre se muestra primero */}
-                    <VinTurnoHome 
-                      tipo="Consulta"
-                      icono="bi bi-chat-left-dots"
-                      nombreEspecialista="Consulta General"
-                      especialidad="Medicina General"
-                      fecha="Disponible"
-                      tipoTurno="consulta"
-                      onConversar={() => handleConversar('consulta-general')}
-                    />
+                    {(roles.rolpaciente || roles.rolmedico) && (
+                      <VinTurnoHome
+                        tipo="Consulta"
+                        icono="bi bi-chat-left-dots"
+                        nombreEspecialista="Consulta General"
+                        especialidad="Medicina General"
+                        fecha="Disponible"
+                        tipoTurno="consulta"
+                        onConversar={() => handleConversar('consulta-general')}
+                      />
+                    )}
 
-                    {/* Turnos dinámicos desde la base de datos */}
-                    {turnos.map((turno, index) => (
-                    <VinTurnoHome 
-                      key={turno.idturno || index} // Using idturno
-                      tipo={turno.tipo || "Presencial"}
-                      icono="bi bi-calendar"
-                      nombreEspecialista={turno.idprofesional || "Profesional"}
-                      especialidad={turno.idservicio || "Especialidad"}
-                      fecha={formatearFecha(turno.dia)}
-                      tipoTurno="presencial"
-                      onCancelar={() => handleCancelarTurno(turno.idturno)} // Using idturno
-                      onModificar={() => handleModificarTurno(turno.idturno)} // Using idturno
-                    />
-                  ))}
+                    {roles.rolpaciente && turnos.map((turno, index) => (
+                      <VinTurnoHome
+                        key={turno.idturno || index}
+                        id={turno.idturno}
+                        tipo={turno.tipo || "Presencial"}
+                        icono="bi bi-calendar"
+                        nombreEspecialista={`${turno.Profesional?.contacto?.nombre || "Profesional"} ${turno.Profesional?.contacto?.apellido || ""}`}
+                        especialidad={turno.Servicio?.nombre || "Especialidad"}
+                        fecha={formatearFecha(turno.dia)}
+                        tipoTurno="presencial"
+                        onCancelar={() => handleCancelarTurno(turno.idturno)}
+                        onModificar={() => handleModificarTurno(turno.idturno)}
+                        onTurnoActualizado={cargarTurnos}
+                      />
+                    ))}
 
-                    {/* Mensaje cuando no hay turnos */}
-                    {turnos.length === 0 && (
+                    {roles.rolpaciente && turnos.length === 0 && (
                       <Col md={12}>
                         <div className="text-center text-muted py-4">
                           <i className="bi bi-calendar-x fs-1 mb-3"></i>
-                          <p>No tienes turnos programados próximamente.</p>
+                          <p>No tenés turnos programados próximamente.</p>
                         </div>
                       </Col>
                     )}
@@ -323,7 +254,6 @@ const Dashboard = ({ setIsLoggedIn, tieneMensajesNuevos, setTieneMensajesNuevos 
                 )}
               </div>
             )}
-          </div>
           </Container>
         </div>
       </div>
