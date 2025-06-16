@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Form, Button, Container, Row, Col, Card, InputGroup } from 'react-bootstrap';
 
-
 const ReservaTurnosAdmin = () => {
   const API = process.env.REACT_APP_API_URL;
 
@@ -20,11 +19,28 @@ const ReservaTurnosAdmin = () => {
   const [diaSel, setDiaSel] = useState('');
 
   const [busquedaPaciente, setBusquedaPaciente] = useState('');
+  const [paginaActual, setPaginaActual] = useState(1);
+  const pacientesPorPagina = 10;
 
   useEffect(() => {
     axios.get(`${API}/servicios`).then(res => setServicios(res.data));
     axios.get(`${API}/contactos?rolusuario=rolmedico`).then(res => setPacientes(res.data)); // pedir pacientes
   }, [API]);
+
+  const handleServicioChange = async (idServicioNuevo) => {
+    setIdServicioSel(idServicioNuevo);
+    setIdProfesionalSel('');
+    setDisponibilidad([]);
+    setTurnosDiaSel([]);
+    setDiaSel('');
+
+    if (idServicioNuevo) {
+      const res = await axios.get(`${API}/profesionales/por-servicio/${idServicioNuevo}`);
+      setProfesionales(res.data);
+    } else {
+      setProfesionales([]);
+    }
+  };
 
   const buscarDisponibilidad = async () => {
     if (!idServicioSel || !idProfesionalSel) return;
@@ -34,21 +50,6 @@ const ReservaTurnosAdmin = () => {
     setTurnosDiaSel([]);
     setDiaSel('');
   };
-
-const handleServicioChange = async (idServicioNuevo) => {
-  setIdServicioSel(idServicioNuevo);
-  setIdProfesionalSel('');
-  setDisponibilidad([]);
-  setTurnosDiaSel([]);
-  setDiaSel('');
-
-  if (idServicioNuevo) {
-    const res = await axios.get(`${API}/profesionales/por-servicio/${idServicioNuevo}`);
-    setProfesionales(res.data);
-  } else {
-    setProfesionales([]);
-  }
-};
 
   const reservarTurno = async (hora) => {
     try {
@@ -71,6 +72,13 @@ const handleServicioChange = async (idServicioNuevo) => {
     `${p.nombre} ${p.apellido} ${p.docum}`.toLowerCase().includes(busquedaPaciente.toLowerCase())
   );
 
+  const pacientesPaginados = pacientesFiltrados.slice(
+    (paginaActual - 1) * pacientesPorPagina,
+    paginaActual * pacientesPorPagina
+  );
+
+  const totalPaginas = Math.ceil(pacientesFiltrados.length / pacientesPorPagina);
+
   return (
     <Container>
       <h3>Reserva de Turnos (Administrativo)</h3>
@@ -82,14 +90,15 @@ const handleServicioChange = async (idServicioNuevo) => {
               type="text"
               placeholder="Buscar paciente por nombre, apellido o documento"
               value={busquedaPaciente}
-              onChange={(e) => setBusquedaPaciente(e.target.value)}
-            />
-            <Button
-              variant="outline-secondary"
-              onClick={() => {
-                setBusquedaPaciente('');
+              onChange={(e) => {
+                setBusquedaPaciente(e.target.value);
+                setPaginaActual(1);
               }}
-            >
+            />
+            <Button variant="outline-secondary" onClick={() => {
+              setBusquedaPaciente('');
+              setPaginaActual(1);
+            }}>
               Limpiar
             </Button>
           </InputGroup>
@@ -99,18 +108,42 @@ const handleServicioChange = async (idServicioNuevo) => {
       <Row className="mb-3">
         <Col>
           <h5>Pacientes encontrados:</h5>
-          {pacientesFiltrados.map(p => (
+          {pacientesPaginados.map(p => (
             <Card
               key={p.idcontacto}
               className={`mb-2 p-2 ${pacienteSel?.idcontacto === p.idcontacto ? 'bg-info text-white' : ''}`}
               style={{ cursor: 'pointer' }}
-              onClick={() => setPacienteSel(p)}
+              onClick={() => {
+                setPacienteSel(p);
+                setIdServicioSel('');
+                setIdProfesionalSel('');
+                setDisponibilidad([]);
+                setTurnosDiaSel([]);
+                setDiaSel('');
+              }}
+
             >
               {p.nombre} {p.apellido} - {p.docum}
             </Card>
           ))}
         </Col>
       </Row>
+
+      {pacientesFiltrados.length > pacientesPorPagina && (
+        <Row className="justify-content-center my-3">
+          <Col xs="auto">
+            <div className="d-flex gap-2 align-items-center">
+              <Button variant="outline-secondary" size="sm" disabled={paginaActual === 1} onClick={() => setPaginaActual(1)}>⏮️</Button>
+              <Button variant="outline-secondary" size="sm" disabled={paginaActual === 1} onClick={() => setPaginaActual(paginaActual - 1)}>◀️</Button>
+              <span style={{ minWidth: '110px', textAlign: 'center' }}>
+                Página <strong>{paginaActual}</strong> de <strong>{totalPaginas}</strong>
+              </span>
+              <Button variant="outline-secondary" size="sm" disabled={paginaActual === totalPaginas} onClick={() => setPaginaActual(paginaActual + 1)}>▶️</Button>
+              <Button variant="outline-secondary" size="sm" disabled={paginaActual === totalPaginas} onClick={() => setPaginaActual(totalPaginas)}>⏭️</Button>
+            </div>
+          </Col>
+        </Row>
+      )}
 
       {pacienteSel && (
         <>

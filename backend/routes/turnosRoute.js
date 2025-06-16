@@ -206,7 +206,8 @@ router.get('/mis-turnos/:idcontacto', async (req, res) => {
         },
         {
           model: Servicios,
-          attributes: ['nombre']
+          as: 'Servicio',
+          attributes: ['idservicio', 'nombre']
         }
       ],
       order: [['dia', 'ASC'], ['hora', 'ASC']]

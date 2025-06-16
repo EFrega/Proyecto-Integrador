@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { Container, Table, Button, InputGroup, Form, Card, Row, Col } from 'react-bootstrap';
 
@@ -11,25 +11,30 @@ const MisTurnosAdmin = () => {
 
   const [servicios, setServicios] = useState([]);
   const [idServicioSel, setIdServicioSel] = useState('');
-  const [profesionales, setProfesionales] = useState([]);
-  const [idProfesionalSel, setIdProfesionalSel] = useState('');
+
+  const [paginaActual, setPaginaActual] = useState(1);
+  const pacientesPorPagina = 10;
 
   useEffect(() => {
     axios.get(`${API}/contactos?rolusuario=rolmedico`).then(res => setPacientes(res.data));
     axios.get(`${API}/servicios`).then(res => setServicios(res.data));
   }, [API]);
 
-  const cargarTurnosPaciente = async () => {
+  const cargarTurnosPaciente = useCallback(async () => {
     if (!pacienteSel) return;
 
-    let url = `${API}/turnos/mis-turnos/${pacienteSel.idcontacto}`;
-    if (idProfesionalSel) {
-      url += `?idprofesional=${idProfesionalSel}`;
+    try {
+      const res = await axios.get(`${API}/turnos/mis-turnos/${pacienteSel.idcontacto}`);
+      const turnosOrdenados = res.data.sort((a, b) => {
+        const fechaA = `${a.dia} ${a.hora}`;
+        const fechaB = `${b.dia} ${b.hora}`;
+        return fechaA.localeCompare(fechaB);
+      });
+      setTurnos(turnosOrdenados);
+    } catch (err) {
+      alert('Error al cargar los turnos del paciente');
     }
-
-    const res = await axios.get(url);
-    setTurnos(res.data);
-  };
+  }, [API, pacienteSel]);
 
   const cancelarTurno = async (idturno) => {
     if (!window.confirm('¿Estás seguro de que querés cancelar este turno?')) return;
@@ -43,20 +48,26 @@ const MisTurnosAdmin = () => {
     }
   };
 
-  const handleServicioChange = async (idservicio) => {
-    setIdServicioSel(idservicio);
-    setIdProfesionalSel('');
-    if (idservicio) {
-      const res = await axios.get(`${API}/profesionales/por-servicio/${idservicio}`);
-      setProfesionales(res.data);
-    } else {
-      setProfesionales([]);
-    }
-  };
-
   const pacientesFiltrados = pacientes.filter(p =>
     `${p.nombre} ${p.apellido} ${p.docum}`.toLowerCase().includes(busquedaPaciente.toLowerCase())
   );
+
+  const pacientesPaginados = pacientesFiltrados.slice(
+    (paginaActual - 1) * pacientesPorPagina,
+    paginaActual * pacientesPorPagina
+  );
+
+  const totalPaginas = Math.ceil(pacientesFiltrados.length / pacientesPorPagina);
+
+  const turnosFiltrados = idServicioSel
+    ? turnos.filter(t => t.Servicio?.idservicio === parseInt(idServicioSel))
+    : turnos;
+
+  useEffect(() => {
+    if (pacienteSel) {
+      cargarTurnosPaciente();
+    }
+  }, [pacienteSel, cargarTurnosPaciente]);
 
   return (
     <Container>
@@ -69,12 +80,15 @@ const MisTurnosAdmin = () => {
               type="text"
               placeholder="Buscar paciente por nombre, apellido o documento"
               value={busquedaPaciente}
-              onChange={(e) => setBusquedaPaciente(e.target.value)}
+              onChange={(e) => {
+                setBusquedaPaciente(e.target.value);
+                setPaginaActual(1);
+              }}
             />
-            <Button
-              variant="outline-secondary"
-              onClick={() => setBusquedaPaciente('')}
-            >
+            <Button variant="outline-secondary" onClick={() => {
+              setBusquedaPaciente('');
+              setPaginaActual(1);
+            }}>
               Limpiar
             </Button>
           </InputGroup>
@@ -84,7 +98,7 @@ const MisTurnosAdmin = () => {
       <Row>
         <Col>
           <h5>Pacientes encontrados:</h5>
-          {pacientesFiltrados.map(p => (
+          {pacientesPaginados.map(p => (
             <Card
               key={p.idcontacto}
               className={`mb-2 p-2 ${pacienteSel?.idcontacto === p.idcontacto ? 'bg-info text-white' : ''}`}
@@ -92,6 +106,7 @@ const MisTurnosAdmin = () => {
               onClick={() => {
                 setPacienteSel(p);
                 setTurnos([]);
+                setIdServicioSel('');
               }}
             >
               {p.nombre} {p.apellido} - {p.docum}
@@ -100,39 +115,42 @@ const MisTurnosAdmin = () => {
         </Col>
       </Row>
 
+      {pacientesFiltrados.length > pacientesPorPagina && (
+        <Row className="justify-content-center my-3">
+          <Col xs="auto">
+            <div className="d-flex gap-2 align-items-center">
+              <Button variant="outline-secondary" size="sm" disabled={paginaActual === 1} onClick={() => setPaginaActual(1)}>⏮️</Button>
+              <Button variant="outline-secondary" size="sm" disabled={paginaActual === 1} onClick={() => setPaginaActual(paginaActual - 1)}>◀️</Button>
+              <span style={{ minWidth: '110px', textAlign: 'center' }}>
+                Página <strong>{paginaActual}</strong> de <strong>{totalPaginas}</strong>
+              </span>
+              <Button variant="outline-secondary" size="sm" disabled={paginaActual === totalPaginas} onClick={() => setPaginaActual(paginaActual + 1)}>▶️</Button>
+              <Button variant="outline-secondary" size="sm" disabled={paginaActual === totalPaginas} onClick={() => setPaginaActual(totalPaginas)}>⏭️</Button>
+            </div>
+          </Col>
+        </Row>
+      )}
+
       {pacienteSel && (
         <>
+
           <hr />
           <Row>
             <Col md={4}>
               <Form.Label>Servicio</Form.Label>
-              <Form.Select value={idServicioSel} onChange={(e) => handleServicioChange(e.target.value)}>
-                <option value="">Seleccione un servicio</option>
+              <Form.Select value={idServicioSel} onChange={(e) => setIdServicioSel(e.target.value)}>
+                <option value="">Todos los servicios</option>
                 {servicios.filter(s => s.activo).map(s => (
                   <option key={s.idservicio} value={s.idservicio}>{s.nombre}</option>
                 ))}
               </Form.Select>
             </Col>
-            <Col md={4}>
-              <Form.Label>Profesional</Form.Label>
-              <Form.Select value={idProfesionalSel} onChange={(e) => setIdProfesionalSel(e.target.value)}>
-                <option value="">Seleccione un profesional</option>
-                {profesionales.map(p => (
-                  <option key={p.idprofesional} value={p.idprofesional}>
-                    {p.nombre} {p.apellido} - {p.matricula}
-                  </option>
-                ))}
-              </Form.Select>
-            </Col>
-            <Col md={4} className="d-flex align-items-end">
-              <Button onClick={cargarTurnosPaciente}>Ver Turnos</Button>
-            </Col>
           </Row>
 
           <hr />
           <h5>Turnos reservados de {pacienteSel.nombre} {pacienteSel.apellido}</h5>
-          {turnos.length === 0 ? (
-            <p>No tiene turnos reservados.</p>
+          {turnosFiltrados.length === 0 ? (
+            <p>No tiene turnos reservados para el servicio seleccionado.</p>
           ) : (
             <Table striped bordered hover>
               <thead>
@@ -145,7 +163,7 @@ const MisTurnosAdmin = () => {
                 </tr>
               </thead>
               <tbody>
-                {turnos.map(t => (
+                {turnosFiltrados.map(t => (
                   <tr key={t.idturno}>
                     <td>{t.dia}</td>
                     <td>{t.hora.substring(0, 5)}</td>
