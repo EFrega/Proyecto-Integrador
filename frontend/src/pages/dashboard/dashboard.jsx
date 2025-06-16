@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Container, Navbar, Nav } from 'react-bootstrap';
+import { Container, Navbar, Nav, Row, Col, Button } from 'react-bootstrap';
 import {
   FaHome,
   FaCalendarAlt,
@@ -21,6 +21,8 @@ import Agendas from '../agendas/agendas';
 import AgendaRegular from '../agendaRegular/agendaRegular';
 import Chat from '../chat/chat';
 import FichaMedica from '../fichaMedica/fichaMedica';
+// Importar el nuevo componente
+import VinTurnoHome from '../vinTurnoHome/vinturnohome';
 
 const Dashboard = ({ setIsLoggedIn, tieneMensajesNuevos, setTieneMensajesNuevos }) => {
   const [visibleIcons, setVisibleIcons] = useState([]);
@@ -31,6 +33,23 @@ const Dashboard = ({ setIsLoggedIn, tieneMensajesNuevos, setTieneMensajesNuevos 
     localStorage.clear();
     setIsLoggedIn(false);
     window.location.href = '/';
+  };
+
+  // Funciones para manejar las acciones de los turnos
+  const handleCancelarTurno = (turnoId) => {
+    console.log('Cancelar turno:', turnoId);
+    // Aquí iría la lógica para cancelar el turno
+  };
+
+  const handleModificarTurno = (turnoId) => {
+    console.log('Modificar turno:', turnoId);
+    // Aquí iría la lógica para modificar el turno
+  };
+
+  const handleConversar = (turnoId) => {
+    console.log('Iniciar conversación:', turnoId);
+    // Aquí iría la lógica para iniciar la conversación
+    setVista('chat');
   };
 
   useEffect(() => {
@@ -144,6 +163,7 @@ const Dashboard = ({ setIsLoggedIn, tieneMensajesNuevos, setTieneMensajesNuevos 
           </Navbar>
 
           <Container fluid className="flex-grow-1 p-4 bg-light">
+          <div className="">  
             {vista === 'roles' ? (
               <Roles />
             ) : vista === 'servicios' ? (
@@ -159,8 +179,74 @@ const Dashboard = ({ setIsLoggedIn, tieneMensajesNuevos, setTieneMensajesNuevos 
             ) : vista === 'chat' ? (
               <Chat setTieneMensajesNuevos={setTieneMensajesNuevos} />
             ) : (
-              <h4 className="text-primary">Inicio</h4>
+              <div>
+                <h4 className="text-primary">Inicio</h4>
+                <Row className="g-4">
+                  {/* Tarjeta Consulta fija */}
+                  {/* <Col md={4}>
+                    <div className="border rounded-3 shadow-sm bg-white p-3 h-100">
+                      <div className="d-flex align-items-center mb-2">
+                        <div className="me-2">
+                          <i className="bi bi-chat-left-dots fs-4 text-primary"></i>
+                        </div>
+                        <strong>Consulta</strong>
+                        <div className="ms-auto">
+                          <i className="bi bi-chevron-right"></i>
+                        </div>
+                      </div>
+                      <div className="mb-2">
+                        <div className="fw-semibold">Nombre especialista</div>
+                        <div className="text-muted small">Especialidad</div>
+                        <div className="text-muted small">DD NN de MM AAAA hh:mm</div>
+                      </div>
+                      <div className="d-flex">
+                        <Button variant="outline-primary" className="flex-fill">
+                          <i className="bi bi-chat-left-text me-1"></i> Conversar
+                        </Button>
+                      </div>
+                    </div>
+                  </Col> */}
+
+
+                  {/* Usando el componente VinTurnoHome para una consulta */}
+                  <VinTurnoHome 
+                    tipo="Consulta"
+                    icono="bi bi-chat-left-dots"
+                    nombreEspecialista="Dr. García"
+                    especialidad="Cardiología"
+                    fecha="15 Jun de 2025 14:30"
+                    tipoTurno="consulta"
+                    onConversar={() => handleConversar('turno1')}
+                  />
+
+                  {/* Usando el componente VinTurnoHome para un turno presencial */}
+                  <VinTurnoHome 
+                    tipo="Presencial"
+                    icono="bi bi-calendar"
+                    nombreEspecialista="Dra. Martínez"
+                    especialidad="Dermatología"
+                    fecha="16 Jun de 2025 10:00"
+                    tipoTurno="presencial"
+                    onCancelar={() => handleCancelarTurno('turno2')}
+                    onModificar={() => handleModificarTurno('turno2')}
+                  />
+
+                  {/* Otro ejemplo con turno próximo pero con borde primary agregado */}
+                  <VinTurnoHome 
+                    tipo="Presencial"
+                    icono="bi bi-calendar"
+                    nombreEspecialista="Dr. López"
+                    especialidad="Traumatología"
+                    fecha="17 Jun de 2025 09:15"
+                    tipoTurno="presencial"
+                    className="border-primary"
+                    onCancelar={() => handleCancelarTurno('turno3')}
+                    onModificar={() => handleModificarTurno('turno3')}
+                  />
+                </Row>
+              </div>
             )}
+          </div>
           </Container>
         </div>
       </div>
