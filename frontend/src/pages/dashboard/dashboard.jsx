@@ -186,7 +186,7 @@ const Dashboard = ({ setIsLoggedIn, tieneMensajesNuevos, setTieneMensajesNuevos 
     } else if (bool(parsedRoles.roladministrativo)) {
       allowedIds = ['home', 'calendar', 'agendaRegular', 'fichaMedica','servicios', 'turnos', 'misTurnos', 'excepcionesProf'];
     } else if (bool(parsedRoles.rolmedico) || bool(parsedRoles.rolpaciente)) {
-      allowedIds = ['home', 'comments', 'turnos', 'misTurnos', 'fichaMedica'];
+      allowedIds = ['home', 'comments', 'fichaMedica'];
     } else {
       allowedIds = ['home', 'comments','fichaMedica'];
     }
