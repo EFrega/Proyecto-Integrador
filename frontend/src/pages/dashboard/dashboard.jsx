@@ -1,33 +1,44 @@
-import React, { useEffect, useState } from 'react';
-import { Container, Navbar, Nav, Row, Col, Button } from 'react-bootstrap';
+// src/pages/dashboard/dashboard.jsx
+
+import React, { useEffect, useState, useCallback } from 'react';
+import { Container, Navbar, Nav, Row, Col } from 'react-bootstrap';
 import {
-  FaHome,
-  FaCalendarAlt,
-  FaComments,
-  FaFileAlt,
-  FaFolder,
-  FaSignOutAlt,
-  FaUsers,
-  FaEnvelope,
-  FaClipboardList,
-  FaTicketAlt
+  FaHome, FaCalendarAlt, FaComments, FaFileAlt, FaFolder, FaSignOutAlt,
+  FaUsers, FaEnvelope, FaClipboardList, FaTicketAlt, FaListAlt, FaCalendarTimes
 } from 'react-icons/fa';
 import './dashboard.css';
 import Roles from '../roles/Roles';
 import CargarServicio from '../cargaServicios/cargarServicios';
 import ExcepcionesProf from '../excepcionesProf/excepcionesProf';
-import { FaCalendarTimes } from 'react-icons/fa';
 import Agendas from '../agendas/agendas';
 import AgendaRegular from '../agendaRegular/agendaRegular';
 import Chat from '../chat/chat';
 import FichaMedica from '../fichaMedica/fichaMedica';
-// Importar el nuevo componente
 import VinTurnoHome from '../vinTurnoHome/vinturnohome';
+import ReservaTurnos from '../reservaTurnos/reservaTurnos';
+import MisTurnos from '../misTurnos/misTurnos';
+import ReservaTurnosAdmin from '../reservaTurnosAdmin/reservaTurnosAdmin';
+import MisTurnosAdmin from '../misTurnosAdmin/misTurnosAdmin';
+
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
 const Dashboard = ({ setIsLoggedIn, tieneMensajesNuevos, setTieneMensajesNuevos }) => {
   const [visibleIcons, setVisibleIcons] = useState([]);
   const [vista, setVista] = useState('inicio');
   const [roles, setRoles] = useState({});
+  const [turnos, setTurnos] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const formatearFecha = (fecha) => {
+    const date = new Date(fecha);
+    return date.toLocaleDateString('es-ES', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
 
   const handleLogout = () => {
     localStorage.clear();
@@ -35,37 +46,59 @@ const Dashboard = ({ setIsLoggedIn, tieneMensajesNuevos, setTieneMensajesNuevos 
     window.location.href = '/';
   };
 
-  // Funciones para manejar las acciones de los turnos
   const handleCancelarTurno = (turnoId) => {
     console.log('Cancelar turno:', turnoId);
-    // Aquí iría la lógica para cancelar el turno
   };
 
   const handleModificarTurno = (turnoId) => {
     console.log('Modificar turno:', turnoId);
-    // Aquí iría la lógica para modificar el turno
   };
 
   const handleConversar = (turnoId) => {
     console.log('Iniciar conversación:', turnoId);
-    // Aquí iría la lógica para iniciar la conversación
     setVista('chat');
   };
 
+const cargarTurnos = useCallback(async () => {
+  try {
+    setLoading(true);
+    const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
+    const idcontacto = usuario.idcontacto;
+    if (!idcontacto) return;
+
+    const response = await fetch(`${API_URL}/turnos/mis-turnos/${idcontacto}`, {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      }
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      const hoy = new Date();
+      hoy.setHours(0, 0, 0, 0);
+
+      const turnosFiltrados = data.filter(turno => {
+        const fechaTurno = new Date(turno.dia);
+        return fechaTurno >= hoy && turno.reservado !== false;
+      });
+
+      setTurnos(turnosFiltrados);
+    }
+  } catch (error) {
+    console.error('Error al cargar turnos:', error);
+  } finally {
+    setLoading(false);
+  }
+}, []);
+
   useEffect(() => {
     const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-    if (!isLoggedIn) {
-      window.location.href = '/';
-      return;
-    }
+    if (!isLoggedIn) return (window.location.href = '/');
 
     let parsedRoles = {};
     try {
-      const rawRoles = localStorage.getItem('roles');
-      parsedRoles = rawRoles && rawRoles !== 'undefined' ? JSON.parse(rawRoles) : {};
-    } catch (error) {
-      parsedRoles = {};
-    }
+      parsedRoles = JSON.parse(localStorage.getItem('roles') || '{}');
+    } catch { parsedRoles = {}; }
 
     setRoles(parsedRoles);
 
@@ -89,7 +122,8 @@ const Dashboard = ({ setIsLoggedIn, tieneMensajesNuevos, setTieneMensajesNuevos 
       { id: 'folder', component: <FaFolder className="fs-4 mb-4 text-secondary hover-icon" key="folder" onClick={() => setVista('inicio')} /> },
       { id: 'excepcionesProf', component: <FaCalendarTimes className="fs-4 mb-4 text-secondary hover-icon" key="excepciones" onClick={() => setVista('excepcionesProf')} /> },
       { id: 'servicios', component: <FaClipboardList className="fs-4 mb-4 text-secondary hover-icon" title="Gestión de Servicios" key="servicios" onClick={() => setVista('servicios')} /> },
-      { id: 'turnos', component: <FaTicketAlt className="fs-4 mb-4 text-secondary hover-icon" title="Gestión de Turnos" key="turnos" onClick={() => setVista('turnos')} /> },
+      { id: 'turnos', component: <FaTicketAlt className="mb-4 text-secondary hover-icon" title="Reservar Turnos" key="turnos" onClick={() => setVista('turnos')} /> },
+      { id: 'misTurnos', component: <FaListAlt className="mb-4 text-secondary hover-icon" title="Mis Turnos" key="misTurnos" onClick={() => setVista('misTurnos')} /> },
       { id: 'agendaRegular', component: <FaCalendarAlt className="fs-4 mb-4 text-secondary hover-icon" title="Agenda Regular" key="agendaRegular" onClick={() => setVista('agendaRegular')} /> },
       { id: 'fichaMedica', component: <FaFileAlt className="fs-4 mb-4 text-secondary hover-icon" title="Ficha Médica" key="fichaMedica" onClick={() => setVista('fichaMedica')} /> },
     ];
@@ -97,39 +131,38 @@ const Dashboard = ({ setIsLoggedIn, tieneMensajesNuevos, setTieneMensajesNuevos 
     let allowedIds = [];
 
     if (bool(parsedRoles.rolsuperadmin)) {
-      allowedIds = ['home', 'calendar', 'agendaRegular', 'file', 'fichaMedica','folder', 'servicios', 'turnos', 'excepcionesProf'];
+      allowedIds = ['home', 'calendar', 'agendaRegular', 'file', 'fichaMedica','folder', 'servicios', 'turnos', 'misTurnos', 'excepcionesProf'];
     } else if (bool(parsedRoles.roladministrativo)) {
-      allowedIds = ['home', 'calendar', 'agendaRegular', 'fichaMedica','servicios', 'turnos', 'excepcionesProf'];
-    } else if (bool(parsedRoles.rolmedico) || bool(parsedRoles.rolpaciente)) {
-      allowedIds = ['home', 'comments', 'turnos', 'fichaMedica'];
-    } else {
-      allowedIds = ['home', 'comments','fichaMedica'];
+      allowedIds = ['home', 'calendar', 'agendaRegular', 'fichaMedica','servicios', 'turnos', 'misTurnos', 'excepcionesProf'];
+    } else if (bool(parsedRoles.rolpaciente)) {
+      allowedIds = ['home', 'comments', 'fichaMedica', 'turnos', 'misTurnos'];
+    } else if (bool(parsedRoles.rolmedico)) {
+      allowedIds = ['home', 'comments', 'fichaMedica'];
     }
 
     const filteredIcons = allIcons.filter(icon => allowedIds.includes(icon.id));
     setVisibleIcons(filteredIcons);
 
-  }, [tieneMensajesNuevos, setTieneMensajesNuevos]);
+    if (parsedRoles.rolpaciente) {
+      cargarTurnos();
+    } else {
+      setLoading(false); // ✅ Para otros roles, salimos del loading
+    }
+  }, [tieneMensajesNuevos, setTieneMensajesNuevos, cargarTurnos]);
+
+  useEffect(() => {
+    if (vista === 'inicio' && roles.rolpaciente) {
+      cargarTurnos();
+    }
+  }, [vista, roles, cargarTurnos]);
 
   return (
     <div className="d-flex min-vh-100 flex-column">
       <div className="d-flex flex-grow-1">
         <div className="bg-white border-end d-flex flex-column align-items-center p-2 mt-4" style={{ width: '60px' }}>
           {visibleIcons.map(icon => icon.component)}
-
-          <FaUsers
-            className="fs-4 mb-4 text-secondary hover-icon"
-            title="Gestión de Usuarios"
-            style={{ cursor: 'pointer' }}
-            onClick={() => setVista('roles')}
-          />
-
-          <FaSignOutAlt
-            className="fs-4 mt-auto mb-2 text-danger hover-icon"
-            title="Cerrar sesión"
-            onClick={handleLogout}
-            style={{ cursor: 'pointer' }}
-          />
+          <FaUsers className="fs-4 mb-4 text-secondary hover-icon" title="Gestión de Usuarios" onClick={() => setVista('roles')} />
+          <FaSignOutAlt className="fs-4 mt-auto mb-2 text-danger hover-icon" title="Cerrar sesión" onClick={handleLogout} />
         </div>
 
         <div className="flex-grow-1 d-flex flex-column">
@@ -151,102 +184,76 @@ const Dashboard = ({ setIsLoggedIn, tieneMensajesNuevos, setTieneMensajesNuevos 
                     const usuario = typeof usuarioRaw === 'string' && usuarioRaw.startsWith('{')
                       ? JSON.parse(usuarioRaw)
                       : { nombre: usuarioRaw };
-
                     return `${usuario?.nombre ?? 'Usuario'} ${usuario?.apellido ?? ''}`.trim();
                   } catch (e) {
                     return 'Usuario';
                   }
                 })()}
               </span>
-
             </Nav>
           </Navbar>
 
           <Container fluid className="flex-grow-1 p-4 bg-light">
-          <div className="">  
-            {vista === 'roles' ? (
-              <Roles />
-            ) : vista === 'servicios' ? (
-              <CargarServicio />
-            ) : vista === 'excepcionesProf' ? (
-              <ExcepcionesProf />
-            ) : vista === 'agendas' ? (
-              <Agendas />
-            ) : vista === 'agendaRegular' ? (
-              <AgendaRegular />
-            ) : vista === 'fichaMedica' ? (
-              <FichaMedica />
-            ) : vista === 'chat' ? (
-              <Chat setTieneMensajesNuevos={setTieneMensajesNuevos} />
-            ) : (
+            {vista === 'roles' ? <Roles />
+            : vista === 'servicios' ? <CargarServicio />
+            : vista === 'excepcionesProf' ? <ExcepcionesProf />
+            : vista === 'agendas' ? <Agendas />
+            : vista === 'agendaRegular' ? <AgendaRegular />
+            : vista === 'fichaMedica' ? <FichaMedica />
+            : vista === 'chat' ? <Chat setTieneMensajesNuevos={setTieneMensajesNuevos} />
+            : vista === 'turnos' ? (roles.roladministrativo || roles.rolsuperadmin) ? <ReservaTurnosAdmin /> : <ReservaTurnos />
+            : vista === 'misTurnos' ? (roles.roladministrativo || roles.rolsuperadmin) ? <MisTurnosAdmin /> : <MisTurnos />
+            : (
               <div>
                 <h4 className="text-primary">Inicio</h4>
-                <Row className="g-4">
-                  {/* Tarjeta Consulta fija */}
-                  {/* <Col md={4}>
-                    <div className="border rounded-3 shadow-sm bg-white p-3 h-100">
-                      <div className="d-flex align-items-center mb-2">
-                        <div className="me-2">
-                          <i className="bi bi-chat-left-dots fs-4 text-primary"></i>
-                        </div>
-                        <strong>Consulta</strong>
-                        <div className="ms-auto">
-                          <i className="bi bi-chevron-right"></i>
-                        </div>
-                      </div>
-                      <div className="mb-2">
-                        <div className="fw-semibold">Nombre especialista</div>
-                        <div className="text-muted small">Especialidad</div>
-                        <div className="text-muted small">DD NN de MM AAAA hh:mm</div>
-                      </div>
-                      <div className="d-flex">
-                        <Button variant="outline-primary" className="flex-fill">
-                          <i className="bi bi-chat-left-text me-1"></i> Conversar
-                        </Button>
-                      </div>
+                {loading ? (
+                  <div className="text-center py-4">
+                    <div className="spinner-border text-primary" role="status">
+                      <span className="visually-hidden">Cargando...</span>
                     </div>
-                  </Col> */}
+                  </div>
+                ) : (
+                  <Row className="g-4">
+                    {(roles.rolpaciente || roles.rolmedico) && (
+                      <VinTurnoHome
+                        tipo="Consulta"
+                        icono="bi bi-chat-left-dots"
+                        nombreEspecialista="Consulta General"
+                        especialidad="Medicina General"
+                        fecha="Disponible"
+                        tipoTurno="consulta"
+                        onConversar={() => handleConversar('consulta-general')}
+                      />
+                    )}
 
+                    {roles.rolpaciente && turnos.map((turno, index) => (
+                      <VinTurnoHome
+                        key={turno.idturno || index}
+                        id={turno.idturno}
+                        tipo={turno.tipo || "Presencial"}
+                        icono="bi bi-calendar"
+                        nombreEspecialista={`${turno.Profesional?.contacto?.nombre || "Profesional"} ${turno.Profesional?.contacto?.apellido || ""}`}
+                        especialidad={turno.Servicio?.nombre || "Especialidad"}
+                        fecha={formatearFecha(turno.dia)}
+                        tipoTurno="presencial"
+                        onCancelar={() => handleCancelarTurno(turno.idturno)}
+                        onModificar={() => handleModificarTurno(turno.idturno)}
+                        onTurnoActualizado={cargarTurnos}
+                      />
+                    ))}
 
-                  {/* Usando el componente VinTurnoHome para una consulta */}
-                  <VinTurnoHome 
-                    tipo="Consulta"
-                    icono="bi bi-chat-left-dots"
-                    nombreEspecialista="Dr. García"
-                    especialidad="Cardiología"
-                    fecha="15 Jun de 2025 14:30"
-                    tipoTurno="consulta"
-                    onConversar={() => handleConversar('turno1')}
-                  />
-
-                  {/* Usando el componente VinTurnoHome para un turno presencial */}
-                  <VinTurnoHome 
-                    tipo="Presencial"
-                    icono="bi bi-calendar"
-                    nombreEspecialista="Dra. Martínez"
-                    especialidad="Dermatología"
-                    fecha="16 Jun de 2025 10:00"
-                    tipoTurno="presencial"
-                    onCancelar={() => handleCancelarTurno('turno2')}
-                    onModificar={() => handleModificarTurno('turno2')}
-                  />
-
-                  {/* Otro ejemplo con turno próximo pero con borde primary agregado */}
-                  <VinTurnoHome 
-                    tipo="Presencial"
-                    icono="bi bi-calendar"
-                    nombreEspecialista="Dr. López"
-                    especialidad="Traumatología"
-                    fecha="17 Jun de 2025 09:15"
-                    tipoTurno="presencial"
-                    className="border-primary"
-                    onCancelar={() => handleCancelarTurno('turno3')}
-                    onModificar={() => handleModificarTurno('turno3')}
-                  />
-                </Row>
+                    {roles.rolpaciente && turnos.length === 0 && (
+                      <Col md={12}>
+                        <div className="text-center text-muted py-4">
+                          <i className="bi bi-calendar-x fs-1 mb-3"></i>
+                          <p>No tenés turnos programados próximamente.</p>
+                        </div>
+                      </Col>
+                    )}
+                  </Row>
+                )}
               </div>
             )}
-          </div>
           </Container>
         </div>
       </div>
