@@ -303,5 +303,22 @@ router.get('/por-servicio/:idservicio', async (req, res) => {
   }
 });
 
+router.put('/acreditar/:idturno', async (req, res) => {
+  const { idturno } = req.params;
+
+  try {
+    const turno = await Turnos.findByPk(idturno);
+    if (!turno) return res.status(404).json({ message: 'Turno no encontrado' });
+
+    turno.acreditado = true;
+    await turno.save();
+
+    res.json({ message: 'Turno acreditado correctamente' });
+  } catch (error) {
+    console.error('Error al acreditar turno:', error);
+    res.status(500).json({ message: 'Error al acreditar turno' });
+  }
+});
+
 
 module.exports = router;

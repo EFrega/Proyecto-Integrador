@@ -1,0 +1,13 @@
+.acreditar-card {
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.acreditar-card:hover {
+  background-color: #f0f8ff;
+}
+
+.acreditar-seleccionado {
+  background-color: #0dcaf0 !important;
+  color: white;
+}

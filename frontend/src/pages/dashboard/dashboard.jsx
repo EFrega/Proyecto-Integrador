@@ -19,6 +19,8 @@ import ReservaTurnos from '../reservaTurnos/reservaTurnos';
 import MisTurnos from '../misTurnos/misTurnos';
 import ReservaTurnosAdmin from '../reservaTurnosAdmin/reservaTurnosAdmin';
 import MisTurnosAdmin from '../misTurnosAdmin/misTurnosAdmin';
+import AcreditarTurnos from '../acreditarTurnos/acreditarTurnos';
+
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
@@ -126,14 +128,15 @@ const cargarTurnos = useCallback(async () => {
       { id: 'misTurnos', component: <FaListAlt className="mb-4 text-secondary hover-icon" title="Mis Turnos" key="misTurnos" onClick={() => setVista('misTurnos')} /> },
       { id: 'agendaRegular', component: <FaCalendarAlt className="fs-4 mb-4 text-secondary hover-icon" title="Agenda Regular" key="agendaRegular" onClick={() => setVista('agendaRegular')} /> },
       { id: 'fichaMedica', component: <FaFileAlt className="fs-4 mb-4 text-secondary hover-icon" title="Ficha Médica" key="fichaMedica" onClick={() => setVista('fichaMedica')} /> },
+      { id: 'acreditarTurnos', component: <FaTicketAlt className="mb-4 text-secondary hover-icon" title="Acreditar Turnos" key="acreditarTurnos" onClick={() => setVista('acreditarTurnos')} /> },
     ];
 
     let allowedIds = [];
 
     if (bool(parsedRoles.rolsuperadmin)) {
-      allowedIds = ['home', 'calendar', 'agendaRegular', 'file', 'fichaMedica','folder', 'servicios', 'turnos', 'misTurnos', 'excepcionesProf'];
+      allowedIds = ['home', 'calendar', 'agendaRegular', 'file', 'fichaMedica','folder', 'servicios', 'turnos', 'misTurnos', 'excepcionesProf', 'acreditarTurnos'];
     } else if (bool(parsedRoles.roladministrativo)) {
-      allowedIds = ['home', 'calendar', 'agendaRegular', 'fichaMedica','servicios', 'turnos', 'misTurnos', 'excepcionesProf'];
+      allowedIds = ['home', 'calendar', 'agendaRegular', 'fichaMedica','servicios', 'turnos', 'misTurnos', 'excepcionesProf', 'acreditarTurnos'];
     } else if (bool(parsedRoles.rolpaciente)) {
       allowedIds = ['home', 'comments', 'fichaMedica', 'turnos', 'misTurnos'];
     } else if (bool(parsedRoles.rolmedico)) {
@@ -203,6 +206,7 @@ const cargarTurnos = useCallback(async () => {
             : vista === 'chat' ? <Chat setTieneMensajesNuevos={setTieneMensajesNuevos} />
             : vista === 'turnos' ? (roles.roladministrativo || roles.rolsuperadmin) ? <ReservaTurnosAdmin /> : <ReservaTurnos />
             : vista === 'misTurnos' ? (roles.roladministrativo || roles.rolsuperadmin) ? <MisTurnosAdmin /> : <MisTurnos />
+            : vista === 'acreditarTurnos' ? <AcreditarTurnos />
             : (
               <div>
                 <h4 className="text-primary">Inicio</h4>
