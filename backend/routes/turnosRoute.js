@@ -20,7 +20,8 @@ const Contactos = ContactosModel(sequelize, require('sequelize').DataTypes);
 
 Profesionales.belongsTo(Contactos, { foreignKey: 'idcontacto', as: 'contacto' });
 Turnos.belongsTo(Profesionales, { foreignKey: 'idprofesional', as: 'Profesional' });
-Turnos.belongsTo(Servicios, { foreignKey: 'idservicio' });
+Turnos.belongsTo(Contactos, { foreignKey: 'idcontacto', as: 'Contacto' });
+Turnos.belongsTo(Servicios, { foreignKey: 'idservicio', as: 'Servicio' });
 
 const { Op } = require('sequelize');
 const moment = require('moment');
@@ -185,33 +186,37 @@ router.post('/reservar', async (req, res) => {
 // GET turnos reservados para un contacto (paciente) o para profesional
 router.get('/mis-turnos/:idcontacto', async (req, res) => {
   const { idcontacto } = req.params;
-
-  try {
-    const turnos = await Turnos.findAll({
+    try {
+      const turnos = await Turnos.findAll({
       where: {
         idcontacto,
-        reservado: true
+        [Op.or]: [
+          { reservado: true },
+          { atendido: true }
+        ]
       },
-      include: [
-        {
-            model: Profesionales,
-            as: 'Profesional',
-            include: [
-                {
-                    model: Contactos,
-                    as: 'contacto',
-                    attributes: ['nombre', 'apellido']
-                }
-            ]
-        },
-        {
-          model: Servicios,
-          as: 'Servicio',
-          attributes: ['idservicio', 'nombre']
-        }
-      ],
-      order: [['dia', 'ASC'], ['hora', 'ASC']]
-    });
+    attributes: ['idturno', 'dia', 'hora', 'atendido', 'observaciones', 'idprofesional', 'idservicio'],
+    include: [
+      {
+        model: Profesionales,
+        as: 'Profesional',
+        include: [
+          {
+            model: Contactos,
+            as: 'contacto',
+            attributes: ['nombre', 'apellido']
+          }
+        ]
+      },
+      {
+        model: Servicios,
+        as: 'Servicio',
+        attributes: ['idservicio', 'nombre']
+      }
+    ],
+    order: [['dia', 'ASC'], ['hora', 'ASC']]
+  });
+
 
     res.json(turnos);
   } catch (err) {
@@ -228,34 +233,42 @@ router.get('/mis-turnos-profesional/:idprofesional', async (req, res) => {
     const turnos = await Turnos.findAll({
       where: {
         idprofesional,
-        reservado: true
+        reservado: true,
+        acreditado: true
       },
       include: [
         {
-          model: Profesionales,
-          as: 'Profesional',
-          include: [
-            {
-              model: Contactos,
-              as: 'contacto',
-              attributes: ['nombre', 'apellido']
-            }
-          ]
+          model: Contactos,
+          as: 'Contacto',
+          attributes: ['nombre', 'apellido']
         },
         {
           model: Servicios,
+          as: 'Servicio',
           attributes: ['nombre']
         }
       ],
       order: [['dia', 'ASC'], ['hora', 'ASC']]
     });
 
-    res.json(turnos);
+  const turnosAdaptados = turnos.map(t => ({
+    idturno: t.idturno,
+    nombre: t.Contacto?.nombre || '',
+    apellido: t.Contacto?.apellido || '',
+    nombreservicio: t.Servicio?.nombre || '',
+    dia: t.dia,
+    hora: t.hora,
+    atendido: t.atendido,
+    acreditado: t.acreditado  
+  }));
+
+    res.json(turnosAdaptados);
   } catch (err) {
     console.error('Error al obtener turnos del profesional:', err);
     res.status(500).json({ message: 'Error al obtener turnos del profesional' });
   }
 });
+
 
 
 // DELETE cancelar turno
@@ -320,5 +333,54 @@ router.put('/acreditar/:idturno', async (req, res) => {
   }
 });
 
+// Obtener un turno por ID
+router.get('/:idturno', async (req, res) => {
+  try {
+    const { idturno } = req.params;
+    const turno = await Turnos.findOne({
+      where: { idturno },
+      include: [
+        { model: Contactos, as: 'Contacto', attributes: ['nombre', 'apellido'] },
+        { model: Servicios, as: 'Servicio', attributes: ['nombre'] },
+        { model: Profesionales, as: 'Profesional', attributes: ['matricula'] }
+      ]
+    });
+
+    if (!turno) return res.status(404).json({ error: 'Turno no encontrado' });
+
+    const contacto = await Contactos.findByPk(turno.idcontacto);
+    res.json({
+      ...turno.toJSON(),
+      nombre: contacto?.nombre || '',
+      apellido: contacto?.apellido || ''
+    });
+  } catch (err) {
+    console.error('Error al obtener el turno:', err);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+// PUT /turnos/:idturno - Marcar como atendido y guardar observaciones
+router.put('/:idturno', async (req, res) => {
+  const { idturno } = req.params;
+  const { observaciones, atendido } = req.body;
+
+  try {
+    const turno = await Turnos.findByPk(idturno);
+    if (!turno) {
+      return res.status(404).json({ message: 'Turno no encontrado' });
+    }
+
+    turno.atendido = !!atendido; // por las dudas, lo forzamos a booleano
+    turno.observaciones = observaciones || '';
+
+    await turno.save();
+
+    res.json({ message: 'Turno actualizado correctamente' });
+  } catch (error) {
+    console.error('Error al actualizar el turno:', error);
+    res.status(500).json({ message: 'Error al actualizar el turno' });
+  }
+});
 
 module.exports = router;

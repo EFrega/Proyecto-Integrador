@@ -4,7 +4,8 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { Container, Navbar, Nav, Row, Col } from 'react-bootstrap';
 import {
   FaHome, FaCalendarAlt, FaComments, FaFileAlt, FaFolder, FaSignOutAlt,
-  FaUsers, FaEnvelope, FaClipboardList, FaTicketAlt, FaListAlt, FaCalendarTimes
+  FaUsers, FaEnvelope, FaClipboardList, FaTicketAlt, FaListAlt, FaCalendarTimes,
+  FaCalendarCheck
 } from 'react-icons/fa';
 import './dashboard.css';
 import Roles from '../roles/Roles';
@@ -20,7 +21,9 @@ import MisTurnos from '../misTurnos/misTurnos';
 import ReservaTurnosAdmin from '../reservaTurnosAdmin/reservaTurnosAdmin';
 import MisTurnosAdmin from '../misTurnosAdmin/misTurnosAdmin';
 import AcreditarTurnos from '../acreditarTurnos/acreditarTurnos';
-
+import MisTurnosMedico from '../misTurnosMedico/misTurnosMedico';
+import TurnosHoyMedico from '../turnosHoyMedico/turnosHoyMedico';
+import AtencionTurno from '../atencionTurno/atencionTurno';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
@@ -30,6 +33,9 @@ const Dashboard = ({ setIsLoggedIn, tieneMensajesNuevos, setTieneMensajesNuevos 
   const [roles, setRoles] = useState({});
   const [turnos, setTurnos] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [turnoSeleccionado, setTurnoSeleccionado] = useState(null);
+
+  const cerrarAtencion = () => setTurnoSeleccionado(null);
 
   const formatearFecha = (fecha) => {
     const date = new Date(fecha);
@@ -48,50 +54,42 @@ const Dashboard = ({ setIsLoggedIn, tieneMensajesNuevos, setTieneMensajesNuevos 
     window.location.href = '/';
   };
 
-  const handleCancelarTurno = (turnoId) => {
-    console.log('Cancelar turno:', turnoId);
-  };
-
-  const handleModificarTurno = (turnoId) => {
-    console.log('Modificar turno:', turnoId);
-  };
-
   const handleConversar = (turnoId) => {
-    console.log('Iniciar conversación:', turnoId);
+    setTurnoSeleccionado(null);
     setVista('chat');
   };
 
-const cargarTurnos = useCallback(async () => {
-  try {
-    setLoading(true);
-    const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
-    const idcontacto = usuario.idcontacto;
-    if (!idcontacto) return;
+  const cargarTurnos = useCallback(async () => {
+    try {
+      setLoading(true);
+      const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
+      const idcontacto = usuario.idcontacto;
+      if (!idcontacto) return;
 
-    const response = await fetch(`${API_URL}/turnos/mis-turnos/${idcontacto}`, {
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
-      }
-    });
-
-    if (response.ok) {
-      const data = await response.json();
-      const hoy = new Date();
-      hoy.setHours(0, 0, 0, 0);
-
-      const turnosFiltrados = data.filter(turno => {
-        const fechaTurno = new Date(turno.dia);
-        return fechaTurno >= hoy && turno.reservado !== false;
+      const response = await fetch(`${API_URL}/turnos/mis-turnos/${idcontacto}`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
       });
 
-      setTurnos(turnosFiltrados);
+      if (response.ok) {
+        const data = await response.json();
+        const hoy = new Date();
+        hoy.setHours(0, 0, 0, 0);
+
+        const turnosFiltrados = data.filter(turno => {
+          const fechaTurno = new Date(turno.dia);
+          return fechaTurno >= hoy && turno.reservado !== false;
+        });
+
+        setTurnos(turnosFiltrados);
+      }
+    } catch (error) {
+      console.error('Error al cargar turnos:', error);
+    } finally {
+      setLoading(false);
     }
-  } catch (error) {
-    console.error('Error al cargar turnos:', error);
-  } finally {
-    setLoading(false);
-  }
-}, []);
+  }, []);
 
   useEffect(() => {
     const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
@@ -107,8 +105,8 @@ const cargarTurnos = useCallback(async () => {
     const bool = (val) => val === true || val === 1 || val === "1";
 
     const allIcons = [
-      { id: 'home', component: <FaHome className="fs-4 mt-5 mb-4 text-secondary hover-icon" title="Inicio" key="home" onClick={() => setVista('inicio')} /> },
-      { id: 'calendar', component: <FaCalendarAlt className="fs-4 mb-4 text-secondary hover-icon" title="Gestión de Agendas" key="agendas" onClick={() => setVista('agendas')} /> },
+      { id: 'home', component: <FaHome className="fs-4 mt-5 mb-4 text-secondary hover-icon" title="Inicio" key="home" onClick={() => { setVista('inicio'); cerrarAtencion(); }} /> },
+      { id: 'calendar', component: <FaCalendarAlt className="fs-4 mb-4 text-secondary hover-icon" title="Gestión de Agendas" key="agendas" onClick={() => { setVista('agendas'); cerrarAtencion(); }} /> },
       { id: 'comments', component: (
         <FaComments
           className={`mb-4 hover-icon ${tieneMensajesNuevos ? 'text-danger' : 'text-secondary'}`}
@@ -117,18 +115,20 @@ const cargarTurnos = useCallback(async () => {
           onClick={() => {
             setVista('chat');
             setTieneMensajesNuevos(false);
+            cerrarAtencion();
           }}
         />
       )},
-      { id: 'file', component: <FaFileAlt className="fs-4 mb-4 text-secondary hover-icon" key="file" onClick={() => setVista('inicio')} /> },
-      { id: 'folder', component: <FaFolder className="fs-4 mb-4 text-secondary hover-icon" key="folder" onClick={() => setVista('inicio')} /> },
-      { id: 'excepcionesProf', component: <FaCalendarTimes className="fs-4 mb-4 text-secondary hover-icon" key="excepciones" onClick={() => setVista('excepcionesProf')} /> },
-      { id: 'servicios', component: <FaClipboardList className="fs-4 mb-4 text-secondary hover-icon" title="Gestión de Servicios" key="servicios" onClick={() => setVista('servicios')} /> },
-      { id: 'turnos', component: <FaTicketAlt className="mb-4 text-secondary hover-icon" title="Reservar Turnos" key="turnos" onClick={() => setVista('turnos')} /> },
-      { id: 'misTurnos', component: <FaListAlt className="mb-4 text-secondary hover-icon" title="Mis Turnos" key="misTurnos" onClick={() => setVista('misTurnos')} /> },
-      { id: 'agendaRegular', component: <FaCalendarAlt className="fs-4 mb-4 text-secondary hover-icon" title="Agenda Regular" key="agendaRegular" onClick={() => setVista('agendaRegular')} /> },
-      { id: 'fichaMedica', component: <FaFileAlt className="fs-4 mb-4 text-secondary hover-icon" title="Ficha Médica" key="fichaMedica" onClick={() => setVista('fichaMedica')} /> },
-      { id: 'acreditarTurnos', component: <FaTicketAlt className="mb-4 text-secondary hover-icon" title="Acreditar Turnos" key="acreditarTurnos" onClick={() => setVista('acreditarTurnos')} /> },
+      { id: 'file', component: <FaFileAlt className="fs-4 mb-4 text-secondary hover-icon" key="file" onClick={() => { setVista('inicio'); cerrarAtencion(); }} /> },
+      { id: 'folder', component: <FaFolder className="fs-4 mb-4 text-secondary hover-icon" key="folder" onClick={() => { setVista('inicio'); cerrarAtencion(); }} /> },
+      { id: 'excepcionesProf', component: <FaCalendarTimes className="fs-4 mb-4 text-secondary hover-icon" key="excepciones" onClick={() => { setVista('excepcionesProf'); cerrarAtencion(); }} /> },
+      { id: 'servicios', component: <FaClipboardList className="fs-4 mb-4 text-secondary hover-icon" title="Gestión de Servicios" key="servicios" onClick={() => { setVista('servicios'); cerrarAtencion(); }} /> },
+      { id: 'turnos', component: <FaTicketAlt className="mb-4 text-secondary hover-icon" title="Reservar Turnos" key="turnos" onClick={() => { setVista('turnos'); cerrarAtencion(); }} /> },
+      { id: 'misTurnos', component: <FaListAlt className="mb-4 text-secondary hover-icon" title="Mis Turnos" key="misTurnos" onClick={() => { setVista('misTurnos'); cerrarAtencion(); }} /> },
+      { id: 'agendaRegular', component: <FaCalendarAlt className="fs-4 mb-4 text-secondary hover-icon" title="Agenda Regular" key="agendaRegular" onClick={() => { setVista('agendaRegular'); cerrarAtencion(); }} /> },
+      { id: 'fichaMedica', component: <FaFileAlt className="fs-4 mb-4 text-secondary hover-icon" title="Ficha Médica" key="fichaMedica" onClick={() => { setVista('fichaMedica'); cerrarAtencion(); }} /> },
+      { id: 'acreditarTurnos', component: <FaTicketAlt className="mb-4 text-secondary hover-icon" title="Acreditar Turnos" key="acreditarTurnos" onClick={() => { setVista('acreditarTurnos'); cerrarAtencion(); }} /> },
+      { id: 'misTurnosMedico', component: <FaCalendarCheck className="fs-4 mb-4 text-secondary hover-icon" title="Mis Turnos Médicos" key="misTurnosMedico" onClick={() => { setVista('misTurnosMedico'); cerrarAtencion(); }} /> },
     ];
 
     let allowedIds = [];
@@ -140,7 +140,7 @@ const cargarTurnos = useCallback(async () => {
     } else if (bool(parsedRoles.rolpaciente)) {
       allowedIds = ['home', 'comments', 'fichaMedica', 'turnos', 'misTurnos'];
     } else if (bool(parsedRoles.rolmedico)) {
-      allowedIds = ['home', 'comments', 'fichaMedica'];
+      allowedIds = ['home', 'comments', 'fichaMedica', 'misTurnosMedico'];
     }
 
     const filteredIcons = allIcons.filter(icon => allowedIds.includes(icon.id));
@@ -149,7 +149,7 @@ const cargarTurnos = useCallback(async () => {
     if (parsedRoles.rolpaciente) {
       cargarTurnos();
     } else {
-      setLoading(false); // ✅ Para otros roles, salimos del loading
+      setLoading(false);
     }
   }, [tieneMensajesNuevos, setTieneMensajesNuevos, cargarTurnos]);
 
@@ -164,7 +164,7 @@ const cargarTurnos = useCallback(async () => {
       <div className="d-flex flex-grow-1">
         <div className="bg-white border-end d-flex flex-column align-items-center p-2 mt-4" style={{ width: '60px' }}>
           {visibleIcons.map(icon => icon.component)}
-          <FaUsers className="fs-4 mb-4 text-secondary hover-icon" title="Gestión de Usuarios" onClick={() => setVista('roles')} />
+          <FaUsers className="fs-4 mb-4 text-secondary hover-icon" title="Gestión de Usuarios" onClick={() => { setVista('roles'); cerrarAtencion(); }} />
           <FaSignOutAlt className="fs-4 mt-auto mb-2 text-danger hover-icon" title="Cerrar sesión" onClick={handleLogout} />
         </div>
 
@@ -197,7 +197,9 @@ const cargarTurnos = useCallback(async () => {
           </Navbar>
 
           <Container fluid className="flex-grow-1 p-4 bg-light">
-            {vista === 'roles' ? <Roles />
+            {turnoSeleccionado ? (
+              <AtencionTurno idturno={turnoSeleccionado} onCerrar={cerrarAtencion} />
+            ) : vista === 'roles' ? <Roles />
             : vista === 'servicios' ? <CargarServicio />
             : vista === 'excepcionesProf' ? <ExcepcionesProf />
             : vista === 'agendas' ? <Agendas />
@@ -207,6 +209,9 @@ const cargarTurnos = useCallback(async () => {
             : vista === 'turnos' ? (roles.roladministrativo || roles.rolsuperadmin) ? <ReservaTurnosAdmin /> : <ReservaTurnos />
             : vista === 'misTurnos' ? (roles.roladministrativo || roles.rolsuperadmin) ? <MisTurnosAdmin /> : <MisTurnos />
             : vista === 'acreditarTurnos' ? <AcreditarTurnos />
+            : vista === 'misTurnosMedico' ? (
+                <MisTurnosMedico setTurnoSeleccionado={setTurnoSeleccionado} />
+              )
             : (
               <div>
                 <h4 className="text-primary">Inicio</h4>
@@ -217,44 +222,50 @@ const cargarTurnos = useCallback(async () => {
                     </div>
                   </div>
                 ) : (
-                  <Row className="g-4">
-                    {(roles.rolpaciente || roles.rolmedico) && (
-                      <VinTurnoHome
-                        tipo="Consulta"
-                        icono="bi bi-chat-left-dots"
-                        nombreEspecialista="Consulta General"
-                        especialidad="Medicina General"
-                        fecha="Disponible"
-                        tipoTurno="consulta"
-                        onConversar={() => handleConversar('consulta-general')}
-                      />
-                    )}
+                  turnoSeleccionado ? (
+                    <AtencionTurno idturno={turnoSeleccionado} onCerrar={cerrarAtencion} />
+                  ) : (
+                    <Row className="g-4">
+                      {(roles.rolpaciente || roles.rolmedico) && (
+                        <VinTurnoHome
+                          tipo="Consulta"
+                          icono="bi bi-chat-left-dots"
+                          nombreEspecialista="Consulta General"
+                          especialidad="Medicina General"
+                          fecha="Disponible"
+                          tipoTurno="consulta"
+                          onConversar={() => handleConversar('consulta-general')}
+                        />
+                      )}
 
-                    {roles.rolpaciente && turnos.map((turno, index) => (
-                      <VinTurnoHome
-                        key={turno.idturno || index}
-                        id={turno.idturno}
-                        tipo={turno.tipo || "Presencial"}
-                        icono="bi bi-calendar"
-                        nombreEspecialista={`${turno.Profesional?.contacto?.nombre || "Profesional"} ${turno.Profesional?.contacto?.apellido || ""}`}
-                        especialidad={turno.Servicio?.nombre || "Especialidad"}
-                        fecha={formatearFecha(turno.dia)}
-                        tipoTurno="presencial"
-                        onCancelar={() => handleCancelarTurno(turno.idturno)}
-                        onModificar={() => handleModificarTurno(turno.idturno)}
-                        onTurnoActualizado={cargarTurnos}
-                      />
-                    ))}
+                      {roles.rolpaciente && turnos.map((turno, index) => (
+                        <VinTurnoHome
+                          key={turno.idturno || index}
+                          id={turno.idturno}
+                          tipo={turno.tipo || "Presencial"}
+                          icono="bi bi-calendar"
+                          nombreEspecialista={`${turno.Profesional?.contacto?.nombre || "Profesional"} ${turno.Profesional?.contacto?.apellido || ""}`}
+                          especialidad={turno.Servicio?.nombre || "Especialidad"}
+                          fecha={formatearFecha(turno.dia)}
+                          tipoTurno="presencial"
+                          onTurnoActualizado={cargarTurnos}
+                        />
+                      ))}
 
-                    {roles.rolpaciente && turnos.length === 0 && (
-                      <Col md={12}>
-                        <div className="text-center text-muted py-4">
-                          <i className="bi bi-calendar-x fs-1 mb-3"></i>
-                          <p>No tenés turnos programados próximamente.</p>
-                        </div>
-                      </Col>
-                    )}
-                  </Row>
+                      {roles.rolpaciente && turnos.length === 0 && (
+                        <Col md={12}>
+                          <div className="text-center text-muted py-4">
+                            <i className="bi bi-calendar-x fs-1 mb-3"></i>
+                            <p>No tenés turnos programados próximamente.</p>
+                          </div>
+                        </Col>
+                      )}
+
+                      {roles.rolmedico && (
+                        <TurnosHoyMedico setTurnoSeleccionado={setTurnoSeleccionado} />
+                      )}
+                    </Row>
+                  )
                 )}
               </div>
             )}

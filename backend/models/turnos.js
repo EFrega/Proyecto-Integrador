@@ -51,5 +51,21 @@ module.exports = (sequelize, DataTypes) => {
         tableName: 'Turnos',
         timestamps: false
     });
+
+    Turnos.associate = function(models) {
+        Turnos.belongsTo(models.Contactos, {
+            foreignKey: 'idcontacto',
+            as: 'Contacto'
+        });
+        Turnos.belongsTo(models.Profesionales, {
+            foreignKey: 'idprofesional',
+            as: 'Profesional'
+        });
+        Turnos.belongsTo(models.Servicios, {
+            foreignKey: 'idservicio',
+            as: 'Servicio'
+        });
+    };
+
     return Turnos;
 };

@@ -9,7 +9,7 @@ import {
 import Login from './pages/login/login';
 import Dashboard from './pages/dashboard/dashboard';
 import Registro from './pages/register/register';
-
+import AtencionTurno from './pages/atencionTurno/atencionTurno';
 import socket from './pages/socket/socket';
 const API = process.env.REACT_APP_API_URL;
 function App() {
@@ -75,6 +75,12 @@ function App() {
             ) : (
               <Navigate to="/" />
             )
+          }
+        />
+        <Route
+          path="/atencion-turno/:idturno"
+          element={
+            isLoggedIn ? <AtencionTurno /> : <Navigate to="/" />
           }
         />
       </Routes>
