@@ -35,6 +35,7 @@ const Login = ({ setIsLoggedIn }) => {
             localStorage.setItem('usuario', JSON.stringify({
                 idusuario,
                 idcontacto,
+                idprofesional: response.data.idprofesional ?? null,
                 nombre,
                 apellido,
                 nombreUsuario

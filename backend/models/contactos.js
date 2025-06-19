@@ -97,5 +97,12 @@ module.exports = (sequelize, DataTypes) => {
     timestamps: false
   });
 
+  Contactos.associate = function(models) {
+    Contactos.hasMany(models.Turnos, {
+      foreignKey: 'idcontacto',
+      as: 'Turnos'
+    });
+  };
+
   return Contactos;
 };
