@@ -3,9 +3,9 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { Container, Navbar, Nav, Row, Col } from 'react-bootstrap';
 import {
-  FaHome, FaCalendarAlt, FaComments, FaFileAlt, FaFolder, FaSignOutAlt,
-  FaUsers, FaEnvelope, FaClipboardList, FaTicketAlt, FaListAlt, FaCalendarTimes,
-  FaCalendarCheck
+  FaHome, FaCalendarAlt, FaComments, FaFileAlt, FaSignOutAlt,
+  FaUsers, FaClipboardList, FaTicketAlt, FaListAlt, FaCalendarTimes,
+  FaCalendarCheck, FaUserCheck
 } from 'react-icons/fa';
 import './dashboard.css';
 import API from '../../helpers/api';
@@ -101,7 +101,7 @@ const Dashboard = ({ setIsLoggedIn, tieneMensajesNuevos, setTieneMensajesNuevos 
 
     const allIcons = [
       { id: 'home', component: <FaHome className="fs-4 mt-5 mb-4 text-secondary hover-icon" title="Inicio" key="home" onClick={() => { setVista('inicio'); cerrarAtencion(); }} /> },
-      { id: 'calendar', component: <FaCalendarAlt className="fs-4 mb-4 text-secondary hover-icon" title="Gestión de Agendas" key="agendas" onClick={() => { setVista('agendas'); cerrarAtencion(); }} /> },
+      { id: 'calendar', component: <FaCalendarAlt className="fs-4 mb-4 text-secondary hover-icon" title="Agenda de Feriados" key="agendas" onClick={() => { setVista('agendas'); cerrarAtencion(); }} /> },
       { id: 'comments', component: (
         <FaComments
           className={`mb-4 hover-icon ${tieneMensajesNuevos ? 'text-danger' : 'text-secondary'}`}
@@ -114,15 +114,15 @@ const Dashboard = ({ setIsLoggedIn, tieneMensajesNuevos, setTieneMensajesNuevos 
           }}
         />
       )},
-      { id: 'file', component: <FaFileAlt className="fs-4 mb-4 text-secondary hover-icon" key="file" onClick={() => { setVista('inicio'); cerrarAtencion(); }} /> },
-      { id: 'folder', component: <FaFolder className="fs-4 mb-4 text-secondary hover-icon" key="folder" onClick={() => { setVista('inicio'); cerrarAtencion(); }} /> },
-      { id: 'excepcionesProf', component: <FaCalendarTimes className="fs-4 mb-4 text-secondary hover-icon" key="excepciones" onClick={() => { setVista('excepcionesProf'); cerrarAtencion(); }} /> },
+//      { id: 'file', component: <FaFileAlt className="fs-4 mb-4 text-secondary hover-icon" key="file" onClick={() => { setVista('inicio'); cerrarAtencion(); }} /> },
+//      { id: 'folder', component: <FaFolder className="fs-4 mb-4 text-secondary hover-icon" key="folder" onClick={() => { setVista('inicio'); cerrarAtencion(); }} /> },
+      { id: 'excepcionesProf', component: <FaCalendarTimes className="fs-4 mb-4 text-secondary hover-icon" title="Gestión de Excepciones" key="excepciones" onClick={() => { setVista('excepcionesProf'); cerrarAtencion(); }} /> },
       { id: 'servicios', component: <FaClipboardList className="fs-4 mb-4 text-secondary hover-icon" title="Gestión de Servicios" key="servicios" onClick={() => { setVista('servicios'); cerrarAtencion(); }} /> },
       { id: 'turnos', component: <FaTicketAlt className="mb-4 text-secondary hover-icon" title="Reservar Turnos" key="turnos" onClick={() => { setVista('turnos'); cerrarAtencion(); }} /> },
       { id: 'misTurnos', component: <FaListAlt className="mb-4 text-secondary hover-icon" title="Mis Turnos" key="misTurnos" onClick={() => { setVista('misTurnos'); cerrarAtencion(); }} /> },
-      { id: 'agendaRegular', component: <FaCalendarAlt className="fs-4 mb-4 text-secondary hover-icon" title="Agenda Regular" key="agendaRegular" onClick={() => { setVista('agendaRegular'); cerrarAtencion(); }} /> },
+      { id: 'agendaRegular', component: <FaCalendarAlt className="fs-4 mb-4 text-secondary hover-icon" title="Gestión de Agenda Regular" key="agendaRegular" onClick={() => { setVista('agendaRegular'); cerrarAtencion(); }} /> },
       { id: 'fichaMedica', component: <FaFileAlt className="fs-4 mb-4 text-secondary hover-icon" title="Ficha Médica" key="fichaMedica" onClick={() => { setVista('fichaMedica'); cerrarAtencion(); }} /> },
-      { id: 'acreditarTurnos', component: <FaTicketAlt className="mb-4 text-secondary hover-icon" title="Acreditar Turnos" key="acreditarTurnos" onClick={() => { setVista('acreditarTurnos'); cerrarAtencion(); }} /> },
+      { id: 'acreditarTurnos', component: <FaUserCheck className="mb-4 text-secondary hover-icon" title="Acreditar Turnos" key="acreditarTurnos" onClick={() => { setVista('acreditarTurnos'); cerrarAtencion(); }} /> },
       { id: 'misTurnosMedico', component: <FaCalendarCheck className="fs-4 mb-4 text-secondary hover-icon" title="Mis Turnos Médicos" key="misTurnosMedico" onClick={() => { setVista('misTurnosMedico'); cerrarAtencion(); }} /> },
     ];
 
@@ -172,9 +172,6 @@ const Dashboard = ({ setIsLoggedIn, tieneMensajesNuevos, setTieneMensajesNuevos 
                   <FaComments color="white" />
                 </div>
               )}
-              <div className="rounded-circle bg-info d-flex justify-content-center align-items-center" style={{ width: '30px', height: '30px' }}>
-                <FaEnvelope color="white" />
-              </div>
               <span className="text-muted small">
                 {(() => {
                   try {

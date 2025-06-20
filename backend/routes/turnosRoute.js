@@ -204,7 +204,7 @@ router.get('/mis-turnos/:idcontacto', async (req, res) => {
           {
             model: Contactos,
             as: 'contacto',
-            attributes: ['nombre', 'apellido']
+            attributes: ['nombre', 'apellido', 'fechanacim']
           }
         ]
       },
@@ -340,7 +340,7 @@ router.get('/:idturno', async (req, res) => {
     const turno = await Turnos.findOne({
       where: { idturno },
       include: [
-        { model: Contactos, as: 'Contacto', attributes: ['nombre', 'apellido'] },
+        { model: Contactos, as: 'Contacto', attributes: ['nombre', 'apellido', 'fechanacim'] },
         { model: Servicios, as: 'Servicio', attributes: ['nombre'] },
         { model: Profesionales, as: 'Profesional', attributes: ['matricula'] }
       ]
@@ -352,7 +352,8 @@ router.get('/:idturno', async (req, res) => {
     res.json({
       ...turno.toJSON(),
       nombre: contacto?.nombre || '',
-      apellido: contacto?.apellido || ''
+      apellido: contacto?.apellido || '',
+      fechanacim: contacto?.fechanacim || null
     });
   } catch (err) {
     console.error('Error al obtener el turno:', err);

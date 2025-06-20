@@ -31,7 +31,8 @@ router.put('/actualizar-medico/:idusuario', async (req, res) => {
       } else {
         await Profesionales.create({
           idcontacto,
-          activo: true
+          activo: true,
+          matricula: '0'
         });
       }
     } else {
