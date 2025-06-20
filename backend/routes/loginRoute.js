@@ -37,9 +37,9 @@ router.post('/', async (req, res) => {
         console.log("Generando el token...");
         const jwtSecret = process.env.JWT_SECRET || 'secreto';
         const token = jwt.sign(
-            { id: usuarioDb.idUsuario, usuario: usuarioDb.usuario },
+            { id: usuarioDb.idusuario, usuario: usuarioDb.usuario },
             jwtSecret, // Usar variable de entorno
-            { expiresIn: '1h' }  // El token expira en una hora
+            { expiresIn: usuarioDb.rolpaciente ? '1h' : '8h' }  // El token expira en una hora si el rol es paciente
         );
 
         const contacto = await Contactos.findByPk(usuarioDb.idcontacto);

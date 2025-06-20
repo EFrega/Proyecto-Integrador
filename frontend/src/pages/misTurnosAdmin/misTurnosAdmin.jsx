@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import axios from 'axios';
+import API from '../../helpers/api';
 import { Container, Table, Button, InputGroup, Form, Card, Row, Col } from 'react-bootstrap';
 
 const MisTurnosAdmin = () => {
-  const API = process.env.REACT_APP_API_URL;
   const [pacientes, setPacientes] = useState([]);
   const [pacienteSel, setPacienteSel] = useState(null);
   const [turnos, setTurnos] = useState([]);
@@ -16,15 +15,15 @@ const MisTurnosAdmin = () => {
   const pacientesPorPagina = 10;
 
   useEffect(() => {
-    axios.get(`${API}/contactos?rolusuario=rolmedico`).then(res => setPacientes(res.data));
-    axios.get(`${API}/servicios`).then(res => setServicios(res.data));
-  }, [API]);
+    API.get(`/contactos?rolusuario=rolmedico`).then(res => setPacientes(res.data));
+    API.get(`/servicios`).then(res => setServicios(res.data));
+  }, []);
 
   const cargarTurnosPaciente = useCallback(async () => {
     if (!pacienteSel) return;
 
     try {
-      const res = await axios.get(`${API}/turnos/mis-turnos/${pacienteSel.idcontacto}`);
+      const res = await API.get(`/turnos/mis-turnos/${pacienteSel.idcontacto}`);
       const turnosOrdenados = res.data.sort((a, b) => {
         const fechaA = `${a.dia} ${a.hora}`;
         const fechaB = `${b.dia} ${b.hora}`;
@@ -34,13 +33,13 @@ const MisTurnosAdmin = () => {
     } catch (err) {
       alert('Error al cargar los turnos del paciente');
     }
-  }, [API, pacienteSel]);
+  }, [pacienteSel]);
 
   const cancelarTurno = async (idturno) => {
     if (!window.confirm('¿Estás seguro de que querés cancelar este turno?')) return;
 
     try {
-      await axios.delete(`${API}/turnos/cancelar/${idturno}`);
+      await API.delete(`/turnos/cancelar/${idturno}`);
       alert('Turno cancelado correctamente');
       cargarTurnosPaciente();
     } catch (err) {

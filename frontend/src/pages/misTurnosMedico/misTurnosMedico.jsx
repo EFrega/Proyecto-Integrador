@@ -1,11 +1,10 @@
 // src/pages/misTurnosMedico.jsx
 
 import React, { useEffect, useState, useCallback } from 'react';
-import axios from 'axios';
+import API from '../../helpers/api';
 import { Table, Container, Button, Form } from 'react-bootstrap';
 
 const MisTurnosMedico = ({ setTurnoSeleccionado }) => {
-  const API = process.env.REACT_APP_API_URL;
   const [turnos, setTurnos] = useState([]);
   const [fechaSeleccionada, setFechaSeleccionada] = useState(new Date().toISOString().split('T')[0]);
 
@@ -13,7 +12,7 @@ const MisTurnosMedico = ({ setTurnoSeleccionado }) => {
 
   const cargarTurnos = useCallback(async () => {
     try {
-      const res = await axios.get(`${API}/turnos/mis-turnos-profesional/${usuario.idprofesional}`);
+      const res = await API.get(`/turnos/mis-turnos-profesional/${usuario.idprofesional}`);
       console.log('Turnos recibidos:', res.data);
 
       const filtrados = res.data.filter(t => {
@@ -26,7 +25,7 @@ const MisTurnosMedico = ({ setTurnoSeleccionado }) => {
     } catch (err) {
       console.error('Error al cargar turnos del médico:', err);
     }
-  }, [API, usuario.idprofesional, fechaSeleccionada]);
+  }, [usuario.idprofesional, fechaSeleccionada]);
 
   useEffect(() => {
     const roles = JSON.parse(localStorage.getItem('roles') || '{}');

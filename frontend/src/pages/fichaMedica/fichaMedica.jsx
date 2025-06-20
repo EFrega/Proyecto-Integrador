@@ -1,11 +1,10 @@
 // src/pages/fichaMedica.jsx
 
 import React, { useState, useEffect, useCallback } from 'react';
-import axios from 'axios';
-import { Form, Button, Container, Row, Col, InputGroup, Table, Pagination } from 'react-bootstrap';
+import API from '../../helpers/api';
+import { Form, Button, Row, Col, InputGroup, Table, Pagination } from 'react-bootstrap';
 
 function FichaMedica() {
-    const API = process.env.REACT_APP_API_URL;
     const [contactos, setContactos] = useState([]);
     const [busqueda, setBusqueda] = useState('');
     const [contactosFiltrados, setContactosFiltrados] = useState([]);
@@ -27,7 +26,7 @@ function FichaMedica() {
 const cargarFicha = useCallback(async (idcontacto) => {
     try {
         // Se obtiene la ficha médica por ID de contacto
-        const res = await axios.get(`${API}/ficha/${idcontacto}`);
+        const res = await API.get(`/ficha/${idcontacto}`);
         // Se actualiza el estado con la ficha médica obtenida
         // Si no se obtiene nada, se establece un objeto vacío
         setFormData(res.data || {
@@ -49,45 +48,39 @@ const cargarFicha = useCallback(async (idcontacto) => {
             observficha: ''
         });
     }
-}, [API]);
+}, []);
 
 
 useEffect(() => {
-    const usuarioGuardado = localStorage.getItem('usuario');
-    const rolesGuardados = localStorage.getItem('roles');
-    if (!usuarioGuardado || !rolesGuardados) {
-        alert('Debe iniciar sesión');
-        return;
+    const obtenerDatosUsuario = async () => {
+        try {
+            const rol = JSON.parse(localStorage.getItem('roles'));
+            const usuario = JSON.parse(localStorage.getItem('usuario'));
+            console.log('Rol del usuario:', rol);
+
+            setUsuarioActual({ ...usuario, roles: rol });
+            console.log(typeof rol);
+            if (rol.rolpaciente) {
+                setContactoSeleccionado({
+                    idcontacto: usuario.idcontacto,
+                    nombre: usuario.nombre,
+                    apellido: usuario.apellido,
+                    docum: usuario.docum
+                });
+                cargarFicha(usuario.idcontacto);
+            } else {
+                const contactos = await API.get(`/contactos`);
+                setContactos(contactos.data);
+                setContactosFiltrados(contactos.data);  
+            }
+        } catch (error) {
+            console.error('Error al obtener datos de usuario:', error);
+            alert('Error al obtener datos del usuario');
+        }
     }
 
-    const usuario = JSON.parse(usuarioGuardado);
-    const roles = JSON.parse(rolesGuardados);
-
-    console.log('Usuario:', usuario);
-    console.log('Roles:', roles);
-
-    setUsuarioActual({ ...usuario, roles });
-
-    if (roles.rolpaciente) {
-        // For patients, set the contact info and load their medical record
-        setContactoSeleccionado({
-            idcontacto: usuario.idcontacto,
-            nombre: usuario.nombre,
-            apellido: usuario.apellido,
-            docum: usuario.docum
-        });
-        cargarFicha(usuario.idcontacto);
-    } else {
-        axios.get(`${API}/contactos`)
-            .then(res => {
-                setContactos(res.data);
-                setContactosFiltrados(res.data);
-            })
-            .catch(err => {
-                console.error('Error al obtener contactos:', err);
-            });
-    }
-}, [API, cargarFicha]);
+    obtenerDatosUsuario();   
+}, [cargarFicha]);
 
     const handleBuscar = (e) => {
         const valor = e.target.value;
@@ -114,7 +107,7 @@ useEffect(() => {
         if (!contactoSeleccionado || !usuarioActual) return;
 
         try {
-            const res = await axios.post(`${API}/ficha`, {
+            const res = await API.post(`/ficha`, {
                 idusuario: usuarioActual.idusuario,
                 idcontacto: contactoSeleccionado.idcontacto,
                 ...formData

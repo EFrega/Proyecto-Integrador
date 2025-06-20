@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import API from '../../helpers/api';
 import {
   Table, Button, Form, Alert, Spinner,
   Container, Row, Col, InputGroup, Modal
 } from 'react-bootstrap';
 import { FaEdit, FaEye, FaKey } from 'react-icons/fa';
-const API = process.env.REACT_APP_API_URL;
 const Roles = () => {
   const [usuariosOriginal, setUsuariosOriginal] = useState([]);
   const [usuariosFiltrados, setUsuariosFiltrados] = useState([]);
@@ -37,7 +36,7 @@ const Roles = () => {
   const usuariosPorPagina = 10;
 
   useEffect(() => {
-    axios.get(`${API}/usuarios`)
+    API.get(`/usuarios`)
       .then((res) => {
         let data = res.data;
 
@@ -63,14 +62,14 @@ const Roles = () => {
 
   const guardarNuevaContrasena = async () => {
     try {
-      await axios.put(`${API}/usuarios/resetear-contrasena/${usuarioPwdId}`, {
+      await API.put(`/usuarios/resetear-contrasena/${usuarioPwdId}`, {
         nuevaContrasena
       });
       alert('Contraseña actualizada correctamente');
       setMostrarModalPwd(false);
 
       // Vuelve a cargar todos los usuarios, manteniendo filtros
-      const res = await axios.get(`${API}/usuarios`);
+      const res = await API.get(`/usuarios`);
       let data = res.data;
 
       if (!roles.roladministrativo && !roles.rolsuperadmin && usuarioLogueado !== 'admin') {
@@ -116,7 +115,7 @@ const Roles = () => {
 
     try {
       // 1. Guardar cambios en roles de usuarios
-      await axios.put(`${API}/usuarios/roles`, {
+      await API.put(`/usuarios/roles`, {
         usuarios: usuariosFiltrados
       });
 
@@ -128,8 +127,8 @@ const Roles = () => {
         const cambioEnRolMedico = original.rolmedico !== user.rolmedico;
 
         if (cambioEnRolMedico) {
-          await axios.put(
-            `${API}/profesionales/actualizar-medico/${user.idusuario}`,
+          await API.put(
+            `/profesionales/actualizar-medico/${user.idusuario}`,
             { rolmedico: user.rolmedico }
           );
         }
@@ -172,7 +171,7 @@ const Roles = () => {
 
   const abrirFormularioEdicion = async (idusuario) => {
     try {
-      const res = await axios.get(`${API}/contactos/${idusuario}`);
+      const res = await API.get(`/contactos/${idusuario}`);
       setContacto({ ...res.data, idusuario });
       setMostrarModal(true);
     } catch (err) {
@@ -189,7 +188,7 @@ const Roles = () => {
   };
   const guardarContacto = async () => {
     try {
-      await axios.put(`${API}/contactos/${contacto.idcontacto}`, contacto);
+      await API.put(`/contactos/${contacto.idcontacto}`, contacto);
       alert('Contacto actualizado correctamente');
 
       // Actualizamos datos y reordenamos visualmente
@@ -220,7 +219,7 @@ const Roles = () => {
   };
   const verContacto = async (idusuario) => {
     try {
-      const res = await axios.get(`${API}/contactos/${idusuario}`);
+      const res = await API.get(`/contactos/${idusuario}`);
       setContactoVista(res.data);
       setModalVista(true);
     } catch (err) {

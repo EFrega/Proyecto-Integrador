@@ -1,10 +1,9 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import axios from 'axios';
+import API from '../../helpers/api';
 import { Table, Button, Form, Spinner, Alert, Row, Col } from 'react-bootstrap';
 import { FaEdit } from 'react-icons/fa';
 
 const Servicios = () => {
-    const API = process.env.REACT_APP_API_URL;
     const [servicios, setServicios] = useState([]);
     const [cargando, setCargando] = useState(true);
     const [mensaje, setMensaje] = useState('');
@@ -16,7 +15,7 @@ const Servicios = () => {
     const cargarServicios = useCallback(async () => {
         try {
         setCargando(true);
-        const res = await axios.get(`${API}/servicios`);
+        const res = await API.get(`/servicios`);
         setServicios(res.data);
         } catch (error) {
         console.error(error);
@@ -24,7 +23,7 @@ const Servicios = () => {
         } finally {
         setCargando(false);
         }
-    }, [API]);
+    }, []);
     
     useEffect(() => {
         cargarServicios();
@@ -44,7 +43,7 @@ const Servicios = () => {
         try {
         
         setGuardandoNuevo(true);
-        const res = await axios.post(`${API}/servicios`, {
+        const res = await API.post(`/servicios`, {
             nombre: nombre.trim(),
             activo,
             duracionturno: duracionInt,
@@ -81,7 +80,7 @@ const Servicios = () => {
         }
 
         try {
-        await axios.put(`${API}/servicios/${editandoId}`, {
+        await API.put(`/servicios/${editandoId}`, {
             nombre: nombre.trim(),
             activo,
             duracionturno: duracionInt,

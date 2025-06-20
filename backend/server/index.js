@@ -7,8 +7,8 @@ const fs = require('fs');
 const sequelize = require('../config/database');
 
 const ChatMsgs = require('../models/chatmsgs')(sequelize, require('sequelize').DataTypes);
-const Usuario = require('../models/systemusers');
-const usuarioModelo = Usuario(sequelize, require('sequelize').DataTypes);
+
+
 
 const loginRoutes = require('../routes/loginRoute');
 const registerRoutes = require('../routes/registerRoute');
@@ -22,11 +22,13 @@ const agendaRegularRoutes = require('../routes/agendaregularRoute');
 const fichaRoute = require('../routes/fichaRoute');
 const chatRoute = require('../routes/chatRoute');
 const turnosRoute = require('../routes/turnosRoute');
+const rolesRoute = require('../routes/rolesRoute');
 
 const authenticateToken = require('../middlewares/auth');
 
 // 🟢 Inicialización de Express y servidor HTTP
 const app = express();
+
 const server = http.createServer(app);
 const io = socketIo(server, {
 
@@ -38,9 +40,10 @@ const io = socketIo(server, {
 // Middlewares
 app.use(express.json());
 app.use(cors());
+app.use(authenticateToken);
 
 // Ruta de prueba
-app.get('/', (req, res) => {
+app.get('/healthcheck', (req, res) => {
 
     res.send('¡Servidor de gestión de turnos en funcionamiento!');
 });
@@ -85,21 +88,9 @@ app.use('/agendaregular', agendaRegularRoutes);
 app.use('/chat', chatRoute);
 app.use('/ficha', fichaRoute);
 app.use('/turnos', turnosRoute);
+app.use('/roles', rolesRoute);
 
-// Ruta protegida
-app.get('/usuarios/:id', authenticateToken, async (req, res) => {
-    const { id } = req.params;
 
-    try {
-        const usuario = await usuarioModelo.findOne({ where: { idUsuario: id } });
-        if (!usuario) {
-            return res.status(404).json({ message: 'Usuario no encontrado' });
-        }
-        return res.json(usuario);
-    } catch (err) {
-        return res.status(500).json({ error: 'Error en el servidor', detalle: err.message });
-    }
-});
 
 // Conexión a la base de datos
 sequelize.authenticate()

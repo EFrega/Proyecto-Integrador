@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import API from '../../helpers/api';
 import { Container, Table, Button } from 'react-bootstrap';
 
 const MisTurnos = () => {
-  const API = process.env.REACT_APP_API_URL;
   const [turnos, setTurnos] = useState([]);
   const [usuario, setUsuario] = useState({});
 
@@ -12,20 +11,20 @@ const MisTurnos = () => {
     setUsuario(usuarioLocal);
 
     if (usuarioLocal?.idcontacto) {
-      axios.get(`${API}/turnos/mis-turnos/${usuarioLocal.idcontacto}`)
+      API.get(`/turnos/mis-turnos/${usuarioLocal.idcontacto}`)
         .then(res => setTurnos(res.data))
         .catch(err => console.error('Error al obtener mis turnos:', err));
     }
-  }, [API]);
+  }, []);
 
   const cancelarTurno = async (idturno) => {
     if (!window.confirm('¿Estás seguro de que querés cancelar este turno?')) return;
 
     try {
-      await axios.delete(`${API}/turnos/cancelar/${idturno}`);
+      await API.delete(`/turnos/cancelar/${idturno}`);
       alert('Turno cancelado correctamente');
       // refrescar
-      const res = await axios.get(`${API}/turnos/mis-turnos/${usuario.idcontacto}`);
+      const res = await API.get(`/turnos/mis-turnos/${usuario.idcontacto}`);
       setTurnos(res.data);
     } catch (err) {
       alert(err.response?.data?.message || 'Error al cancelar turno');

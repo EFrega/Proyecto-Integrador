@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import API from '../../helpers/api';
 import './register.css';
 import { Link, useNavigate } from 'react-router-dom';
 import { Form, Button, Row, Col, Navbar, Container, Card, Alert, FormGroup, FormLabel, FormControl, CardBody } from 'react-bootstrap';
 
-const API = process.env.REACT_APP_API_URL;
 
 const Registro = () => {
     const [formData, setFormData] = useState({
@@ -46,7 +45,7 @@ const Registro = () => {
         }
 
         try {
-            await axios.post(`${API}/register`, formData);
+            await API.post(`/register`, formData);
             alert('¡Registro exitoso!');
             navigate('/');
         } catch (err) {

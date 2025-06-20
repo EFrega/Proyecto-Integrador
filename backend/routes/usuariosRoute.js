@@ -4,9 +4,11 @@ const sequelize = require('../config/database');
 
 const SystemUsersModel = require('../models/systemusers');
 const ContactosModel = require('../models/contactos');
+const Usuario = require('../models/systemusers');
 
 const SystemUsers = SystemUsersModel(sequelize, require('sequelize').DataTypes);
 const Contactos = ContactosModel(sequelize, require('sequelize').DataTypes);
+const usuarioModelo = Usuario(sequelize, require('sequelize').DataTypes);
 
 // Asociación
 SystemUsers.belongsTo(Contactos, {
@@ -52,6 +54,21 @@ router.get('/', async (req, res) => {
     console.error('Error al obtener usuarios:', error);
     res.status(500).json({ message: 'Error al obtener usuarios' });
   }
+});
+
+// Ruta protegida
+router.get('/:id', async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const usuario = await usuarioModelo.findOne({ where: { idUsuario: id } });
+        if (!usuario) {
+            return res.status(404).json({ message: 'Usuario no encontrado' });
+        }
+        return res.json(usuario);
+    } catch (err) {
+        return res.status(500).json({ error: 'Error en el servidor', detalle: err.message });
+    }
 });
 
 // Actualizar roles

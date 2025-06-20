@@ -25,11 +25,9 @@ router.get('/:idcontacto', async (req, res) => {
 
 // Guardar o actualizar ficha médica
 router.post('/', async (req, res) => {
-
-    const { idusuario, idcontacto, gruposang, cobertura, histenfermflia, observficha } = req.body;
-
+    const { idcontacto, gruposang, cobertura, histenfermflia, observficha } = req.body;
     try {
-        const user = await SystemUsers.findByPk(idusuario);
+        const user = await SystemUsers.findByPk(req.user.id);
         if (!user) return res.status(403).json({ message: 'Usuario no autorizado' });
 
         const updateData = {};

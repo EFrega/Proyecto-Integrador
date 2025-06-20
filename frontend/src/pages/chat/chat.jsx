@@ -1,12 +1,10 @@
 import './chat.css';
 import React, { useEffect, useState, useRef, useCallback } from 'react';
-import axios from 'axios';
+import API from '../../helpers/api';
 import { Card, Button, Form, ListGroup, Row, Col, InputGroup } from 'react-bootstrap';
 import socket from '../socket/socket'; // 👉 usamos socket global
 
 const Chat = ({ setTieneMensajesNuevos }) => {
-
-  const API = process.env.REACT_APP_API_URL;
   const [chats, setChats] = useState([]);
   const [contactos, setContactos] = useState([]);
   const [chatActivo, setChatActivo] = useState(null);
@@ -47,7 +45,7 @@ const Chat = ({ setTieneMensajesNuevos }) => {
       };
 
 
-      const res = await axios.get(`${API}/contactos`, { params });
+      const res = await API.get(`/contactos`, { params });
 
       const contactosData = Array.isArray(res.data) ? res.data : [];
 
@@ -82,7 +80,16 @@ const Chat = ({ setTieneMensajesNuevos }) => {
     } catch (error) {
       console.error('Error al cargar contactos:', error);
     }
-  }, [API]);
+  }, []);
+
+    const cargarChats = useCallback(async (id) => {
+    try {
+      const res = await API.get(`/chat/chats/${id}`);
+      setChats(res.data);
+    } catch (error) {
+      console.error('Error al cargar chats:', error);
+    }
+  }, []);
 
   useEffect(() => {
     const storedUsuario = localStorage.getItem('usuario');
@@ -99,7 +106,7 @@ const Chat = ({ setTieneMensajesNuevos }) => {
         console.error('No se pudo parsear localStorage usuario:', e);
       }
     }
-  }, [cargarContactos, idusuario]);
+  }, [ cargarChats, cargarContactos, idusuario]);
 
   useEffect(() => {
     const handleNuevoMensaje = (msg) => {
@@ -130,16 +137,7 @@ const Chat = ({ setTieneMensajesNuevos }) => {
     return () => {
       socket.off('nuevo-mensaje', handleNuevoMensaje);
     };
-  }, [chatActivo, idusuario, setTieneMensajesNuevos]);
-
-  const cargarChats = useCallback(async (id) => {
-    try {
-      const res = await axios.get(`${API}/chat/chats/${id}`);
-      setChats(res.data);
-    } catch (error) {
-      console.error('Error al cargar chats:', error);
-    }
-  }, [API]);
+  }, [cargarChats, chatActivo, idusuario, setTieneMensajesNuevos]);
 
   const abrirChat = async (chat) => {
     try {
@@ -156,7 +154,7 @@ const Chat = ({ setTieneMensajesNuevos }) => {
       });
 
 
-      const res = await axios.get(`${API}/chat/mensajes/${chat.idchat}`);
+      const res = await API.get(`/chat/mensajes/${chat.idchat}`);
 
       setMensajes(res.data);
       scrollAlFinal();
@@ -168,7 +166,7 @@ const Chat = ({ setTieneMensajesNuevos }) => {
   const iniciarChat = async (idReceptor) => {
     try {
 
-      const res = await axios.post(`${API}/chat/chats`, {
+      const res = await API.post(`/chat/chats`, {
 
         id1: idusuario,
         id2: idReceptor

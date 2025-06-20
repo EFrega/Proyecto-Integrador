@@ -1,10 +1,10 @@
 import './acreditarTurnos.css';
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import API from '../../helpers/api';
 import { Container, Row, Col, Card, Form, Button, InputGroup } from 'react-bootstrap';
 
 const AcreditarTurnos = () => {
-  const API = process.env.REACT_APP_API_URL;
+
   const [pacientes, setPacientes] = useState([]);
   const [pacienteSel, setPacienteSel] = useState(null);
   const [turnos, setTurnos] = useState([]);
@@ -14,8 +14,8 @@ const AcreditarTurnos = () => {
   const pacientesPorPagina = 10;
   
   useEffect(() => {
-    axios.get(`${API}/contactos?rolusuario=rolmedico`).then(res => setPacientes(res.data));
-  }, [API]);
+    API.get(`/contactos?rolusuario=rolmedico`).then(res => setPacientes(res.data));
+  }, []);
 
   const pacientesFiltrados = pacientes.filter(p =>
     `${p.nombre} ${p.apellido} ${p.docum}`.toLowerCase().includes(busqueda.toLowerCase())
@@ -31,7 +31,7 @@ const AcreditarTurnos = () => {
     const cargarTurnosPaciente = async (idcontacto) => {
     setLoadingTurnos(true); // ⏳ Inicio de carga
     try {
-        const res = await axios.get(`${API}/turnos/mis-turnos/${idcontacto}`);
+        const res = await API.get(`/turnos/mis-turnos/${idcontacto}`);
 
         const hoy = new Date();
         hoy.setHours(0, 0, 0, 0);
@@ -64,7 +64,7 @@ const AcreditarTurnos = () => {
 
   const acreditarTurno = async (turno) => {
     try {
-      await axios.put(`${API}/turnos/acreditar/${turno.idturno}`);
+      await API.put(`/turnos/acreditar/${turno.idturno}`);
       alert('Turno acreditado correctamente');
       cargarTurnosPaciente(pacienteSel.idcontacto);
     } catch (err) {

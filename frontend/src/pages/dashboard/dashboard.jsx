@@ -8,6 +8,7 @@ import {
   FaCalendarCheck
 } from 'react-icons/fa';
 import './dashboard.css';
+import API from '../../helpers/api';
 import Roles from '../roles/Roles';
 import CargarServicio from '../cargaServicios/cargarServicios';
 import ExcepcionesProf from '../excepcionesProf/excepcionesProf';
@@ -25,7 +26,6 @@ import MisTurnosMedico from '../misTurnosMedico/misTurnosMedico';
 import TurnosHoyMedico from '../turnosHoyMedico/turnosHoyMedico';
 import AtencionTurno from '../atencionTurno/atencionTurno';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
 const Dashboard = ({ setIsLoggedIn, tieneMensajesNuevos, setTieneMensajesNuevos }) => {
   const [visibleIcons, setVisibleIcons] = useState([]);
@@ -66,24 +66,19 @@ const Dashboard = ({ setIsLoggedIn, tieneMensajesNuevos, setTieneMensajesNuevos 
       const idcontacto = usuario.idcontacto;
       if (!idcontacto) return;
 
-      const response = await fetch(`${API_URL}/turnos/mis-turnos/${idcontacto}`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
+      const response = await API.get(`/turnos/mis-turnos/${idcontacto}`);
 
-      if (response.ok) {
-        const data = await response.json();
-        const hoy = new Date();
-        hoy.setHours(0, 0, 0, 0);
+      const data = await response.data;
+      const hoy = new Date();
+      hoy.setHours(0, 0, 0, 0);
 
-        const turnosFiltrados = data.filter(turno => {
-          const fechaTurno = new Date(turno.dia);
-          return fechaTurno >= hoy && turno.reservado !== false;
+      const turnosFiltrados = data.filter(turno => {
+        const fechaTurno = new Date(turno.dia);
+        return fechaTurno >= hoy && turno.reservado !== false;
         });
 
         setTurnos(turnosFiltrados);
-      }
+      
     } catch (error) {
       console.error('Error al cargar turnos:', error);
     } finally {

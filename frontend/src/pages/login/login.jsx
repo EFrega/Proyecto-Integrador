@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import axios from 'axios';
+import API from '../../helpers/api';
 import './login.css';
 import { Navbar, Container, Row, Col, Card, Form, Button, Alert, CardBody, FormLabel, FormControl, FormGroup } from 'react-bootstrap';
 
-const API = process.env.REACT_APP_API_URL;
+
 const Login = ({ setIsLoggedIn }) => {
     const [usuario, setUsuario] = useState('');
     const [contrasena, setContrasena] = useState('');
@@ -16,7 +16,7 @@ const Login = ({ setIsLoggedIn }) => {
         setError('');
 
         try {
-            const response = await axios.post(`${API}/login`, {
+            const response = await API.post(`/login`, {
                 usuario,
                 contrasena,
             });

@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import API from '../../helpers/api';
 import { Form, Button, Container, Row, Col, Card, InputGroup } from 'react-bootstrap';
 
 const ReservaTurnosAdmin = () => {
-  const API = process.env.REACT_APP_API_URL;
 
   const [servicios, setServicios] = useState([]);
   const [profesionales, setProfesionales] = useState([]);
@@ -23,9 +22,9 @@ const ReservaTurnosAdmin = () => {
   const pacientesPorPagina = 10;
 
   useEffect(() => {
-    axios.get(`${API}/servicios`).then(res => setServicios(res.data));
-    axios.get(`${API}/contactos?rolusuario=rolmedico`).then(res => setPacientes(res.data)); // pedir pacientes
-  }, [API]);
+    API.get(`/servicios`).then(res => setServicios(res.data));
+    API.get(`/contactos?rolusuario=rolmedico`).then(res => setPacientes(res.data)); // pedir pacientes
+  }, []);
 
   const handleServicioChange = async (idServicioNuevo) => {
     setIdServicioSel(idServicioNuevo);
@@ -35,7 +34,7 @@ const ReservaTurnosAdmin = () => {
     setDiaSel('');
 
     if (idServicioNuevo) {
-      const res = await axios.get(`${API}/profesionales/por-servicio/${idServicioNuevo}`);
+      const res = await API.get(`/profesionales/por-servicio/${idServicioNuevo}`);
       setProfesionales(res.data);
     } else {
       setProfesionales([]);
@@ -45,7 +44,7 @@ const ReservaTurnosAdmin = () => {
   const buscarDisponibilidad = async () => {
     if (!idServicioSel || !idProfesionalSel) return;
 
-    const res = await axios.get(`${API}/turnos/disponibles/${idProfesionalSel}/${idServicioSel}`);
+    const res = await API.get(`/turnos/disponibles/${idProfesionalSel}/${idServicioSel}`);
     setDisponibilidad(res.data);
     setTurnosDiaSel([]);
     setDiaSel('');
@@ -53,7 +52,7 @@ const ReservaTurnosAdmin = () => {
 
   const reservarTurno = async (hora) => {
     try {
-      await axios.post(`${API}/turnos/reservar`, {
+      await API.post(`/turnos/reservar`, {
         idcontacto: pacienteSel.idcontacto,
         idprofesional: idProfesionalSel,
         idservicio: idServicioSel,
