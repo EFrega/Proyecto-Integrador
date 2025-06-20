@@ -73,7 +73,7 @@ const AtencionTurno = ({ idturno, onCerrar }) => {
             <Card.Header>Datos del Paciente</Card.Header>
             <Card.Body>
               <p><strong>Nombre:</strong> {turno.nombre} {turno.apellido}</p>
-              <p><strong>Fecha de Nacimiento:</strong> {ficha.fechanac}</p>
+              <p><strong>Fecha de nacimiento:</strong> {turno.fechanacim ? new Date(turno.fechanacim).toLocaleDateString() : 'No disponible'}</p>
               <p><strong>Grupo Sanguíneo:</strong> {ficha.gruposang}</p>
               <p><strong>Cobertura:</strong> {ficha.cobertura}</p>
             </Card.Body>
@@ -83,7 +83,7 @@ const AtencionTurno = ({ idturno, onCerrar }) => {
           <Card>
             <Card.Header>Ficha Médica</Card.Header>
             <Card.Body>
-              <p><strong>Antecedentes:</strong> {ficha.histerenfmlia}</p>
+              <p><strong>Antecedentes:</strong> {ficha.histenfermflia}</p>
               <p><strong>Observaciones:</strong> {ficha.observficha}</p>
             </Card.Body>
           </Card>
