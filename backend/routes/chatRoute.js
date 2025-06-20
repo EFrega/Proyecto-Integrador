@@ -9,7 +9,7 @@ const Contactos = require('../models/contactos')(sequelize, require('sequelize')
 
 router.get('/chats/:idusuario', async (req, res) => {
 
-    const idusuario = parseInt(req.params.idusuario);
+    const idusuario = parseInt(req.user.id);
 
     try {
         const chats = await ChatIndex.findAll({

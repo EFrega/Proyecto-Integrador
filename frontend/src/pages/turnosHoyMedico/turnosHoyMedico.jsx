@@ -1,18 +1,18 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { Row, Col, Form } from 'react-bootstrap';
 import VinTurnoHome from '../vinTurnoHome/vinturnohome';
+import API from '../../helpers/api';
 
 const TurnosHoyMedico = ({ setTurnoSeleccionado }) => {
   const [turnos, setTurnos] = useState([]);
   const [fechaSeleccionada, setFechaSeleccionada] = useState(new Date().toISOString().split('T')[0]);
 
-  const API = process.env.REACT_APP_API_URL;
   const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
 
   const cargarTurnos = useCallback(async () => {
     try {
-      const res = await fetch(`${API}/turnos/mis-turnos-profesional/${usuario.idprofesional}`);
-      const data = await res.json();
+      const res = await API.get(`/turnos/mis-turnos-profesional/${usuario.idprofesional}`);
+      const data = await res.data;
 
       const filtrados = data.filter(t => {
         const fechaTurno = new Date(t.dia).toISOString().split('T')[0];
@@ -24,7 +24,7 @@ const TurnosHoyMedico = ({ setTurnoSeleccionado }) => {
     } catch (error) {
       console.error('Error al cargar turnos del médico:', error);
     }
-  }, [API, fechaSeleccionada, usuario.idprofesional]);
+  }, [fechaSeleccionada, usuario.idprofesional]);
 
   useEffect(() => {
     cargarTurnos();

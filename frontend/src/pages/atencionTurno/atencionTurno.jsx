@@ -2,10 +2,9 @@
 
 import React, { useEffect, useState } from 'react';
 import { Container, Row, Col, Card, Form, Button, Table } from 'react-bootstrap';
-import axios from 'axios';
+import API from '../../helpers/api';
 
 const AtencionTurno = ({ idturno, onCerrar }) => {
-  const API = process.env.REACT_APP_API_URL;
   const [turno, setTurno] = useState(null);
   const [ficha, setFicha] = useState(null);
   const [observacionesAnteriores, setObservacionesAnteriores] = useState([]);
@@ -14,13 +13,13 @@ const AtencionTurno = ({ idturno, onCerrar }) => {
   useEffect(() => {
     const cargarDatos = async () => {
       try {
-        const { data: turnoData } = await axios.get(`${API}/turnos/${idturno}`);
+        const { data: turnoData } = await API.get(`/turnos/${idturno}`);
         setTurno(turnoData);
 
-        const { data: fichaData } = await axios.get(`${API}/ficha/${turnoData.idcontacto}`);
+        const { data: fichaData } = await API.get(`/ficha/${turnoData.idcontacto}`);
         setFicha(fichaData);
 
-        const { data: turnosAnteriores } = await axios.get(`${API}/turnos/mis-turnos/${turnoData.idcontacto}`);
+        const { data: turnosAnteriores } = await API.get(`/turnos/mis-turnos/${turnoData.idcontacto}`);
         console.log('Turnos anteriores recibidos del backend:', turnosAnteriores);
         console.log('Observaciones extraídas:', turnosAnteriores.map(t => ({
           id: t.idturno,
@@ -44,11 +43,11 @@ const AtencionTurno = ({ idturno, onCerrar }) => {
     };
 
     if (idturno) cargarDatos();
-  }, [API, idturno]);
+  }, [idturno]);
 
   const handleAtender = async () => {
     try {
-      await axios.put(`${API}/turnos/${idturno}`, {
+      await API.put(`/turnos/${idturno}`, {
         observaciones: observacionNueva,
         atendido: 1
       });

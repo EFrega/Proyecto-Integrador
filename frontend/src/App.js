@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
 import {
   BrowserRouter as Router,
   Routes,
@@ -11,9 +10,10 @@ import Dashboard from './pages/dashboard/dashboard';
 import Registro from './pages/register/register';
 import AtencionTurno from './pages/atencionTurno/atencionTurno';
 import socket from './pages/socket/socket';
-const API = process.env.REACT_APP_API_URL;
+import API from './helpers/api';
+
 function App() {
-  const [, setMessage] = useState('');
+  const [message, setMessage] = useState('');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [tieneMensajesNuevos, setTieneMensajesNuevos] = useState(false); // 👉 nuevo
 
@@ -25,7 +25,7 @@ function App() {
 
     }    
   
-    axios.get(`${API}`)
+    API.get(`/healthcheck`)
 
       .then(response => {
         setMessage(response.data);
