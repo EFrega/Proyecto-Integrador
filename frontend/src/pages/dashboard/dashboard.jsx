@@ -165,7 +165,7 @@ const Dashboard = ({ setIsLoggedIn, tieneMensajesNuevos, setTieneMensajesNuevos 
 
         <div className="flex-grow-1 d-flex flex-column">
           <Navbar bg="white" expand="lg" className="shadow-sm px-4 py-2 justify-content-between">
-            <Navbar.Brand className="text-primary fw-bold">Clínica<span className="text-dark">Medica</span></Navbar.Brand>
+            <Navbar.Brand className="text-primary fw-bold">Clínica<b>Medici</b></Navbar.Brand>
             <Nav className="d-flex align-items-center gap-3">
               {!(roles.roladministrativo || roles.rolsuperadmin) && (
                 <div className={`rounded-circle d-flex justify-content-center align-items-center ${tieneMensajesNuevos ? 'bg-danger' : 'bg-secondary'}`} style={{ width: '30px', height: '30px' }}>
