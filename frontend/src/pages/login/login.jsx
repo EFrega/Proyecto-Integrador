@@ -62,7 +62,7 @@ const Login = ({ setIsLoggedIn }) => {
             <Navbar expand="lg" className='shadow bg-light px-4 py-2 justify-content-between'>
                 <Navbar.Brand className='text-primary'>
                     <img src='logo.png' alt='logo' width={30} height={30} fluid className='d-inline-block align-top' />{' '}
-                    Clínica<b>Médica</b>
+                    Clínica<b>Medici</b>
                 </Navbar.Brand>
             </Navbar>
             <div className='login-wrapper'>
