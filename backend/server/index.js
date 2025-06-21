@@ -1,41 +1,25 @@
-// index.js
 const express = require('express');
 const http = require('http');
-const socketIo = require('socket.io');
 const cors = require('cors');
-const fs = require('fs');
+const { DataTypes } = require('sequelize');
+const socketIo = require('socket.io');
 const sequelize = require('../config/database');
 
-const ChatMsgs = require('../models/chatmsgs')(sequelize, require('sequelize').DataTypes);
-
-
-
-const loginRoutes = require('../routes/loginRoute');
-const registerRoutes = require('../routes/registerRoute');
-const usuariosRoutes = require('../routes/usuariosRoute');
-const contactosRoutes = require('../routes/contactosRoute');
-const profesionalesRoute = require('../routes/profesionalesRoute');
-const serviciosRoutes = require('../routes/serviciosRoute');
-const excepcionesRoute = require('../routes/excepcionesRoute');
-const feriadosRoutes = require('../routes/feriadosRoute');
-const agendaRegularRoutes = require('../routes/agendaregularRoute');
-const fichaRoute = require('../routes/fichaRoute');
-const chatRoute = require('../routes/chatRoute');
-const turnosRoute = require('../routes/turnosRoute');
-const rolesRoute = require('../routes/rolesRoute');
-
+// Modelos y lógica
+const ChatMsgs = require('../models/chatmsgs')(sequelize, DataTypes);
+const routes = require('../routes');
 const authenticateToken = require('../middlewares/auth');
+const handleSocket = require('../socket/socketHandler');
 
-// 🟢 Inicialización de Express y servidor HTTP
+// Inicialización de Express y servidor HTTP
 const app = express();
+const server = http.createServer(app); // ✅ Crear el server primero
 
-const server = http.createServer(app);
+// Inicialización de Socket.IO
 const io = socketIo(server, {
-
-    cors: {
-        origin: '*',
-    }
+  cors: { origin: '*' }
 });
+handleSocket(io, ChatMsgs); // ✅ Manejar conexión WebSocket
 
 // Middlewares
 app.use(express.json());
@@ -44,70 +28,50 @@ app.use(authenticateToken);
 
 // Ruta de prueba
 app.get('/healthcheck', (req, res) => {
-
-    res.send('¡Servidor de gestión de turnos en funcionamiento!');
+  res.send('¡Servidor de gestión de turnos en funcionamiento!');
 });
 
-// WebSocket
-io.on('connection', socket => {
+// Mapeo de rutas base → nombre del archivo de ruta
+const routeMap = {
+  '/login': 'loginRoute',
+  '/register': 'registerRoute',
+  '/usuarios': 'usuariosRoute',
+  '/contactos': 'contactosRoute',
+  '/profesionales': 'profesionalesRoute',
+  '/servicios': 'serviciosRoute',
+  '/excepcionesProf': 'excepcionesRoute',
+  '/agendas': 'feriadosRoute',
+  '/agendaregular': 'agendaregularRoute',
+  '/chat': 'chatRoute',
+  '/ficha': 'fichaRoute',
+  '/turnos': 'turnosRoute',
+  '/roles': 'rolesRoute'
+};
 
-    console.log('🟢 Cliente conectado:', socket.id);
-
-    socket.on('enviar-mensaje', async (msg) => {
-        try {
-        const nuevo = await ChatMsgs.create({
-            idchat: msg.idchat,
-            idsystemuseremisor: msg.idsystemuseremisor,
-            msgtexto: msg.msgtexto,
-            msgtimesent: msg.msgtimesent || new Date(),
-            msgstatus: 1 // asumimos "pendiente"
-        });
-
-        io.emit('nuevo-mensaje', nuevo); // reenvía a todos
-        } catch (error) {
-        console.error('❌ Error al guardar mensaje:', error);
-        }
-    });
-
-    socket.on('disconnect', () => {
-        console.log('🔴 Cliente desconectado:', socket.id);
-    });
+// Registro automático de rutas
+Object.entries(routeMap).forEach(([base, routeName]) => {
+  if (routes[routeName]) {
+    app.use(base, routes[routeName]);
+  } else {
+    console.warn(`⚠️ Ruta no encontrada: ${routeName}`);
+  }
 });
-
-
-// Rutas principales
-app.use('/login', loginRoutes);
-app.use('/register', registerRoutes);
-app.use('/usuarios', usuariosRoutes);
-app.use('/contactos', contactosRoutes);
-app.use('/profesionales', profesionalesRoute);
-app.use('/servicios', serviciosRoutes);
-app.use('/excepcionesProf', excepcionesRoute);
-app.use('/agendas', feriadosRoutes);
-app.use('/agendaregular', agendaRegularRoutes);
-app.use('/chat', chatRoute);
-app.use('/ficha', fichaRoute);
-app.use('/turnos', turnosRoute);
-app.use('/roles', rolesRoute);
-
-
 
 // Conexión a la base de datos
 sequelize.authenticate()
+  .then(() => {
+    console.log('✅ Conexión con la base de datos establecida correctamente.');
+  })
+  .catch(err => {
+    console.error('❌ No se pudo conectar a la base de datos:', err);
+    process.exit(1);
+  });
 
-    .then(() => {
-        console.log('Conexión con la base de datos establecida correctamente.');
-    })
-    .catch(err => {
-        console.error('No se pudo conectar a la base de datos:', err);
-    });
-
-// Puerto y arranque
+// Puerto y arranque del servidor
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
-
-    console.log(`Servidor corriendo en http://localhost:${PORT}`);
+  console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
 });
 
-// Exportación para otros módulos si es necesario
+// Exportación para pruebas u otros usos
 module.exports = { app, server };
