@@ -56,7 +56,13 @@ const TurnosHoyMedico = ({ setTurnoSeleccionado }) => {
               icono="bi bi-person-check"
               nombreEspecialista={`${turno.nombre} ${turno.apellido}`}
               especialidad={turno.nombreservicio}
-              fecha={`${turno.dia} ${turno.hora.substring(0, 5)}`}
+              fecha={new Date(`${turno.dia}T${turno.hora}`).toLocaleString('es-AR', {
+                weekday: 'short',
+                day: 'numeric',
+                month: 'short',
+                hour: '2-digit',
+                minute: '2-digit'
+              })}
               tipoTurno="presencial"
               estado={turno.atendido ? 'completado' : 'acreditado'}
               onTurnoActualizado={cargarTurnos}
