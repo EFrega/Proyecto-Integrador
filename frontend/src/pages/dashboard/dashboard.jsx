@@ -264,6 +264,32 @@ const Dashboard = ({ setIsLoggedIn, tieneMensajesNuevos, setTieneMensajesNuevos 
           </Container>
         </div>
       </div>
+      <footer className="text-bg-dark py-4 mt-auto">
+          <Container>
+              <Row>
+                  <Col md={4}>
+                      <h5><img src="logo.png" alt='logo' width={30} height={30} fluid className="d-inline-block align-top" />{' '} Clínica<b>Medici</b></h5>
+                  </Col>
+                  <Col md={4}>
+                      <p><b>Información Institucional</b></p>
+                      <p>Especialidades médicas</p>
+                      <p>Calidad y seguridad del paciente</p>
+                  </Col>
+                  <Col md={4}>
+                      <p><b>Información Útil</b></p>
+                      <p>Coberturas médicas</p>
+                      <p>Solicite turno</p>
+                      <p>Preguntas frecuentes</p>
+                  </Col>
+              </Row>
+              <Row className="text-center mt-3">
+                  <Col>
+                      <small>©2025 Diseñado y desarrollado por <a className="text-info text-decoration-underline" href="https://www.linkedin.com/company/hifive-developers/" target="_blank" rel="noreferrer">HiFive Developers</a></small>
+                  </Col>
+              </Row>
+          </Container>
+      </footer>
+      
     </div>
   );
 };
