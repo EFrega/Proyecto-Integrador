@@ -234,7 +234,6 @@ router.get('/mis-turnos-profesional/:idprofesional', async (req, res) => {
       where: {
         idprofesional,
         reservado: true,
-        acreditado: true
       },
       include: [
         {

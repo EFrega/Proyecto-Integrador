@@ -16,7 +16,7 @@ const TurnosHoyMedico = ({ setTurnoSeleccionado }) => {
 
       const filtrados = data.filter(t => {
         const fechaTurno = new Date(t.dia).toISOString().split('T')[0];
-        return (t.acreditado === true || t.acreditado === 1 || t.acreditado === '1') && fechaTurno === fechaSeleccionada;
+        return fechaTurno === fechaSeleccionada;
       });
 
       filtrados.sort((a, b) => `${a.dia}T${a.hora}`.localeCompare(`${b.dia}T${b.hora}`));
@@ -64,7 +64,14 @@ const TurnosHoyMedico = ({ setTurnoSeleccionado }) => {
                 minute: '2-digit'
               })}
               tipoTurno="presencial"
-              estado={turno.atendido ? 'completado' : 'acreditado'}
+              estado={
+                turno.atendido
+                  ? 'completado'
+                  : turno.acreditado
+                    ? 'acreditado'
+                    : 'reservado'
+              }
+              acreditado={turno.acreditado}
               onTurnoActualizado={cargarTurnos}
               onModificar={() => {
                 console.log('Click en Atender para ID', turno.idturno, 'Atendido:', turno.atendido);

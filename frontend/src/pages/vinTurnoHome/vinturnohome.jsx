@@ -10,6 +10,7 @@ const VinTurnoHome = ({
   fecha = "DD NN de MM AAAA hh:mm",
   tipoTurno = "presencial",
   estado = "activo",
+  acreditado = true,
   onModificar,
   onConversar,
   className = ""
@@ -82,7 +83,7 @@ const VinTurnoHome = ({
           </div>
         ) : (
           <div className="d-flex">
-            {estado !== 'completado' && onModificar && (
+            {estado !== 'completado' && acreditado && onModificar && (
               <Button
                 variant="outline-success"
                 className="flex-fill"
