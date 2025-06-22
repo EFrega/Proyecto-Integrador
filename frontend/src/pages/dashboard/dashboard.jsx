@@ -37,17 +37,6 @@ const Dashboard = ({ setIsLoggedIn, tieneMensajesNuevos, setTieneMensajesNuevos 
 
   const cerrarAtencion = () => setTurnoSeleccionado(null);
 
-  const formatearFecha = (fecha) => {
-    const date = new Date(fecha);
-    return date.toLocaleDateString('es-ES', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
-
   const handleLogout = () => {
     localStorage.clear();
     setIsLoggedIn(false);
@@ -238,7 +227,13 @@ const Dashboard = ({ setIsLoggedIn, tieneMensajesNuevos, setTieneMensajesNuevos 
                           icono="bi bi-calendar"
                           nombreEspecialista={`${turno.Profesional?.contacto?.nombre || "Profesional"} ${turno.Profesional?.contacto?.apellido || ""}`}
                           especialidad={turno.Servicio?.nombre || "Especialidad"}
-                          fecha={formatearFecha(turno.dia)}
+                          fecha={new Date(`${turno.dia}T${turno.hora}`).toLocaleString('es-AR', {
+                            weekday: 'short',
+                            day: 'numeric',
+                            month: 'short',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })}
                           tipoTurno="presencial"
                           onTurnoActualizado={cargarTurnos}
                         />
