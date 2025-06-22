@@ -65,8 +65,8 @@ const AcreditarTurnos = () => {
   const acreditarTurno = async (turno) => {
     try {
       await API.put(`/turnos/acreditar/${turno.idturno}`);
+      await cargarTurnosPaciente(pacienteSel.idcontacto);
       alert('Turno acreditado correctamente');
-      cargarTurnosPaciente(pacienteSel.idcontacto);
     } catch (err) {
       alert('Error al acreditar el turno');
     }
@@ -138,16 +138,30 @@ const AcreditarTurnos = () => {
             ) : (
               turnos.map(t => (
                 <Card key={t.idturno} className="mb-2 p-2">
-                  <strong>Fecha:</strong> {new Date(t.dia).toLocaleDateString()}<br />
-                  <strong>Hora:</strong> {t.hora?.substring(0, 5)}<br />
+                  <strong>Fecha y hora:</strong> {new Date(`${t.dia}T${t.hora}`).toLocaleString('es-AR', {
+                    weekday: 'short',
+                    day: 'numeric',
+                    month: 'short',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })}<br />
                   <strong>Servicio:</strong> {t.Servicio?.nombre}<br />
                   <strong>Profesional:</strong> {t.Profesional?.contacto?.nombre} {t.Profesional?.contacto?.apellido}<br />
-                  <strong>Acreditado:</strong> {t.acreditado ? 'Sí' : 'No'}<br />
-                  {!t.acreditado && (
-                    <Button className="mt-2" disabled={t.acreditado} onClick={() => acreditarTurno(t)}>
-                        {t.acreditado ? 'Acreditado' : 'Acreditar'}
-                    </Button>
-                  )}
+                  {(() => {
+                    const estaAcreditado = t.acreditado === true || t.acreditado === 1 || t.acreditado === '1';
+
+                    return (
+                      <>
+                        <strong>Acreditado:</strong> {estaAcreditado ? 'Sí' : 'No'}<br />
+                        {!estaAcreditado && (
+                          <Button className="mt-2" onClick={() => acreditarTurno(t)}>
+                            Acreditar
+                          </Button>
+                        )}
+                      </>
+                    );
+                  })()}
+
                 </Card>
               ))
             )}

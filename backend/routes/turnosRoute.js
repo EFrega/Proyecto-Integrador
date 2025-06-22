@@ -195,7 +195,7 @@ router.get('/mis-turnos/:idcontacto', async (req, res) => {
           { atendido: true }
         ]
       },
-    attributes: ['idturno', 'dia', 'hora', 'atendido', 'observaciones', 'idprofesional', 'idservicio'],
+    attributes: ['idturno', 'dia', 'hora', 'atendido',  'acreditado', 'observaciones', 'idprofesional', 'idservicio'],
     include: [
       {
         model: Profesionales,
