@@ -17,7 +17,7 @@ const MisTurnosMedico = ({ setTurnoSeleccionado }) => {
 
       const filtrados = res.data.filter(t => {
         const fechaTurno = new Date(t.dia).toISOString().split('T')[0];
-        return (t.acreditado === true || t.acreditado === 1 || t.acreditado === '1') && fechaTurno === fechaSeleccionada;
+        return fechaTurno === fechaSeleccionada;
       });
 
       filtrados.sort((a, b) => `${a.dia}T${a.hora}`.localeCompare(`${b.dia}T${b.hora}`));
@@ -63,14 +63,23 @@ const MisTurnosMedico = ({ setTurnoSeleccionado }) => {
               <td>{turno.nombreservicio}</td>
               <td>{turno.dia}</td>
               <td>{turno.hora}</td>
-              <td>{turno.atendido ? 'Atendido' : 'Acreditado'}</td>
+              <td>
+                {turno.atendido
+                  ? 'Atendido'
+                  : turno.acreditado === true || turno.acreditado === 1 || turno.acreditado === '1'
+                    ? 'Acreditado'
+                    : 'Reservado'}
+              </td>
+
               <td className="text-center">
                 {turno.atendido ? (
                   <span className="text-success fw-bold">Atendido</span>
+                ) : turno.acreditado === true || turno.acreditado === 1 || turno.acreditado === '1' ? (
+                  <Button size="sm" onClick={() => setTurnoSeleccionado(turno.idturno)}>
+                    Atender
+                  </Button>
                 ) : (
-                <Button size="sm" onClick={() => setTurnoSeleccionado(turno.idturno)}>
-                  Atender
-                </Button>
+                  <span className="text-muted">No acreditado</span>
                 )}
               </td>
             </tr>
