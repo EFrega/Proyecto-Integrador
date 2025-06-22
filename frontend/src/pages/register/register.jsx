@@ -159,7 +159,7 @@ const Registro = () => {
                 <Container>
                     <Row>
                         <Col md={4}>
-                            <h5><img src="logo.png" alt='logo' width={30} height={30} fluid className="d-inline-block align-top" />{' '} Clínica<b>Médica</b></h5>
+                            <h5><img src="logo.png" alt='logo' width={30} height={30} fluid className="d-inline-block align-top" />{' '} Clínica<b>Medici</b></h5>
                         </Col>
                         <Col md={4}>
                             <p><b>Información Institucional</b></p>
