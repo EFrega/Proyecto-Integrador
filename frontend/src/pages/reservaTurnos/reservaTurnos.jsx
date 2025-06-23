@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import Calendar from 'react-calendar';
+import 'react-calendar/dist/Calendar.css';
 import API from '../../helpers/api';
-import { Form, Button, Container, Row, Col, Card } from 'react-bootstrap';
+import { Form, Button, Container, Row, Col } from 'react-bootstrap';
+import './reservaTurnos.css'; // asegurate de que coincida en mayúsculas/minúsculas
 
 const ReservaTurnos = () => {
   const [servicios, setServicios] = useState([]);
@@ -15,36 +18,29 @@ const ReservaTurnos = () => {
 
   const [usuario, setUsuario] = useState({});
 
-    useEffect(() => {
+  useEffect(() => {
     API.get(`/servicios`).then(res => setServicios(res.data));
-    // ya NO traemos profesionales acá
-
     const usuarioLocal = JSON.parse(localStorage.getItem('usuario'));
     setUsuario(usuarioLocal);
-    }, []);
+  }, []);
 
-    const handleServicioChange = async (idServicioNuevo) => {
-        setIdServicioSel(idServicioNuevo);
-        setIdProfesionalSel(''); // reset profesional
+  const handleServicioChange = async (idServicioNuevo) => {
+    setIdServicioSel(idServicioNuevo);
+    setIdProfesionalSel('');
+    setDisponibilidad([]);
+    setTurnosDiaSel([]);
+    setDiaSel('');
 
-        // limpiar turnos anteriores
-        setDisponibilidad([]);
-        setTurnosDiaSel([]);
-        setDiaSel('');
-
-        if (idServicioNuevo) {
-            const res = await API.get(`/profesionales/por-servicio/${idServicioNuevo}`);
-            setProfesionales(res.data);
-        } else {
-            setProfesionales([]);
-        }
-    };
-
-
+    if (idServicioNuevo) {
+      const res = await API.get(`/profesionales/por-servicio/${idServicioNuevo}`);
+      setProfesionales(res.data);
+    } else {
+      setProfesionales([]);
+    }
+  };
 
   const buscarDisponibilidad = async () => {
     if (!idServicioSel || !idProfesionalSel) return;
-
     const res = await API.get(`/turnos/disponibles/${idProfesionalSel}/${idServicioSel}`);
     setDisponibilidad(res.data);
     setTurnosDiaSel([]);
@@ -60,14 +56,37 @@ const ReservaTurnos = () => {
         dia: diaSel,
         hora
       });
-
-    alert('Turno reservado correctamente');
-    setTimeout(() => {
-        buscarDisponibilidad(); // refrescar
-    }, 300);
-
+      alert('Turno reservado correctamente');
+      setTimeout(() => buscarDisponibilidad(), 300);
     } catch (err) {
       alert(err.response?.data?.message || 'Error al reservar turno');
+    }
+  };
+
+  const diasDisponibles = disponibilidad.map(d => d.dia);
+
+  const tileDisabled = ({ date, view }) => {
+    if (view !== 'month') return false;
+    const fecha = date.toISOString().split('T')[0];
+    return !diasDisponibles.includes(fecha);
+  };
+
+  const tileClassName = ({ date, view }) => {
+    if (view !== 'month') return '';
+    const fecha = date.toISOString().split('T')[0];
+    if (diasDisponibles.includes(fecha)) return 'dia-disponible';
+    return 'dia-no-disponible';
+  };
+
+  const handleDateSelect = (fecha) => {
+    const fechaStr = fecha.toISOString().split('T')[0];
+    const turno = disponibilidad.find(d => d.dia === fechaStr);
+    if (turno) {
+      setDiaSel(fechaStr);
+      setTurnosDiaSel(turno.horarios);
+    } else {
+      setDiaSel('');
+      setTurnosDiaSel([]);
     }
   };
 
@@ -75,36 +94,32 @@ const ReservaTurnos = () => {
     <Container>
       <h3>Reserva de Turnos</h3>
 
-      <Row>
+      <Row className="mb-3">
         <Col md={4}>
-            <Form.Label>Servicio</Form.Label>
-            <Form.Select value={idServicioSel} onChange={(e) => handleServicioChange(e.target.value)}>
+          <Form.Label>Servicio</Form.Label>
+          <Form.Select value={idServicioSel} onChange={(e) => handleServicioChange(e.target.value)}>
             <option value="">Seleccione...</option>
             {servicios.filter(s => s.activo).map(s => (
-                <option key={s.idservicio} value={s.idservicio}>{s.nombre}</option>
+              <option key={s.idservicio} value={s.idservicio}>{s.nombre}</option>
             ))}
-            </Form.Select>
-
+          </Form.Select>
         </Col>
 
         <Col md={4}>
-            <Form.Label>Profesional</Form.Label>
-            <Form.Select value={idProfesionalSel} onChange={(e) => {
+          <Form.Label>Profesional</Form.Label>
+          <Form.Select value={idProfesionalSel} onChange={(e) => {
             setIdProfesionalSel(e.target.value);
-
-            // limpiar turnos anteriores
             setDisponibilidad([]);
             setTurnosDiaSel([]);
             setDiaSel('');
-            }}>
+          }}>
             <option value="">Seleccione...</option>
             {profesionales.map(p => (
-                <option key={p.idprofesional} value={p.idprofesional}>
+              <option key={p.idprofesional} value={p.idprofesional}>
                 {p.nombre} {p.apellido} - {p.matricula}
-                </option>
+              </option>
             ))}
-            </Form.Select>
-
+          </Form.Select>
         </Col>
 
         <Col md={4} className="d-flex align-items-end">
@@ -112,23 +127,15 @@ const ReservaTurnos = () => {
         </Col>
       </Row>
 
-      <hr />
-
-      <Row>
-        {disponibilidad.map(dia => (
-          <Col key={dia.dia} md={2}>
-            <Card className="mb-3 p-2" style={{ cursor: 'pointer' }} onClick={() => {
-              setDiaSel(dia.dia);
-              setTurnosDiaSel(dia.horarios);
-            }}>
-              <Card.Body>
-                <Card.Title>{dia.dia}</Card.Title>
-                <Card.Text>{dia.horarios.length} turnos disponibles</Card.Text>
-              </Card.Body>
-            </Card>
-          </Col>
-        ))}
-      </Row>
+      {disponibilidad.length > 0 && (
+        <div className="calendario-container mb-4">
+          <Calendar
+            onClickDay={handleDateSelect}
+            tileDisabled={tileDisabled}
+            tileClassName={tileClassName}
+          />
+        </div>
+      )}
 
       {diaSel && (
         <>

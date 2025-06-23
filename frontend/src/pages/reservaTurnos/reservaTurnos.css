@@ -1,0 +1,75 @@
+/* Centrado y ajuste general del calendario */
+.calendario-container {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto;
+}
+
+/* Calendario base de react-calendar */
+.react-calendar {
+  width: 100% !important;
+  max-width: 400px;
+  background: #fff;
+  border: none;
+  font-family: Arial, Helvetica, sans-serif;
+  line-height: 1.125em;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  padding: 10px;
+}
+
+/* Días con turnos disponibles */
+.dia-disponible {
+  background-color: #e6f0ff !important;
+  color: #007bff !important;
+  font-weight: bold;
+  text-decoration: underline;
+  border-radius: 8px;
+}
+
+/* Días sin turnos */
+.dia-no-disponible {
+  color: #ccc !important;
+  pointer-events: none;
+  background-color: #f0f0f0 !important;
+  border-radius: 8px;
+}
+
+/* Hover sobre días habilitados */
+.react-calendar__tile:enabled:hover {
+  background-color: #cce0ff;
+  color: #003366;
+  border-radius: 8px;
+}
+
+/* Días seleccionados */
+.react-calendar__tile--active {
+  background: #007bff !important;
+  color: white !important;
+  border-radius: 8px;
+}
+
+/* Responsividad */
+@media (max-width: 576px) {
+  .react-calendar {
+    font-size: 14px;
+  }
+
+  .react-calendar__tile {
+    padding: 8px 2px !important;
+  }
+
+  .react-calendar__navigation {
+    flex-direction: column;
+  }
+
+  .react-calendar__month-view__weekdays {
+    font-size: 12px;
+  }
+
+  .calendario-container {
+    padding: 0 10px;
+  }
+}
