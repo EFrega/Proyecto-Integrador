@@ -127,7 +127,7 @@ router.get('/', async (req, res) => {
     // Si es médico → devolver normal (con SystemUser)
     res.json(contactosFiltrados);
   } catch (error) {
-    console.error('🔥 Error al obtener contactos:', error);
+    console.error('Error al obtener contactos:', error);
     res.status(500).json({ message: 'Error al obtener contactos' });
   }
 });

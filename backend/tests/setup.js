@@ -1,114 +1,90 @@
 const sequelize = require('../config/database');
 
 beforeAll(async () => {
-  console.log('🧪 Iniciando tests...');
-  
-  // Configurar variables de entorno para tests
+  console.log('Iniciando tests...');
+
   process.env.NODE_ENV = 'test';
   process.env.JWT_SECRET = 'test_secret_key_for_testing';
-  
+
   try {
-    // Conectar a la base de datos
     await sequelize.authenticate();
-    console.log('✅ Conexión a BD de test establecida');
-    
-    // Sincronizar modelos (crear tablas si no existen)
-    // IMPORTANTE: force: false para no borrar datos existentes
+    console.log('Conexión a BD de test establecida');
+
     await sequelize.sync({ force: false });
-    console.log('✅ Modelos sincronizados');
-    
+    console.log('Modelos sincronizados');
   } catch (error) {
-    console.error('❌ Error configurando BD para tests:', error);
+    console.error('Error configurando BD para tests:', error);
     throw error;
   }
 });
 
-beforeEach(async () => {
-  console.log('🔄 Preparando test...');
-});
-
 afterEach(async () => {
-  console.log('🧹 Limpiando después del test...');
-  
-  // Limpiar datos de test después de cada test
-  try {
-    // Limpiar solo datos que contengan patrones de test
-    const testPatterns = [
-      'test_',
-      'testuser',
-      'integration_',
-      'bcrypt_test_',
-      'roles_test_',
-      'contacto_test_',
-      'relacion_test_',
-      'nologin_',
-      'protectedtest',
-      '@test.com'
-    ];
+  console.log('Limpiando después del test...');
 
+  const testPatterns = [
+    'test_',
+    'testuser',
+    'integration_',
+    'bcrypt_test_',
+    'roles_test_',
+    'contacto_test_',
+    'relacion_test_',
+    'nologin_',
+    'protectedtest',
+    '@test.com'
+  ];
+
+  try {
     for (const pattern of testPatterns) {
-      // Limpiar SystemUsers
+      await sequelize.query(
+        `DELETE FROM Chat WHERE idcontactoreceptor IN (
+          SELECT idcontacto FROM Contactos WHERE correo LIKE '%${pattern}%' OR nombre LIKE '%${pattern}%'
+        ) OR idcontactoemisor IN (
+          SELECT idcontacto FROM Contactos WHERE correo LIKE '%${pattern}%' OR nombre LIKE '%${pattern}%'
+        )`,
+        { type: sequelize.QueryTypes.DELETE }
+      );
+
+      await sequelize.query(
+        `DELETE FROM ChatIndex WHERE idsystemuser1 IN (
+          SELECT idcontacto FROM Contactos WHERE correo LIKE '%${pattern}%' OR nombre LIKE '%${pattern}%'
+        ) OR idsystemuser2 IN (
+          SELECT idcontacto FROM Contactos WHERE correo LIKE '%${pattern}%' OR nombre LIKE '%${pattern}%'
+        )`,
+        { type: sequelize.QueryTypes.DELETE }
+      );
+
       await sequelize.query(
         `DELETE FROM SystemUsers WHERE usuario LIKE '%${pattern}%'`,
         { type: sequelize.QueryTypes.DELETE }
       );
-      
-      // Limpiar Contactos
+
       await sequelize.query(
         `DELETE FROM Contactos WHERE correo LIKE '%${pattern}%' OR nombre LIKE '%${pattern}%'`,
         { type: sequelize.QueryTypes.DELETE }
       );
     }
-    
-    console.log('✅ Datos de test limpiados');
+
+    console.log('Datos de test limpiados');
   } catch (error) {
-    console.warn('⚠️ Error limpiando datos de test:', error.message);
+    console.warn('Error limpiando datos de test:', error.message);
   }
 });
 
 afterAll(async () => {
-  console.log('🧪 Finalizando tests...');
-  
   try {
-    // Limpieza final más agresiva si es necesario
-    const testPatterns = [
-      'test_',
-      'testuser',
-      'integration_',
-      'bcrypt_test_',
-      'roles_test_',
-      'contacto_test_',
-      'relacion_test_',
-      'nologin_',
-      'protectedtest',
-      '@test.com'
-    ];
-
-    for (const pattern of testPatterns) {
-      await sequelize.query(
-        `DELETE FROM SystemUsers WHERE usuario LIKE '%${pattern}%'`,
-        { type: sequelize.QueryTypes.DELETE }
-      );
-      
-      await sequelize.query(
-        `DELETE FROM Contactos WHERE correo LIKE '%${pattern}%' OR nombre LIKE '%${pattern}%'`,
-        { type: sequelize.QueryTypes.DELETE }
-      );
-    }
-
-    // Cerrar conexión a BD
     await sequelize.close();
-    console.log('✅ Conexión a BD cerrada');
+    console.log('Conexión a BD cerrada');
   } catch (error) {
-    console.error('❌ Error en limpieza final:', error);
+    console.error('Error cerrando la BD:', error);
   }
 });
 
-// Función helper para generar datos de test únicos
+// Helpers globales
 global.generateTestData = (prefix = 'test') => {
   const timestamp = Date.now();
   const random = Math.floor(Math.random() * 1000);
-  
+
   return {
     timestamp,
     random,
@@ -120,21 +96,30 @@ global.generateTestData = (prefix = 'test') => {
   };
 };
 
-// Función helper para limpiar datos específicos
 global.cleanupTestData = async (identifiers) => {
   try {
     for (const id of identifiers) {
       await sequelize.query(
+        `DELETE FROM Chat WHERE idcontactoreceptor = ${id} OR idcontactoemisor = ${id}`,
+        { type: sequelize.QueryTypes.DELETE }
+      );
+
+      await sequelize.query(
+        `DELETE FROM ChatIndex WHERE idsystemuser1 = ${id} OR idsystemuser2 = ${id}`,
+        { type: sequelize.QueryTypes.DELETE }
+      );
+
+      await sequelize.query(
         `DELETE FROM SystemUsers WHERE usuario LIKE '%${id}%' OR idusuario = ${id}`,
         { type: sequelize.QueryTypes.DELETE }
       );
-      
+
       await sequelize.query(
         `DELETE FROM Contactos WHERE correo LIKE '%${id}%' OR idcontacto = ${id}`,
         { type: sequelize.QueryTypes.DELETE }
       );
     }
   } catch (error) {
-    console.warn('⚠️ Error en limpieza específica:', error.message);
+    console.warn('Error en limpieza específica:', error.message);
   }
 };

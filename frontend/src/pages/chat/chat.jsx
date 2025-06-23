@@ -2,7 +2,7 @@ import './chat.css';
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import API from '../../helpers/api';
 import { Card, Button, Form, ListGroup, Row, Col, InputGroup } from 'react-bootstrap';
-import socket from '../socket/socket'; // 👉 usamos socket global
+import socket from '../socket/socket'; // usamos socket global
 
 const Chat = ({ setTieneMensajesNuevos }) => {
   const [chats, setChats] = useState([]);
@@ -119,7 +119,7 @@ const Chat = ({ setTieneMensajesNuevos }) => {
           if (!prev.includes(msg.idchat)) {
             const nuevos = [...prev, msg.idchat];
 
-            setTieneMensajesNuevos(true); // ✅ ACTUALIZADO
+            setTieneMensajesNuevos(true); // ACTUALIZADO
 
             return nuevos;
           }
@@ -147,7 +147,7 @@ const Chat = ({ setTieneMensajesNuevos }) => {
         const nuevos = prev.filter(id => id !== chat.idchat);
 
         if (nuevos.length === 0) {
-          setTieneMensajesNuevos(false); // ✅ ACTUALIZADO
+          setTieneMensajesNuevos(false); // ACTUALIZADO
         }
 
         return nuevos;

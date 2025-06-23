@@ -41,7 +41,7 @@ router.delete('/:idprofesional/:dia_inicio', async (req, res) => {
       }
     });
     if (eliminado === 0) {
-      console.warn(`⚠️ No se eliminó nada: ${idprofesional} - ${dia_inicio}`);
+      console.warn(`No se eliminó nada: ${idprofesional} - ${dia_inicio}`);
     }
     res.json({ message: 'Excepción eliminada', eliminado })
   } catch (error) {

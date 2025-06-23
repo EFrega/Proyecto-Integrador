@@ -13,13 +13,13 @@ const handleSocket = require('../socket/socketHandler');
 
 // Inicialización de Express y servidor HTTP
 const app = express();
-const server = http.createServer(app); // ✅ Crear el server primero
+const server = http.createServer(app); // Crear el server primero
 
 // Inicialización de Socket.IO
 const io = socketIo(server, {
   cors: { origin: '*' }
 });
-handleSocket(io, ChatMsgs); // ✅ Manejar conexión WebSocket
+handleSocket(io, ChatMsgs); // Manejar conexión WebSocket
 
 // Middlewares
 app.use(express.json());
@@ -53,24 +53,24 @@ Object.entries(routeMap).forEach(([base, routeName]) => {
   if (routes[routeName]) {
     app.use(base, routes[routeName]);
   } else {
-    console.warn(`⚠️ Ruta no encontrada: ${routeName}`);
+    console.warn(`Ruta no encontrada: ${routeName}`);
   }
 });
 
 // Conexión a la base de datos
 sequelize.authenticate()
   .then(() => {
-    console.log('✅ Conexión con la base de datos establecida correctamente.');
+    console.log(' Conexión con la base de datos establecida correctamente.');
   })
   .catch(err => {
-    console.error('❌ No se pudo conectar a la base de datos:', err);
+    console.error('No se pudo conectar a la base de datos:', err);
     process.exit(1);
   });
 
 // Puerto y arranque del servidor
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
-  console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
+  console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });
 
 // Exportación para pruebas u otros usos
