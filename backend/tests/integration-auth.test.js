@@ -48,7 +48,7 @@ describe('Flujo Completo de Autenticación', () => {
 
   it('debería completar el flujo: registro → login → acceso protegido', async () => {
     // 1. REGISTRO
-    console.log('🔄 Paso 1: Registrando usuario...');
+    console.log('Paso 1: Registrando usuario...');
     const registerRes = await request(app)
       .post('/register')
       .send(datosUsuario);
@@ -58,7 +58,7 @@ describe('Flujo Completo de Autenticación', () => {
     usuarioCreado = true;
 
     // 2. LOGIN
-    console.log('🔄 Paso 2: Iniciando sesión...');
+    console.log('Paso 2: Iniciando sesión...');
     const loginRes = await request(app)
       .post('/login')
       .send({ 
@@ -74,7 +74,7 @@ describe('Flujo Completo de Autenticación', () => {
     const token = loginRes.body.token;
 
     // 3. ACCESO A RUTA PROTEGIDA
-    console.log('🔄 Paso 3: Accediendo a ruta protegida...');
+    console.log('Paso 3: Accediendo a ruta protegida...');
     
     // Primero necesitamos obtener el ID del usuario creado
     const usuarioDb = await SystemUsers.findOne({ 
@@ -88,7 +88,7 @@ describe('Flujo Completo de Autenticación', () => {
     expect(protectedRes.statusCode).toBe(200);
     expect(protectedRes.body.usuario).toBe(datosUsuario.correo);
 
-    console.log('✅ Flujo completo exitoso');
+    console.log('Flujo completo exitoso');
   });
 
   it('debería fallar el login con credenciales de usuario no registrado', async () => {

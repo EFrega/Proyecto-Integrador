@@ -49,7 +49,7 @@ router.get('/chats/:idusuario', async (req, res) => {
 
         res.json(enrichedChats);
     } catch (error) {
-        console.error('🔥 Error al obtener chats:', error);
+        console.error('Error al obtener chats:', error);
         res.status(500).json({ message: 'Error interno del servidor' });
     }
 });
@@ -98,7 +98,7 @@ router.post('/chats', async (req, res) => {
         });
 
     } catch (error) {
-        console.error('🔥 Error al crear chat:', error);
+        console.error('Error al crear chat:', error);
         res.status(500).json({ message: 'Error al crear chat' });
     }
     });
@@ -119,7 +119,7 @@ router.post('/chats', async (req, res) => {
         });
         res.json(mensajes);
     } catch (error) {
-        console.error('🔥 Error al obtener mensajes:', error);
+        console.error('Error al obtener mensajes:', error);
         res.status(500).json({ message: 'Error al obtener mensajes' });
     }
 });

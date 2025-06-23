@@ -14,7 +14,7 @@ module.exports = (io, ChatMsgs) => {
         });
         io.emit('nuevo-mensaje', nuevo);
       } catch (error) {
-        console.error('❌ Error al guardar mensaje:', error);
+        console.error('Error al guardar mensaje:', error);
       }
     });
 

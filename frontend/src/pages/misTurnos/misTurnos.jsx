@@ -50,7 +50,7 @@ const MisTurnos = () => {
           </thead>
           <tbody>
             {turnos.map(t => {
-                console.log(t); // 👈 ponelo acá
+                console.log(t); 
 
                 return (
                 <tr key={t.idturno}>
