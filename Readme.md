@@ -172,9 +172,10 @@ PROYECTO-INTEGRADOR/
 
 ---
 
-## 🚧 Pendientes / Ideas futuras
+## 🚧 Mejoras a implementar / Ideas futuras
 
 - [ ] Implementar recuperación de contraseña por email.
+- [ ] Confirmación del turno por email.
 - [ ] Subida de documentos personales (DNI, carnet médico).
 - [ ] Pagos online y gestión de facturación.
 - [ ] Panel de administración más avanzado (estadísticas, logs).
