@@ -19,4 +19,14 @@ module.exports = (sequelize, DataTypes) => {
         timestamps: false
     });
     return Profesionales;
+
+    Profesionales.belongsTo(Contactos, {
+        foreignKey: 'idcontacto'
+    });
+
+    Profesionales.hasMany(ProfServicios, {
+        foreignKey: 'idprofesional',
+        as: 'profServicios' // 👈 Debe coincidir con include del backend
+    });
+
 };

@@ -16,4 +16,13 @@ module.exports = (sequelize, DataTypes) => {
         timestamps: false
     });
     return ProfServicios;
+
+    ProfServicios.belongsTo(Servicios, {
+        foreignKey: 'idservicio',
+        as: 'servicio' // 👈 Es el nombre que se usa en el include
+    });
+
+    ProfServicios.belongsTo(Profesionales, {
+        foreignKey: 'idprofesional'
+    });
 };

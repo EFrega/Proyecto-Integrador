@@ -77,5 +77,12 @@ module.exports = (sequelize, DataTypes) => {
 
   console.log("Modelo Usuario cargado correctamente");
 
+  systemUsers.associate = (models) => {
+    systemUsers.belongsTo(models.Contactos, {
+      foreignKey: 'idcontacto',
+      as: 'contacto' // 👈 debe coincidir con el `as` usado en el include
+    });
+  };
+
   return systemUsers;
 };

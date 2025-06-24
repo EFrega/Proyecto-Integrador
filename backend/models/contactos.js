@@ -102,6 +102,15 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: 'idcontacto',
       as: 'Turnos'
     });
+
+    Contactos.hasOne(models.SystemUsers, {
+      foreignKey: 'idcontacto'
+    });
+
+    Contactos.hasOne(models.Profesionales, {
+      foreignKey: 'idcontacto',
+      as: 'profesional'
+    });
   };
 
   return Contactos;
