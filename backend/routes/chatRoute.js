@@ -2,106 +2,118 @@ const express = require('express');
 const router = express.Router();
 const sequelize = require('../config/database');
 
-const ChatIndex = require('../models/chatindex')(sequelize, require('sequelize').DataTypes);
-const ChatMsgs = require('../models/chatmsgs')(sequelize, require('sequelize').DataTypes);
-const SystemUsers = require('../models/systemusers')(sequelize, require('sequelize').DataTypes);
-const Contactos = require('../models/contactos')(sequelize, require('sequelize').DataTypes);
+const { ChatIndex, ChatMsgs, SystemUsers, Contactos } = require('../models');
 
 router.get('/chats/:idusuario', async (req, res) => {
+  const idusuario = parseInt(req.params.idusuario);
 
-    const idusuario = parseInt(req.user.id);
+  try {
+    const chats = await ChatIndex.findAll({
+      where: {
+        [sequelize.Sequelize.Op.or]: [
+          { idsystemuser1: idusuario },
+          { idsystemuser2: idusuario }
+        ]
+      }
+    });
 
-    try {
-        const chats = await ChatIndex.findAll({
-        where: {
-            [sequelize.Sequelize.Op.or]: [
-            { idsystemuser1: idusuario },
-            { idsystemuser2: idusuario }
-            ]
-        }
-        });
+    console.log('🟢 Chats encontrados:', chats.length);
 
-        const enrichedChats = await Promise.all(
-        chats.map(async chat => {
-            const idOtroUsuario = chat.idsystemuser1 === idusuario ? chat.idsystemuser2 : chat.idsystemuser1;
+    const enrichedChats = await Promise.all(
+      chats.map(async chat => {
+        try {
+          const idOtroUsuario = chat.idsystemuser1 === idusuario
+            ? chat.idsystemuser2
+            : chat.idsystemuser1;
 
-            const usuarioOtro = await SystemUsers.findOne({
-            where: { idusuario: idOtroUsuario },
-            attributes: ['idcontacto']
-            });
+          const usuarioOtro = await SystemUsers.findOne({
+            where: { idcontacto: idOtroUsuario },
+            include: [{
+              model: Contactos,
+              as: 'contacto',
+              attributes: ['nombre', 'apellido']
+            }]
+          });
 
-            let contactoOtro = null;
-            if (usuarioOtro?.idcontacto) {
-            contactoOtro = await Contactos.findOne({
-                where: { idcontacto: usuarioOtro.idcontacto },
-                attributes: ['nombre', 'apellido']
-            });
-            }
+          console.log('🧪 usuarioOtro:', JSON.stringify(usuarioOtro, null, 2));
 
-            return {
+          const nombre = usuarioOtro?.contacto?.nombre || 'Desconocido';
+          const apellido = usuarioOtro?.contacto?.apellido || '';
+
+          return {
             ...chat.toJSON(),
-            nombreOtro: contactoOtro?.nombre || 'Desconocido',
-            apellidoOtro: contactoOtro?.apellido || ''
-            };
-        })
-        );
+            nombreOtro: nombre,
+            apellidoOtro: apellido
+          };
 
+        } catch (innerErr) {
+          console.error('❌ Error enriqueciendo un chat:', innerErr);
+          return {
+            ...chat.toJSON(),
+            nombreOtro: 'ERROR',
+            apellidoOtro: ''
+          };
+        }
+      })
+    );
 
-        res.json(enrichedChats);
-    } catch (error) {
-        console.error('Error al obtener chats:', error);
-        res.status(500).json({ message: 'Error interno del servidor' });
-    }
+    res.json(enrichedChats);
+
+  } catch (error) {
+    console.error('🔥 Error al obtener chats:', error);
+    res.status(500).json({ message: 'Error interno del servidor' });
+  }
 });
+
 
 // Crear nuevo chat si no existe
 router.post('/chats', async (req, res) => {
-    const { id1, id2 } = req.body;
+  const { id1, id2 } = req.body;
 
-    try {
-        let chat = await ChatIndex.findOne({
-        where: {
-            [sequelize.Sequelize.Op.or]: [
-            { idsystemuser1: id1, idsystemuser2: id2 },
-            { idsystemuser1: id2, idsystemuser2: id1 }
-            ]
-        }
-        });
-
-        if (!chat) {
-        chat = await ChatIndex.create({ idsystemuser1: id1, idsystemuser2: id2 });
-        }
-
-        // 👇 Enriquecer con nombre y apellido del otro usuario
-        const idOtroUsuario = chat.idsystemuser1 === id1 ? chat.idsystemuser2 : chat.idsystemuser1;
-
-        const SystemUsers = require('../models/systemusers')(sequelize, require('sequelize').DataTypes);
-        const Contactos = require('../models/contactos')(sequelize, require('sequelize').DataTypes);
-        const usuarioOtro = await SystemUsers.findOne({
-        where: { idusuario: idOtroUsuario },
-        attributes: ['idcontacto']
-        });
-
-        let contactoOtro = null;
-        if (usuarioOtro?.idcontacto) {
-
-        contactoOtro = await Contactos.findOne({
-            where: { idcontacto: usuarioOtro.idcontacto },
-            attributes: ['nombre', 'apellido']
-        });
-        }
-
-        res.json({
-        ...chat.toJSON(),
-        nombreOtro: contactoOtro?.nombre,
-        apellidoOtro: contactoOtro?.apellido
-        });
-
-    } catch (error) {
-        console.error('Error al crear chat:', error);
-        res.status(500).json({ message: 'Error al crear chat' });
-    }
+  try {
+    let chat = await ChatIndex.findOne({
+      where: {
+        [sequelize.Sequelize.Op.or]: [
+          { idsystemuser1: id1, idsystemuser2: id2 },
+          { idsystemuser1: id2, idsystemuser2: id1 }
+        ]
+      }
     });
+
+    if (!chat) {
+      chat = await ChatIndex.create({
+        idsystemuser1: id1,
+        idsystemuser2: id2
+      });
+    }
+
+    const idOtroUsuario = chat.idsystemuser1 === id1 ? chat.idsystemuser2 : chat.idsystemuser1;
+
+    const usuarioOtro = await SystemUsers.findOne({
+      where: { idusuario: idOtroUsuario },
+      include: [{
+        model: Contactos,
+        as: 'contacto',
+        attributes: ['nombre', 'apellido']
+      }]
+    });
+
+    console.log('🧪 usuarioOtro:', JSON.stringify(usuarioOtro, null, 2));
+    const nombre = usuarioOtro?.contacto?.nombre || 'Desconocido';
+    const apellido = usuarioOtro?.contacto?.apellido || '';
+
+    res.json({
+      ...chat.toJSON(),
+      nombreOtro: nombre,
+      apellidoOtro: apellido
+    });
+
+  } catch (error) {
+    console.error('🔥 Error al crear chat:', error);
+    res.status(500).json({ message: 'Error al crear chat' });
+  }
+});
+
 
     // Enviar mensaje
     router.post('/mensajes', async (req, res) => {

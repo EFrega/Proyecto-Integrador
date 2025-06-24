@@ -19,4 +19,9 @@ module.exports = (sequelize, DataTypes) => {
         timestamps: false
     });
     return Servicios;
+
+    Servicios.hasMany(ProfServicios, {
+        foreignKey: 'idservicio'
+    });
+
 };
