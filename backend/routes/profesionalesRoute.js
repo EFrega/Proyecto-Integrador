@@ -10,7 +10,7 @@ const SystemUsers = SystemUsersModel(sequelize, require('sequelize').DataTypes);
 const Profesionales = ProfesionalesModel(sequelize, require('sequelize').DataTypes);
 const Contactos = ContactosModel(sequelize, require('sequelize').DataTypes);
 
-// 🔧 Esta línea es clave
+//Asociación
 Profesionales.belongsTo(Contactos, { foreignKey: 'idcontacto' });
 
 // Actualizar estado del profesional según rolmedico

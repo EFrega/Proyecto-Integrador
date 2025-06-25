@@ -15,7 +15,7 @@ import API from './helpers/api';
 function App() {
   const [message, setMessage] = useState('');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-    const [tieneMensajesNuevos, setTieneMensajesNuevos] = useState(false); // 👉 nuevo
+    const [tieneMensajesNuevos, setTieneMensajesNuevos] = useState(false); // nuevo
 
 
   useEffect(() => {
