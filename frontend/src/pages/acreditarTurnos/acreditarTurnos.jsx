@@ -29,7 +29,7 @@ const AcreditarTurnos = () => {
   const totalPaginas = Math.ceil(pacientesFiltrados.length / pacientesPorPagina);
 
     const cargarTurnosPaciente = async (idcontacto) => {
-    setLoadingTurnos(true); // ⏳ Inicio de carga
+    setLoadingTurnos(true); // Inicio de carga
     try {
         const res = await API.get(`/turnos/mis-turnos/${idcontacto}`);
 
@@ -55,7 +55,7 @@ const AcreditarTurnos = () => {
     } catch (err) {
         console.error('Error al cargar turnos:', err);
     } finally {
-        setLoadingTurnos(false); // ✅ Fin de carga
+        setLoadingTurnos(false); // Fin de carga
     }
     };
 

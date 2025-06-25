@@ -17,7 +17,7 @@ router.get('/chats/:idusuario', async (req, res) => {
       }
     });
 
-    console.log('🟢 Chats encontrados:', chats.length);
+    console.log('Chats encontrados:', chats.length);
 
     const enrichedChats = await Promise.all(
       chats.map(async chat => {
@@ -35,7 +35,7 @@ router.get('/chats/:idusuario', async (req, res) => {
             }]
           });
 
-          console.log('🧪 usuarioOtro:', JSON.stringify(usuarioOtro, null, 2));
+          console.log('usuarioOtro:', JSON.stringify(usuarioOtro, null, 2));
 
           const nombre = usuarioOtro?.contacto?.nombre || 'Desconocido';
           const apellido = usuarioOtro?.contacto?.apellido || '';
@@ -47,7 +47,7 @@ router.get('/chats/:idusuario', async (req, res) => {
           };
 
         } catch (innerErr) {
-          console.error('❌ Error enriqueciendo un chat:', innerErr);
+          console.error('Error enriqueciendo un chat:', innerErr);
           return {
             ...chat.toJSON(),
             nombreOtro: 'ERROR',
@@ -60,7 +60,7 @@ router.get('/chats/:idusuario', async (req, res) => {
     res.json(enrichedChats);
 
   } catch (error) {
-    console.error('🔥 Error al obtener chats:', error);
+    console.error('Error al obtener chats:', error);
     res.status(500).json({ message: 'Error interno del servidor' });
   }
 });
@@ -98,7 +98,7 @@ router.post('/chats', async (req, res) => {
       }]
     });
 
-    console.log('🧪 usuarioOtro:', JSON.stringify(usuarioOtro, null, 2));
+    console.log('usuarioOtro:', JSON.stringify(usuarioOtro, null, 2));
     const nombre = usuarioOtro?.contacto?.nombre || 'Desconocido';
     const apellido = usuarioOtro?.contacto?.apellido || '';
 

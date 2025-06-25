@@ -9,7 +9,7 @@ const Registro = () => {
     const [formData, setFormData] = useState({
         nombre: '',
         apellido: '',
-        tipodoc: 'DNI',
+        tipodoc: '',
         docum: '',
         fechanacim: '',
         correo: '',
@@ -83,7 +83,7 @@ const Registro = () => {
                                         {/* <FormLabel>Tipo de documento</FormLabel> */}
                                         <Form.Select name="tipodoc" onChange={handleChange}>
                                             <option value="DNI">DNI</option>
-                                            <option value="Pasaporte">Pasaporte</option>
+                                            <option value="PASAPORTE">Pasaporte</option>
                                         </Form.Select>
                                     </FormGroup>
                                     <FormGroup as={Col} md="6" className='mb-3' controlId='formNumDoc'>

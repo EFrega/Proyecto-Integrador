@@ -3,7 +3,7 @@ import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import API from '../../helpers/api';
 import { Form, Button, Container, Row, Col } from 'react-bootstrap';
-import './reservaTurnos.css'; // asegurate de que coincida en mayúsculas/minúsculas
+import './reservaTurnos.css'; 
 
 const ReservaTurnos = () => {
   const [servicios, setServicios] = useState([]);
