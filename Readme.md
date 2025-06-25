@@ -48,17 +48,9 @@ cd ../frontend
 npm install
 ```
 
-### 3. Ejecutar el Backend
+### 3. Ejecutar en el raíz
 
 ```bash
-cd backend/server
-node index.js
-```
-
-### 4. Ejecutar el Frontend
-
-```bash
-cd frontend
 npm start
 ```
 
@@ -165,7 +157,7 @@ PROYECTO-INTEGRADOR/
 - ✅ Registro y Login de Usuarios con cifrado de contraseña.
 - ✅ Rutas protegidas por JWT (`/usuarios/:id`, etc).
 - ✅ Administración de Contactos, Profesionales, Servicios, Turnos y Excepciones.
-- ✅ WebSockets configurado para futura mensajería en tiempo real.
+- ✅ WebSockets configurado para mensajería en tiempo real.
 - ✅ Testing completo backend (validaciones, autenticación, integridad referencial).
 - ✅ Documentación clara y modularización adecuada.
 - ✅ Compatible con ejecución local y en Docker.
@@ -186,7 +178,7 @@ PROYECTO-INTEGRADOR/
 ## Usuarios del sistema en la DB remota:
 
 -  Paciente: 
-    pgrifin@example.com / password
+    pgriffin@example.com / password
 -  Medico: 
     fgordon@example.com / password 
 -  Tester:
