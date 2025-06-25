@@ -48,17 +48,9 @@ cd ../frontend
 npm install
 ```
 
-### 3. Ejecutar el Backend
+### 3. Ejecutar en el raíz
 
 ```bash
-cd backend/server
-node index.js
-```
-
-### 4. Ejecutar el Frontend
-
-```bash
-cd frontend
 npm start
 ```
 
@@ -186,7 +178,7 @@ PROYECTO-INTEGRADOR/
 ## Usuarios del sistema en la DB remota:
 
 -  Paciente: 
-    pgrifin@example.com / password
+    pgriffin@example.com / password
 -  Medico: 
     fgordon@example.com / password 
 -  Tester:
