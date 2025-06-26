@@ -71,13 +71,14 @@ El proyecto incluye configuración para ejecutar todo con Docker:
 Desde la raíz del proyecto:
 
 ```bash
+cd <Carpeta-Raiz>
 docker-compose up --build
 ```
 
 Esto levantará:
 
 - **Backend (API):** http://localhost:5000
-- **Frontend (React):** http://localhost:3000
+- **Frontend (React):** http://localhost:80
 
 > La configuración actual **utiliza una base externa**, pero puede adaptarse fácilmente para levantar un contenedor `mysql` desde el `docker-compose.yml`.
 
