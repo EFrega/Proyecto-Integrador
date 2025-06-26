@@ -108,6 +108,7 @@ npm run test:all
 #   Falla correctamente con usuario duplicado.
 
 cd backend
+npm install
 npm run test:register
 ```
 
