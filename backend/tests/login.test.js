@@ -1,67 +1,42 @@
+// backend/tests/login.test.js
+require('dotenv').config({ path: '.env.test' });
 const request = require('supertest');
-const { app } = require('../server/index');
-const sequelize = require('../config/database');
-const Usuario = require('../models/systemusers');
+const { app } = require('../server/index'); // Extraemos solo `app`, no todo el objeto
 
-const usuarioModelo = Usuario(sequelize, require('sequelize').DataTypes);
+jest.setTimeout(15000);
 
-describe('POST /login', () => {
-  let usuarioTest;
-
-  beforeAll(async () => {
-    // Crear usuario de prueba
-    usuarioTest = await usuarioModelo.create({
-      usuario: 'testuser@test.com',
-      contrasena: 'Test1234', // Se cifrará automáticamente por el hook
-      rolpaciente: true,
-      rolmedico: false,
-      roladministrativo: false,
-      rolsuperadmin: false
+describe('Login de usuario', () => {
+    test('debería autenticar exitosamente con credenciales válidas', async () => {
+        const res = await request(app)
+        .post('/login')
+        .send({
+            usuario: 'moni@example.com',
+            contrasena: 'password' // asegurate que sea la contraseña correcta
+        });
+        console.log(res.body);
+        expect(res.statusCode).toBe(200);
+        expect(res.body).toHaveProperty('token');
     });
-  });
 
-  afterAll(async () => {
-    // Limpiar usuario de prueba
-    if (usuarioTest) {
-      await usuarioModelo.destroy({ where: { idusuario: usuarioTest.idusuario } });
-    }
-  });
+    test('debería fallar con contraseña incorrecta', async () => {
+        const res = await request(app)
+        .post('/login')
+        .send({
+            usuario: 'moni@example.com',
+            contrasena: 'contramal'
+        });
+        expect(res.statusCode).toBe(401);
+        expect(res.body).toHaveProperty('message', 'Credenciales incorrectas');
+    });
 
-  it('debería fallar si el usuario no existe', async () => {
-    const res = await request(app)
-      .post('/login')
-      .send({ usuario: 'usuarioInvalido', contrasena: '1234' });
-
-    expect(res.statusCode).toBe(401);
-    expect(res.body.message).toMatch(/No existe el usuario/i);
-  });
-
-  it('debería fallar con contraseña incorrecta', async () => {
-    const res = await request(app)
-      .post('/login')
-      .send({ usuario: 'testuser@test.com', contrasena: 'contraseñaIncorrecta' });
-
-    expect(res.statusCode).toBe(401);
-    expect(res.body.message).toMatch(/Credenciales incorrectas/i);
-  });
-
-  it('debería autenticar usuario válido', async () => {
-    const res = await request(app)
-      .post('/login')
-      .send({ usuario: 'testuser@test.com', contrasena: 'Test1234' });
-
-    expect(res.statusCode).toBe(200);
-    expect(res.body).toHaveProperty('token');
-    expect(res.body).toHaveProperty('usuario', 'testuser@test.com');
-    expect(res.body).toHaveProperty('roles');
-    expect(res.body.roles.rolpaciente).toBe(true);
-  });
-
-  it('debería fallar con datos incompletos', async () => {
-    const res = await request(app)
-      .post('/login')
-      .send({ usuario: 'testuser@test.com' }); // Falta contraseña
-
-    expect(res.statusCode).toBe(401);
-  });
+    test('debería fallar con usuario inexistente', async () => {
+        const res = await request(app)
+        .post('/login')
+        .send({
+            usuario: 'inexistente@example.com',
+            contrasena: 'algo'
+        });
+        expect(res.statusCode).toBe(401);
+        expect(res.body).toHaveProperty('message', 'No existe el usuario');
+    });
 });

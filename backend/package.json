@@ -4,64 +4,33 @@
   "description": "Backend del proyecto integrador",
   "main": "server/index.js",
   "scripts": {
-  "start": "node server/index.js",
-  "dev": "nodemon server/index.js",
-  "test": "cross-env NODE_ENV=test jest",
-  "test:watch": "cross-env NODE_ENV=test jest --watch",
-  "test:coverage": "cross-env NODE_ENV=test jest --coverage",
-  "test:verbose": "cross-env NODE_ENV=test jest --verbose",
-  "test:auth": "cross-env NODE_ENV=test jest --testPathPattern=auth",
-  "test:models": "cross-env NODE_ENV=test jest models-validation.test.js",
-  "test:integration": "cross-env NODE_ENV=test jest integration-auth.test.js",
-  "test:server": "cross-env NODE_ENV=test jest server.test.js",
-  "test:login": "cross-env NODE_ENV=test jest login.test.js",
-  "test:register": "cross-env NODE_ENV=test jest register.test.js",
-  "test:protected": "cross-env NODE_ENV=test jest protectedRoute.test.js",
-  "test:ci": "cross-env NODE_ENV=test jest --ci --coverage --watchAll=false"
-},
-
+    "start": "node server/index.js",
+    "dev": "nodemon server/index.js",
+    "test:register": "cross-env NODE_ENV=test jest tests/register.test.js --detectOpenHandles",
+    "test:login": "cross-env NODE_ENV=test jest tests/login.test.js --detectOpenHandles",
+    "test:protected": "cross-env NODE_ENV=test jest tests/protected.test.js --detectOpenHandles",
+    "test:chat": "cross-env NODE_ENV=test jest tests/chat.test.js --detectOpenHandles",
+    "test:all": "npm run test:register && npm run test:login && npm run test:protected && npm run test:chat",
+    "test:jest": "jest --runInBand --detectOpenHandles"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
+    "dotenv": "^16.5.0",
     "express": "^4.18.2",
     "jsonwebtoken": "^9.0.0",
-    "mysql2": "^3.2.0",
+    "mysql2": "^3.14.1",
     "sequelize": "^6.30.0",
-    "socket.io": "^4.8.1"
+    "socket.io": "^4.8.1",
+    "socket.io-client": "^4.8.1"
   },
   "devDependencies": {
     "cross-env": "^7.0.3",
-    "jest": "^29.7.0",
+    "jest": "^30.0.3",
     "nodemon": "^2.0.22",
     "supertest": "^7.1.1"
-  },
-  "jest": {
-    "testEnvironment": "node",
-    "setupFilesAfterEnv": [
-      "<rootDir>/tests/setup.js"
-    ],
-    "testTimeout": 10000,
-    "verbose": true,
-    "collectCoverageFrom": [
-      "**/*.js",
-      "!node_modules/**",
-      "!tests/**",
-      "!coverage/**",
-      "!logs.txt"
-    ],
-    "coverageDirectory": "tests/coverage",
-    "coverageReporters": [
-      "text",
-      "lcov",
-      "html"
-    ],
-    "testMatch": [
-      "**/tests/**/*.test.js"
-    ],
-    "forceExit": true,
-    "detectOpenHandles": true
   }
 }

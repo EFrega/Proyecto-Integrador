@@ -28,7 +28,7 @@ app.use(authenticateToken);
 
 // Ruta de prueba
 app.get('/healthcheck', (req, res) => {
-  res.send('¡Servidor de gestión de turnos en funcionamiento!');
+  res.status(200).send('OK');
 });
 
 // Mapeo de rutas base → nombre del archivo de ruta
@@ -64,14 +64,20 @@ sequelize.authenticate()
   })
   .catch(err => {
     console.error('No se pudo conectar a la base de datos:', err);
-    process.exit(1);
+    if (process.env.NODE_ENV !== 'test') {
+      process.exit(1); // Solo salir si NO estamos testeando
+    }
   });
 
 // Puerto y arranque del servidor
 const PORT = process.env.PORT || 5000;
-server.listen(PORT, () => {
-  console.log(`Servidor corriendo en http://localhost:${PORT}`);
-});
 
-// Exportación para pruebas u otros usos
+// Solo iniciar el server si se ejecuta directamente (no en tests)
+if (require.main === module) {
+  server.listen(PORT, () => {
+    console.log(`Servidor corriendo en http://localhost:${PORT}`);
+  });
+}
+
 module.exports = { app, server };
+

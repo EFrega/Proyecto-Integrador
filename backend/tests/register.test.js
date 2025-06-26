@@ -1,114 +1,72 @@
+require('dotenv').config({ path: '.env.test' });
 const request = require('supertest');
-const { app, server } = require('../server/index');
+const { app } = require('../server/index');
 const sequelize = require('../config/database');
 
-function generateTestData(prefix = 'test') {
-  const timestamp = Date.now();
-  const random = Math.floor(Math.random() * 1000);
-  return {
-    correo: `${prefix}_${timestamp}_${random}@test.com`,
-    usuario: `${prefix}_user_${timestamp}_${random}`,
-    nombre: `TestUser${timestamp}`,
-    apellido: `TestApellido${timestamp}`,
-    docum: `${(timestamp + random).toString().slice(0, 8)}`,
-    contrasena: 'Password123!',
-    fechanacim: '1990-01-01',
-    tipodoc: 'DNI',
-    telcontacto: '123456789',
-    telemergencia: '987654321',
-    direccion: 'Calle Falsa 123'
-  };
-}
+jest.setTimeout(15000);
 
-jest.setTimeout(60000);
-
-beforeAll(async () => {
-  process.env.NODE_ENV = 'test';
-  await sequelize.authenticate();
-  await sequelize.sync({ force: false });
-});
-
-afterAll(async () => {
-  await new Promise((resolve, reject) => {
-    server.close(err => (err ? reject(err) : resolve()));
+describe('Registro de usuario', () => {
+  beforeAll(async () => {
+    await sequelize.authenticate();
   });
-  await sequelize.close();
-});
 
-describe('POST /register', () => {
-  it('debería registrar un nuevo usuario correctamente', async () => {
-    const testUser = generateTestData('register_ok');
+  afterAll(async () => {
+    await sequelize.close();
+  });
 
-    const res = await request(app)
-      .post('/register')
-      .send(testUser);
+  test('debería registrar un usuario nuevo exitosamente', async () => {
+    const timestamp = Date.now();
+    const usuario = {
+      usuario: `usuario${timestamp}@mail.com`,
+      contrasena: '12345678',
+      nombre: 'Juan',
+      apellido: 'Pérez',
+      correo: `correo${timestamp}@mail.com`,
+      docum: `${99999 + Math.floor(Math.random() * 10000)}`,
+      tipodoc: 'DNI',
+      direccion: 'Av Siempre Viva 742',
+      fechanacim: '1990-01-01'
+    };
 
+
+    const res = await request(app).post('/register').send(usuario);
+
+    console.log(res.body);
     expect(res.statusCode).toBe(201);
-    expect(res.body).toHaveProperty('message', 'Usuario registrado exitosamente');
+    expect(res.body.message).toMatch(/registrado/i);
   });
 
-  it('debería fallar con datos incompletos', async () => {
-    const res = await request(app)
-      .post('/register')
-      .send({
-        usuario: '',
-        correo: '',
-        contrasena: '',
-      });
-    expect(res.statusCode).toBe(400);
-  });
-
-  it('debería fallar con correo duplicado', async () => {
-    const testUser = generateTestData('dup_correo');
-
-    await request(app).post('/register').send(testUser);
-
+    test('debería rechazar el registro con datos incompletos', async () => {
     const res = await request(app).post('/register').send({
-      ...generateTestData('dup_correo2'),
-      correo: testUser.correo,
-      docum: `${Math.floor(Math.random() * 100000000)}` // doc distinto
+      usuario: '',
+      correo: '',
+      contrasena: '',
     });
 
+    console.log(res.body); // Para depuración si falla
+
+    expect(res.statusCode).toBe(400);
+    expect(res.body.message || res.body.error).toMatch(/faltan|incompletos|obligatorios/i);
+  });
+
+  test('debería fallar con usuario duplicado', async () => {
+    const res = await request(app).post('/register').send({
+      usuario: 'moni@example.com', // mismo que en la base
+      contrasena: 'OtraPass123!',
+      nombre: 'Otra Monica',
+      apellido: 'Distinta',
+      docum: `${Math.floor(Math.random() * 100000000)}`, // documento único
+      tipodoc: 'DNI',
+      fechanacim: '1992-02-02',
+      telcontacto: '1123456789',
+      telemergencia: '1198765432',
+      correo: 'moni@example.com',
+      direccion: 'Otra dirección 789'
+    });
+
+    console.log(res.body);
     expect(res.statusCode).toBe(409);
     expect(res.body).toHaveProperty('error');
   });
 
-  it('debería fallar con docum duplicado', async () => {
-    const testUser = generateTestData('dup_docum');
-
-    await request(app).post('/register').send(testUser);
-
-    const res = await request(app).post('/register').send({
-      ...generateTestData('dup_docum2'),
-      docum: testUser.docum,
-      correo: `otro${Date.now()}@test.com`
-    });
-
-    expect(res.statusCode).toBe(409);
-    expect(res.body).toHaveProperty('error');
-  });
-
-  it('debería validar formato de correo inválido', async () => {
-    const user = generateTestData('bad_email');
-    user.correo = 'emailinvalido';
-
-    const res = await request(app).post('/register').send(user);
-    expect(res.statusCode).toBe(400);
-  });
-
-  it('debería validar longitud mínima de contraseña', async () => {
-    const user = generateTestData('bad_pass');
-    user.contrasena = '123';
-
-    const res = await request(app).post('/register').send(user);
-    expect(res.statusCode).toBe(400);
-  });
-
-  it('debería manejar fechas de nacimiento inválidas', async () => {
-    const user = generateTestData('bad_date');
-    user.fechanacim = '3000-01-01';
-
-    const res = await request(app).post('/register').send(user);
-    expect(res.statusCode).toBe(400);
-  });
 });

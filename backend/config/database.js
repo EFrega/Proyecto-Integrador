@@ -9,6 +9,13 @@ const sequelize = new Sequelize(
         port: process.env.DB_PORT || 3306,
         host: process.env.DB_HOST || 'db4free.net',
         dialect: 'mysql',
+        dialectOptions: {
+            charset: 'utf8mb4'
+        },
+        define: {
+        charset: 'utf8mb4',
+        collate: 'utf8mb4_general_ci',
+        },
         logging: false, // Desactiva los logs de SQL para producción
         pool: {
             max: 5,
