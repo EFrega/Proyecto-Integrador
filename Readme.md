@@ -86,7 +86,9 @@ Esto levantará:
 
 ## 🧪 Testing
 
-### Herramientas
+El proyecto cuenta con pruebas automatizadas implementadas con **Jest** y **Supertest**, abarcando desde validaciones básicas hasta flujos completos de autenticación y WebSockets.
+
+### Herramientas utilizadas
 
 - [Jest](https://jestjs.io/)
 - [Supertest](https://github.com/visionmedia/supertest)
@@ -94,23 +96,57 @@ Esto levantará:
 ### Comandos disponibles
 
 ```bash
-# Todos los tests
-npm test
-
-# Tests con cobertura
-npm run test:coverage
-
-# Solo validaciones de modelos
-npm run test:models
-
-# Solo autenticación
-npm run test:auth
-
-# Solo flujo completo login → token → ruta protegida
-npm run test:integration
+# Ejecutar todos los tests (solo estando el contenedor de Backend funcionando)
+cd backend
+npm run test:all
 ```
 
-> Las pruebas incluyen validación de modelos, validaciones de base de datos, login y flujo de autenticación, rutas protegidas, y verificación de cifrado de contraseñas.
+```bash
+# Test de Registro de usuario
+#   Registra un nuevo usuario con datos válidos.
+#   Rechaza el registro con datos incompletos.
+#   Falla correctamente con usuario duplicado.
+
+cd backend
+npm run test:register
+```
+
+![Test de Registro de usuario](img/register.test.jpeg)
+
+
+```bash
+# Test de Autenticación de usuario
+#   Autenticación exitosa con credenciales válidas.
+#   Falla con contraseña incorrecta.
+#   Falla con usuario inexistente.
+
+cd backend
+npm run test:login
+```
+
+![Test de Autenticación de usuario](img/login.test.jpeg)
+
+```bash
+# Test de Acceso a rutas protegidas
+#   Autenticación exitosa con credenciales válidas.
+#   Falla con contraseña incorrecta.
+#   Falla con usuario inexistente.
+
+cd backend
+npm run test:protected
+```
+
+![Test de Acceso a rutas protegidas](img/protected.test.jpeg)
+
+```bash
+# Test de Comunicación WebSocket
+#   Envía y recibe mensajes en tiempo real a través de WebSocket.
+
+cd backend
+npm run test:chat
+```
+
+![Test de Comunicación WebSocket](img/chat.test.jpeg)
 
 ---
 
